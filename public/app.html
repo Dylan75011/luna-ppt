@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw PPT 编辑器</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>OpenClaw PPT</h1>
+    <div class="header-actions">
+      <a href="/" class="btn btn-secondary">返回首页</a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- AI Section -->
+    <section class="ai-section">
+      <div class="ai-header">
+        <span class="ai-icon">🤖</span>
+        <span class="ai-title">AI智能生成</span>
+      </div>
+      <div class="ai-form">
+        <input type="text" id="aiTopicInput" class="ai-input" placeholder="输入PPT主题，例如：华为智界2025上海车展策划方案">
+        <button id="aiGenerateBtn" class="btn btn-primary">AI生成</button>
+      </div>
+      <div id="aiResult" class="ai-result"></div>
+    </section>
+
+    <!-- Template Selection -->
+    <section>
+      <h2 class="section-title">选择模板</h2>
+      <div id="templateGrid" class="template-grid">
+        <!-- 模板卡片将通过JS动态加载 -->
+        <div style="text-align: center; padding: 40px; color: #999;">加载中...</div>
+      </div>
+    </section>
+
+    <!-- Editor Section -->
+    <section id="editorSection" class="editor-section hidden">
+      <div class="editor-header">
+        <h2 id="editorTitle" class="editor-title">编辑模板</h2>
+        <button id="generateBtn" class="btn btn-success">生成PPT</button>
+      </div>
+
+      <!-- Page List -->
+      <h3 style="font-size: 16px; margin-bottom: 15px; color: #666;">页面列表</h3>
+      <div id="pageList" class="page-list">
+        <!-- 页面列表将通过JS动态加载 -->
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-container">
+        <div class="preview-info">
+          <div class="preview-placeholder">
+            选择模板后，这里将显示PPT预览<br><br>
+            点击「生成PPT」按钮开始生成
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Generated Files -->
+    <section class="file-list">
+      <h2 class="section-title">已生成的文件</h2>
+      <div id="fileList">
+        <p style="color: #999; text-align: center; padding: 20px;">暂无生成的文件</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

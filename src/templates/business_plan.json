@@ -1,0 +1,124 @@
+{
+  "id": "business_plan",
+  "name": "商业计划书",
+  "description": "适合创业融资、商业合作的计划书PPT",
+  "version": "1.0.0",
+  "theme": {
+    "primary": "00A86B",
+    "secondary": "1A1A2E"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "title": "封面",
+      "mainTitle": "商业计划书",
+      "subtitle": "项目名称 / Company Name",
+      "date": "2025年",
+      "brand": "CONFIDENTIAL"
+    },
+    {
+      "type": "toc",
+      "title": "目录",
+      "items": [
+        { "title": "项目概述" },
+        { "title": "市场分析" },
+        { "title": "产品介绍" },
+        { "title": "商业模式" },
+        { "title": "竞争分析" },
+        { "title": "团队介绍" },
+        { "title": "融资计划" }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "项目概述",
+      "sectionNum": "01",
+      "sections": [
+        {
+          "title": "我们是谁",
+          "content": [
+            "专注于[行业]的创新企业",
+            "致力于解决行业痛点",
+            "打造端到端解决方案"
+          ]
+        },
+        {
+          "title": "我们要做什么",
+          "content": [
+            "开发创新产品/服务",
+            "建立行业领先平台",
+            "创造商业和社会价值"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "市场分析",
+      "sectionNum": "02",
+      "sections": [
+        {
+          "title": "市场规模",
+          "content": [
+            "TAM（总市场）：XX亿元",
+            "SAM（可服务市场）：XX亿元",
+            "SOM（可获得市场）：XX亿元"
+          ]
+        }
+      ],
+      "kpis": [
+        { "value": "XX%", "label": "年增长率" },
+        { "value": "XX亿", "label": "市场规模" },
+        { "value": "XX万", "label": "目标用户" }
+      ]
+    },
+    {
+      "type": "two_column",
+      "title": "竞争分析",
+      "sectionNum": "05",
+      "columns": [
+        {
+          "title": "我们的优势",
+          "items": [
+            "技术创新能力",
+            "团队背景强大",
+            "先发优势明显",
+            "资源整合能力"
+          ]
+        },
+        {
+          "title": "差异化定位",
+          "items": [
+            "独特产品功能",
+            "商业模式创新",
+            "深度用户洞察",
+            "生态协同效应"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "融资计划",
+      "sectionNum": "07",
+      "sections": [
+        {
+          "title": "本轮融资需求",
+          "content": [
+            "融资轮次：A轮",
+            "融资金额：XXX万元",
+            "估值：XXX万元",
+            "资金用途：产品研发、市场推广、团队扩建"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "end",
+      "title": "结束页",
+      "mainText": "谢谢",
+      "subText": "THANKS FOR YOUR TIME",
+      "brand": "Contact: email@example.com"
+    }
+  ]
+}

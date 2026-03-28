@@ -1,0 +1,5 @@
+node_modules/
+output/
+.env
+*.pptx
+.DS_Store

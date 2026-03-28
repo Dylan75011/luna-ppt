@@ -1,0 +1,93 @@
+{
+  "id": "product_launch",
+  "name": "产品发布会",
+  "description": "适合新产品发布、上市活动的策划方案PPT",
+  "version": "1.0.0",
+  "theme": {
+    "primary": "007ACC",
+    "secondary": "1A1A2E"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "title": "封面",
+      "mainTitle": "新产品发布",
+      "subtitle": "20XX新品上市发布会",
+      "date": "2025年X月X日",
+      "location": "中国·北京",
+      "brand": "Company Logo"
+    },
+    {
+      "type": "toc",
+      "title": "目录",
+      "items": [
+        { "title": "产品理念" },
+        { "title": "产品介绍" },
+        { "title": "核心功能" },
+        { "title": "技术亮点" },
+        { "title": "市场定位" },
+        { "title": "定价策略" },
+        { "title": "上市计划" }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "产品理念",
+      "sectionNum": "01",
+      "sections": [
+        {
+          "title": "改变行业",
+          "content": [
+            "重新定义用户体验",
+            "创新技术驱动变革",
+            "引领行业发展方向"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "title": "核心功能",
+      "sectionNum": "03",
+      "cards": [
+        {
+          "title": "功能一",
+          "tag": "智能体验",
+          "description": "行业领先的智能功能",
+          "features": [
+            "AI智能识别",
+            "个性化推荐",
+            "无缝连接生态"
+          ]
+        },
+        {
+          "title": "功能二",
+          "tag": "卓越性能",
+          "description": "强劲动力与续航",
+          "features": [
+            "超长续航",
+            "快速充电",
+            "稳定可靠"
+          ]
+        },
+        {
+          "title": "功能三",
+          "tag": "设计美学",
+          "description": "极简设计语言",
+          "features": [
+            "匠心工艺",
+            "优质材料",
+            "精美外观"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "end",
+      "title": "结束页",
+      "mainText": "感谢观看",
+      "subText": "THANK YOU",
+      "brand": "Company Name · 2025"
+    }
+  ]
+}

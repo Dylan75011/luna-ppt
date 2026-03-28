@@ -1,0 +1,96 @@
+{
+  "id": "meeting",
+  "name": "会议汇报",
+  "description": "适合工作汇报、会议总结的简洁PPT",
+  "version": "1.0.0",
+  "theme": {
+    "primary": "4A90D9",
+    "secondary": "2C3E50"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "title": "封面",
+      "mainTitle": "工作汇报",
+      "subtitle": "2025年X月工作汇报",
+      "date": "2025年X月X日",
+      "brand": "汇报人：XXX"
+    },
+    {
+      "type": "toc",
+      "title": "目录",
+      "items": [
+        { "title": "本月工作回顾" },
+        { "title": "重点项目进展" },
+        { "title": "问题与挑战" },
+        { "title": "下月工作计划" }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "本月工作回顾",
+      "sectionNum": "01",
+      "sections": [
+        {
+          "title": "完成事项",
+          "content": [
+            "项目A第一阶段交付",
+            "团队扩招3人",
+            "客户需求调研完成"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "重点项目进展",
+      "sectionNum": "02",
+      "sections": [
+        {
+          "title": "项目进度",
+          "content": [
+            "项目A：进度80%，预计下月上线",
+            "项目B：进度50%，按计划推进"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "问题与挑战",
+      "sectionNum": "03",
+      "sections": [
+        {
+          "title": "待解决问题",
+          "content": [
+            "资源协调需要支持",
+            "技术方案待确认",
+            "供应商交付延迟"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "下月工作计划",
+      "sectionNum": "04",
+      "sections": [
+        {
+          "title": "重点工作",
+          "content": [
+            "完成项目A上线",
+            "启动项目B第二阶段",
+            "优化团队协作流程"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "end",
+      "title": "结束页",
+      "mainText": "谢谢",
+      "subText": "THANK YOU",
+      "brand": ""
+    }
+  ]
+}

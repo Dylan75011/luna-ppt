@@ -1,0 +1,83 @@
+{
+  "id": "simple",
+  "name": "简约通用",
+  "description": "简洁干净的通用模板，适用于各种场景",
+  "version": "1.0.0",
+  "theme": {
+    "primary": "333333",
+    "secondary": "0066CC"
+  },
+  "pages": [
+    {
+      "type": "cover",
+      "title": "封面",
+      "mainTitle": "演示标题",
+      "subtitle": "副标题信息",
+      "date": "",
+      "location": "",
+      "brand": ""
+    },
+    {
+      "type": "toc",
+      "title": "目录",
+      "items": [
+        { "title": "第一部分" },
+        { "title": "第二部分" },
+        { "title": "第三部分" },
+        { "title": "总结" }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "第一部分",
+      "sectionNum": "01",
+      "sections": [
+        {
+          "title": "内容标题",
+          "content": [
+            "要点一：简要说明内容",
+            "要点二：简要说明内容",
+            "要点三：简要说明内容"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "第二部分",
+      "sectionNum": "02",
+      "sections": [
+        {
+          "title": "内容标题",
+          "content": [
+            "要点一：简要说明内容",
+            "要点二：简要说明内容",
+            "要点三：简要说明内容"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "title": "第三部分",
+      "sectionNum": "03",
+      "sections": [
+        {
+          "title": "内容标题",
+          "content": [
+            "要点一：简要说明内容",
+            "要点二：简要说明内容",
+            "要点三：简要说明内容"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "end",
+      "title": "结束页",
+      "mainText": "谢谢观看",
+      "subText": "THANK YOU",
+      "brand": ""
+    }
+  ]
+}
