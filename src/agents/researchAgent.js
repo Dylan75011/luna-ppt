@@ -15,13 +15,13 @@ class ResearchAgent extends BaseAgent {
     let searchResults = '（搜索结果为空，请基于行业知识生成内容）';
     try {
       const results = await searchWithTavily(task.keywords.join(' '));
-      if (results && results.length > 0) {
+      if (Array.isArray(results) && results.length > 0) {
         searchResults = results.map((r, i) =>
           `[${i + 1}] ${r.title || ''}\n${r.content || r.snippet || ''}`
         ).join('\n\n');
       }
     } catch (err) {
-      console.warn(`[${this.name}] Tavily 搜索失败，使用模型知识:`, err.message);
+      console.warn(`[${this.name}] 搜索失败，使用模型知识:`, err.message);
     }
 
     const { systemPrompt, userPrompt } = buildResearchPrompt(task, orchestratorOutput);

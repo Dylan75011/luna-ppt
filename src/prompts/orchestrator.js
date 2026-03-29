@@ -2,7 +2,7 @@ const { buildTaskPromptContext } = require('../services/contextEngineering');
 
 // Orchestrator Agent 提示词
 function buildOrchestratorPrompt(input) {
-  const { brand, productCategory, eventType, topic, scale, budget, style } = input;
+  const { brand, productCategory, eventType, topic, scale, budget, style, requirements } = input;
   const ctx = buildTaskPromptContext(input);
 
   const systemPrompt = `你是一位资深活动策划顾问，擅长为各类品牌的线下发布会、展览、峰会等活动制定策划方案。

@@ -6,10 +6,7 @@ async function searchWithTavily(query) {
   const apiKey = config.tavilyApiKey;
 
   if (!apiKey) {
-    return {
-      success: false,
-      error: 'Tavily API未配置，请设置 TAVILY_API_KEY 环境变量'
-    };
+    return [];
   }
 
   try {
@@ -32,16 +29,9 @@ async function searchWithTavily(query) {
 
     const data = await response.json();
 
-    return {
-      success: true,
-      results: data.results || [],
-      answer: data.answer
-    };
+    return data.results || [];
   } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
+    return [];
   }
 }
 
