@@ -1,0 +1,14 @@
+{
+  "id": "doc_d626d1bcbf5a",
+  "docType": "document",
+  "name": "README",
+  "contentFormat": "legacy-html",
+  "content": "<h1>岚图 空间索引</h1>\n    <p>这个索引用于记录「岚图」空间里真正有参考价值的上下文、关键资产和最近任务。</p>\n    \n    \n    <h2>关键资产</h2>\n    <p>当前还没有稳定可复用的空间资产。</p>\n    <h2>最近任务</h2>\n    <p>当前还没有可回顾的任务记录。</p>",
+  "createdAt": "2026-03-29T14:23:04.027Z",
+  "updatedAt": "2026-03-29T14:23:04.027Z",
+  "indexData": {
+    "summary": "",
+    "assets": [],
+    "recentTasks": []
+  }
+}

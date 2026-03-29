@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-29T14:45:51.564Z",
+  "spaces": [
+    {
+      "id": "space_c3b5dce94dbb",
+      "type": "space",
+      "name": "华为",
+      "createdAt": "2026-03-28T14:46:14.273Z",
+      "children": [
+        {
+          "id": "doc_e25fc617fdbe",
+          "type": "document",
+          "name": "README",
+          "createdAt": "2026-03-29T11:42:43.724Z",
+          "updatedAt": "2026-03-29T14:45:51.561Z",
+          "docType": "document",
+          "system": true,
+          "systemType": "space_index"
+        },
+        {
+          "id": "doc_f200d9e4c059",
+          "type": "document",
+          "name": "122",
+          "createdAt": "2026-03-28T15:44:28.056Z",
+          "updatedAt": "2026-03-29T14:26:27.810Z",
+          "docType": "document"
+        },
+        {
+          "id": "doc_aa76fbdcbbf7",
+          "type": "document",
+          "name": "7787",
+          "createdAt": "2026-03-28T15:49:51.991Z",
+          "updatedAt": "2026-03-29T13:59:14.876Z",
+          "docType": "document"
+        }
+      ],
+      "indexDocId": "doc_e25fc617fdbe"
+    },
+    {
+      "id": "space_8b44e7372180",
+      "type": "space",
+      "name": "岚图",
+      "createdAt": "2026-03-29T14:23:04.026Z",
+      "children": [
+        {
+          "id": "doc_d626d1bcbf5a",
+          "type": "document",
+          "name": "README",
+          "createdAt": "2026-03-29T14:23:04.027Z",
+          "updatedAt": "2026-03-29T14:23:04.027Z",
+          "docType": "document",
+          "system": true,
+          "systemType": "space_index"
+        },
+        {
+          "id": "doc_44e71a551927",
+          "type": "document",
+          "name": "岚图汽车区域车展运营项目方案_v2",
+          "createdAt": "2026-03-29T14:23:12.170Z",
+          "updatedAt": "2026-03-29T14:23:12.170Z",
+          "docType": "document"
+        }
+      ],
+      "indexDocId": "doc_d626d1bcbf5a"
+    }
+  ]
+}

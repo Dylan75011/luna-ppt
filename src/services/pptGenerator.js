@@ -103,6 +103,25 @@ async function generatePPT(templateData, outputFilename = null) {
     currentSlide = pptx.addSlide();
     slideIndex++;
 
+    // 如果页面有背景图，设置为幻灯片背景
+    if (page.bgImagePath && fs.existsSync(page.bgImagePath)) {
+      try {
+        currentSlide.addImage({
+          path: page.bgImagePath,
+          x: 0, y: 0, w: slideW, h: slideH,
+          sizing: { type: 'cover', w: slideW, h: slideH }
+        });
+        // 背景图上加半透明遮罩，确保文字可读
+        currentSlide.addShape(pptx.ShapeType.rect, {
+          x: 0, y: 0, w: slideW, h: slideH,
+          fill: { color: '000000', transparency: 45 },
+          line: { color: 'none' }
+        });
+      } catch (e) {
+        console.warn('[pptGenerator] 背景图加载失败:', e.message);
+      }
+    }
+
     // 根据页面类型渲染
     switch (page.type) {
       case 'cover':
