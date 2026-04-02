@@ -56,4 +56,23 @@ async function callDeepseekReasoner(messages, options = {}) {
   return response.choices[0].message.content;
 }
 
-module.exports = { callMinimax, callDeepseekReasoner };
+/**
+ * 调用 MiniMax，支持 function calling（工具调用）
+ * 返回 choice 对象：{ message: { role, content, tool_calls }, finish_reason }
+ */
+async function callMinimaxWithTools(messages, tools, options = {}) {
+  const client = createMinimaxClient(options.runtimeKey);
+  const model = options.minimaxModel || config.minimaxModel;
+  const response = await client.chat.completions.create({
+    model,
+    messages,
+    tools,
+    tool_choice: options.tool_choice || 'auto',
+    temperature: options.temperature ?? 0.7,
+    max_tokens: options.maxTokens ?? 4096,
+    ...(options.extra || {})
+  });
+  return response.choices[0]; // { message, finish_reason }
+}
+
+module.exports = { callMinimax, callDeepseekReasoner, callMinimaxWithTools };

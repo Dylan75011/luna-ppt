@@ -34,7 +34,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const apiKeys = computed(() => ({
     minimaxApiKey:  data.value.minimaxApiKey  || '',
     deepseekApiKey: data.value.deepseekApiKey || '',
-    minimaxModel:   data.value.minimaxModel   || 'MiniMax-M2.5'
+    minimaxModel:   data.value.minimaxModel   || 'MiniMax-M2.5',
+    tavilyApiKey:   data.value.tavilyApiKey   || ''
   }))
 
   return { data, save, hasMinimaxKey, hasDeepseekKey, minimaxModel, criticPassScore, criticMaxRounds, apiKeys }

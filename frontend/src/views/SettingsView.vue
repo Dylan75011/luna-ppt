@@ -47,6 +47,18 @@
           </a-form-item>
         </a-card>
 
+        <!-- Tavily 搜索 -->
+        <a-card class="settings-card" title="Tavily（搜索服务 · 推荐开启）">
+          <a-form-item label="API Key">
+            <a-input-password
+              v-model="form.tavilyApiKey"
+              placeholder="tvly-..."
+              allow-clear
+            />
+            <template #extra>Tavily 是高精度搜索服务，可大幅提升策划方案的信息丰富度。<a href="https://tavily.com" target="_blank">获取 API Key</a>（免费额度 1000 次/月）</template>
+          </a-form-item>
+        </a-card>
+
         <!-- 评审参数 -->
         <a-card class="settings-card" title="评审参数">
           <a-row :gutter="24">
@@ -89,6 +101,7 @@ const form = reactive({
   minimaxApiKey:   store.data.minimaxApiKey   || '',
   minimaxModel:    store.data.minimaxModel    || 'MiniMax-M2.5',
   deepseekApiKey:  store.data.deepseekApiKey  || '',
+  tavilyApiKey:    store.data.tavilyApiKey    || '',
   criticPassScore: store.data.criticPassScore ?? 7.0,
   criticMaxRounds: store.data.criticMaxRounds ?? 3
 })

@@ -487,7 +487,7 @@ function openBlockActions() {
 const editor = useEditor({
   content: normalizeContent(props.modelValue),
   extensions: [
-    StarterKit.configure({ codeBlock: true }),
+    StarterKit.configure({ codeBlock: true, link: false }),
     Placeholder.configure({ placeholder: '输入 / 插入块，或开始写作...' }),
     Typography,
     TaskList,
@@ -573,15 +573,17 @@ function onDocClick(event) {
 onMounted(() => {
   document.addEventListener('click', onDocClick)
   nextTick(() => {
-    const dom = editor.value?.view.dom
-    dom?.addEventListener('keyup', handleEditorInput)
+    if (editor.value?.view?.dom) {
+      editor.value.view.dom.addEventListener('keyup', handleEditorInput)
+    }
   })
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)
-  const dom = editor.value?.view.dom
-  dom?.removeEventListener('keyup', handleEditorInput)
+  if (editor.value?.view?.dom) {
+    editor.value.view.dom.removeEventListener('keyup', handleEditorInput)
+  }
   editor.value?.destroy()
 })
 

@@ -112,147 +112,83 @@
     <div class="chat-panel">
       <!-- 消息历史 -->
       <div class="chat-history" ref="historyRef">
-        <div
-          v-for="(msg, i) in messages"
-          :key="i"
-          class="bubble-wrap"
-          :class="msg.role"
-        >
-          <div class="bubble" :class="msg.role">
-            <template v-if="msg.role === 'ai'">
-              <template v-if="msg.kind === 'task-card'">
-                <div class="task-card">
-                  <div class="task-card-head">
-                    <div class="task-card-title-row">
-                      <span class="task-card-dot" :class="msg.taskState.status" />
-                      <div class="task-card-copy">
-                        <div class="task-card-title">{{ msg.taskState.title }}</div>
-                        <div class="task-card-subtitle">{{ msg.taskState.subtitle }}</div>
-                      </div>
-                    </div>
-                    <a-tag size="small" :color="msg.taskState.tagColor">{{ msg.taskState.tagText }}</a-tag>
-                  </div>
-
-                  <a-progress
-                    class="task-card-progress"
-                    :percent="msg.taskState.progress"
-                    :show-text="false"
-                    :stroke-width="6"
-                  />
-
-                  <div v-if="msg.taskState.summary?.length" class="task-card-chip-row">
-                    <span v-for="item in msg.taskState.summary" :key="item.label" class="task-card-chip">
-                      <b>{{ item.label }}</b>{{ item.value }}
-                    </span>
-                  </div>
-
-                  <div class="task-card-meta">
-                    <span>{{ msg.taskState.stageLabel }}</span>
-                    <span v-if="msg.taskState.lastUpdate">{{ msg.taskState.lastUpdate }}</span>
-                  </div>
-
-                  <button class="task-card-toggle" @click="msg.taskState.expanded = !msg.taskState.expanded">
-                    {{ msg.taskState.expanded ? '收起详情' : '展开详情' }}
-                  </button>
-
-                  <div v-if="msg.taskState.expanded" class="task-card-detail">
-                    <div class="task-card-section">
-                      <div class="task-card-section-title">执行阶段</div>
-                      <div class="task-card-steps">
-                        <div
-                          v-for="step in msg.taskState.steps"
-                          :key="step.key"
-                          class="task-card-step"
-                          :class="step.status"
-                        >
-                          <span class="task-card-step-name">{{ step.title }}</span>
-                          <span class="task-card-step-status">{{ statusLabel(step.status) }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div v-if="msg.taskState.error" class="task-card-section">
-                      <div class="task-card-section-title">异常信息</div>
-                      <div class="task-card-error">{{ msg.taskState.error }}</div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template v-else-if="msg.kind === 'task-log'">
-                <div class="task-log">
-                  <span class="task-log-time">{{ msg.time }}</span>
-                  <span class="task-log-text">{{ msg.text }}</span>
-                </div>
-              </template>
-              <template v-else-if="msg.kind === 'task-log-group'">
-                <div class="task-log-group">
-                  <div class="task-log-group-head">
-                    <div class="task-log-group-title">执行过程</div>
-                    <button
-                      v-if="msg.group.logs.length > msg.group.previewCount"
-                      class="task-log-group-toggle"
-                      @click="msg.group.expanded = !msg.group.expanded"
-                    >
-                      {{ msg.group.expanded ? '收起' : `查看全部 ${msg.group.logs.length} 条` }}
-                    </button>
-                  </div>
-                  <div class="task-log-group-list">
-                    <div
-                      v-for="log in (msg.group.expanded ? msg.group.logs : msg.group.logs.slice(0, msg.group.previewCount))"
-                      :key="log.id"
-                      class="task-log-group-item"
-                    >
-                      <span class="task-log-time">{{ log.time }}</span>
-                      <span class="task-log-text">{{ log.text }}</span>
-                    </div>
-                  </div>
-                  <div
-                    v-if="!msg.group.expanded && msg.group.logs.length > msg.group.previewCount"
-                    class="task-log-group-foot"
-                  >
-                    已折叠 {{ msg.group.logs.length - msg.group.previewCount }} 条较早过程
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <span v-html="msg.html" />
-              </template>
+        <!-- 按时间顺序渲染所有消息 -->
+        <div v-for="msg in messages" :key="msg.id" class="bubble-wrap" :class="msg.role">
+          
+          <!-- 用户消息 -->
+          <template v-if="msg.role === 'user'">
+            <div class="bubble user">{{ msg.text }}</div>
+          </template>
+          
+          <!-- AI消息 -->
+          <template v-else>
+            
+            <!-- 思考过程 - 折叠显示 -->
+            <template v-if="msg.kind === 'thinking'">
+              <div class="thinking-bubble">
+                <span class="thinking-dot" /><span class="thinking-dot" /><span class="thinking-dot" />
+              </div>
             </template>
-            <template v-else>{{ msg.text }}</template>
-          </div>
-        </div>
+            
+            <!-- 工具调用 -->
+            <template v-else-if="msg.kind === 'tool-call'">
+              <div class="tool-call-card" :class="{ active: msg.progress }">
+                <div class="tool-call-card-head">
+                  <span class="tool-call-card-icon">{{ toolIcon(msg.tool) }}</span>
+                  <div class="tool-call-card-content">
+                    <div class="tool-call-card-title">{{ msg.display }}</div>
+                    <div v-if="msg.progress" class="tool-call-card-progress">{{ msg.progress }}</div>
+                  </div>
+                </div>
+                <div v-if="msg.resultSummary" class="tool-call-card-result">
+                  <div class="tool-call-card-result-summary">{{ msg.resultSummary }}</div>
+                  <button
+                    v-if="msg.resultDetails"
+                    type="button"
+                    class="tool-call-card-toggle"
+                    @click="msg.expanded = !msg.expanded"
+                  >
+                    {{ msg.expanded ? '收起' : '查看详情' }}
+                  </button>
+                  <pre v-if="msg.expanded && msg.resultDetails" class="tool-call-card-details">{{ msg.resultDetails }}</pre>
+                </div>
+              </div>
+            </template>
+            
+            <!-- 澄清问题 -->
+            <template v-else-if="msg.kind === 'clarification'">
+              <div class="clarification-card">
+                <div class="clarification-icon">💬</div>
+                <div class="clarification-question">{{ msg.question }}</div>
+              </div>
+            </template>
 
-        <div v-if="pendingLoading" class="bubble-wrap ai pending-loading-wrap">
-          <div class="pending-loading-card" v-html="loadingMarkup(pendingLoading.label)" />
+            <!-- 产出物卡片 -->
+            <template v-else-if="msg.kind === 'artifact-card'">
+              <div class="artifact-msg-card" :class="`artifact-msg-card--${msg.artifactType}`" @click="openArtifactModal(msg)">
+                <div class="artifact-msg-card-head">
+                  <span class="artifact-msg-card-icon">{{ artifactMsgIcon(msg.artifactType) }}</span>
+                  <span class="artifact-msg-card-title">{{ msg.title }}</span>
+                  <span class="artifact-msg-card-arrow">›</span>
+                </div>
+                <div v-if="msg.summary" class="artifact-msg-card-summary">{{ msg.summary }}</div>
+                <div v-if="msg.chips?.length" class="artifact-msg-card-chips">
+                  <span v-for="chip in msg.chips" :key="chip" class="artifact-msg-chip">{{ chip }}</span>
+                </div>
+              </div>
+            </template>
+
+            <!-- 普通AI消息 -->
+            <template v-else>
+              <div class="ai-message-card" v-html="msg.html" />
+            </template>
+            
+          </template>
         </div>
       </div>
 
       <!-- 输入区 -->
       <div class="chat-input-area">
-
-        <!-- 任务队列（仅显示等待中的，跳过正在处理的第一条） -->
-        <transition name="queue-slide">
-          <div v-if="taskQueue.length > 1" class="task-queue">
-            <div class="queue-header">
-              <icon-clock-circle class="queue-header-icon" />
-              <span>待处理</span>
-              <span class="queue-badge">{{ taskQueue.length - 1 }}</span>
-            </div>
-            <div class="queue-list">
-              <div
-                v-for="task in taskQueue.slice(1)"
-                :key="task.id"
-                class="queue-item"
-                :class="task.type"
-              >
-                <span class="queue-item-dot waiting" />
-                <span class="queue-item-type">{{ task.type === 'agent' ? '策划任务' : '对话' }}</span>
-                <span class="queue-item-text">{{ task.text }}</span>
-                <span class="queue-item-status">等待中</span>
-              </div>
-            </div>
-          </div>
-        </transition>
 
         <div class="input-card" :class="{ focused: inputFocused }">
           <!-- 文本输入 -->
@@ -260,7 +196,7 @@
             v-model="inputText"
             class="chat-textarea"
             :auto-size="{ minRows: 2, maxRows: 6 }"
-            placeholder="描述活动需求，如：帮我为小米做一个大型新品发布会..."
+            :placeholder="waitingForClarification ? '请回答上述问题...' : '描述活动需求，如：帮我为小米做一个大型新品发布会...'"
             @focus="inputFocused = true"
             @blur="inputFocused = false"
             @compositionstart="isComposing = true"
@@ -272,7 +208,7 @@
           <div class="input-toolbar">
             <!-- 终止按钮（任务运行中显示） -->
             <button
-              v-if="isRunning"
+              v-if="isRunning || wsState === 'execution'"
               type="button"
               class="stop-btn"
               @click="stopTask"
@@ -299,13 +235,21 @@
     <div
       v-if="previewVisible"
       class="panel-resizer"
-      @mousedown.prevent="startResize"
+      :class="{ 'panel-resizer--collapsed': previewCollapsed }"
+      @mousedown.prevent="!previewCollapsed && startResize($event)"
     >
       <div class="panel-resizer-line" />
+      <button
+        type="button"
+        class="panel-resizer-toggle"
+        :title="previewCollapsed ? '展开预览区' : '收起预览区'"
+        @mousedown.stop
+        @click.stop="previewCollapsed = !previewCollapsed"
+      >{{ previewCollapsed ? '‹' : '›' }}</button>
     </div>
 
     <!-- ── 右侧：任务工作区 / 结果预览区 ── -->
-    <div v-if="previewVisible" class="ws-workspace">
+    <div v-if="previewVisible && !previewCollapsed" class="ws-workspace">
       <div v-if="wsState === 'execution' || wsState === 'failed'" class="ws-execution">
         <div class="exec-preview-card preview-only">
           <div class="exec-preview-head">
@@ -475,6 +419,7 @@
           :content="docContent"
           :title="docTitle"
           :spaces="spaces"
+          :loading="isRunning"
           @generate-ppt="triggerPptBuild"
           @saved="loadSpaces"
         />
@@ -635,6 +580,132 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 产出物详情弹窗 -->
+    <a-modal
+      v-model:visible="showArtifactModal"
+      :title="selectedArtifact?.title || '产出物详情'"
+      width="680px"
+      :footer="null"
+      @cancel="showArtifactModal = false"
+    >
+      <div v-if="selectedArtifact" class="artifact-modal-content">
+        <!-- plan_draft -->
+        <template v-if="selectedArtifact.artifactType === 'plan_draft'">
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">核心策略</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.coreStrategy || '—' }}</div>
+          </div>
+          <div v-if="selectedArtifact.payload?.highlights?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">活动亮点</div>
+            <div class="artifact-modal-highlights">
+              <div v-for="(h, i) in selectedArtifact.payload.highlights" :key="i" class="artifact-modal-highlight">
+                <span class="highlight-num">{{ i + 1 }}</span>
+                <span>{{ h }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="selectedArtifact.payload?.sections?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">方案结构</div>
+            <div class="artifact-modal-sections">
+              <div v-for="(s, i) in selectedArtifact.payload.sections" :key="i" class="artifact-modal-section-item">
+                <span class="section-num">{{ String(i + 1).padStart(2, '0') }}</span>
+                <div class="section-info">
+                  <div class="section-title">{{ s.title }}</div>
+                  <div class="section-points">{{ (s.keyPoints || []).slice(0, 3).join(' / ') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- task_brief -->
+        <template v-else-if="selectedArtifact.artifactType === 'task_brief'">
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">任务目标</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.parsedGoal || selectedArtifact.payload?.goal || '—' }}</div>
+          </div>
+          <div v-if="selectedArtifact.payload?.keyThemes?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">关键主题</div>
+            <div class="artifact-modal-chips">
+              <span v-for="t in selectedArtifact.payload.keyThemes" :key="t" class="artifact-modal-chip">{{ t }}</span>
+            </div>
+          </div>
+        </template>
+
+        <!-- research_result -->
+        <template v-else-if="selectedArtifact.artifactType === 'research_result'">
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">研究主题</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.focus || '—' }}</div>
+          </div>
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">摘要</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.summary || '—' }}</div>
+          </div>
+          <div v-if="selectedArtifact.payload?.keyFindings?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">关键发现</div>
+            <ul class="artifact-modal-list">
+              <li v-for="(f, i) in selectedArtifact.payload.keyFindings" :key="i">{{ f }}</li>
+            </ul>
+          </div>
+        </template>
+
+        <!-- review_feedback -->
+        <template v-else-if="selectedArtifact.artifactType === 'review_feedback'">
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-score" :class="{ pass: selectedArtifact.payload?.passed }">
+              <span class="score-num">{{ selectedArtifact.payload?.score || 0 }}</span>
+              <span class="score-label">分</span>
+              <span class="score-status">{{ selectedArtifact.payload?.passed ? '通过' : '待优化' }}</span>
+            </div>
+          </div>
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">评审反馈</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.specificFeedback || '—' }}</div>
+          </div>
+          <div v-if="selectedArtifact.payload?.weaknesses?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">待优化项</div>
+            <ul class="artifact-modal-list">
+              <li v-for="(w, i) in selectedArtifact.payload.weaknesses" :key="i">{{ w }}</li>
+            </ul>
+          </div>
+          <div v-if="selectedArtifact.payload?.suggestions?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">修改建议</div>
+            <ul class="artifact-modal-list">
+              <li v-for="(s, i) in selectedArtifact.payload.suggestions" :key="i">{{ s }}</li>
+            </ul>
+          </div>
+        </template>
+
+        <!-- ppt_outline -->
+        <template v-else-if="selectedArtifact.artifactType === 'ppt_outline'">
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">PPT 主题</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.title || '—' }}</div>
+          </div>
+          <div class="artifact-modal-section">
+            <div class="artifact-modal-label">总页数</div>
+            <div class="artifact-modal-text">{{ selectedArtifact.payload?.total || 0 }} 页</div>
+          </div>
+          <div v-if="selectedArtifact.payload?.pages?.length" class="artifact-modal-section">
+            <div class="artifact-modal-label">页面结构</div>
+            <div class="artifact-modal-pages">
+              <div v-for="(p, i) in selectedArtifact.payload.pages" :key="i" class="artifact-modal-page-item">
+                <span class="page-num">{{ i + 1 }}</span>
+                <span class="page-layout">{{ p.layout || p.type }}</span>
+                <span class="page-title">{{ p.content?.title || p.content?.name || '' }}</span>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- fallback -->
+        <template v-else>
+          <pre class="artifact-modal-json">{{ JSON.stringify(selectedArtifact.payload, null, 2) }}</pre>
+        </template>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -648,7 +719,6 @@ import SlideViewer from '../components/SlideViewer.vue'
 import PlanDocumentPanel from '../components/PlanDocumentPanel.vue'
 import PptEditor from '../components/PptEditor.vue'
 import {
-  IconUnorderedList, IconSearch, IconBulb, IconStar, IconLayers,
   IconMobile, IconCompass, IconCamera, IconRecordStop
 } from '@arco-design/web-vue/es/icon'
 
@@ -663,6 +733,79 @@ function loadConversationSidebarCollapsed() {
   } catch {
     return false
   }
+}
+
+// ── Brain Agent 状态 ─────────────────────────────────────────────
+const currentSessionId        = ref('')   // 当前 Brain 会话 ID
+const waitingForClarification = ref(false) // Brain 正在等待用户回答
+const clarificationReplyText  = ref('')    // 澄清回答输入框内容
+const processedStreamEvents = new Set()
+
+// 工具图标映射
+function toolIcon(tool) {
+  return { web_search: '🔍', web_fetch: '🌐', run_strategy: '📋', build_ppt: '🎨' }[tool] || '🔧'
+}
+
+function resetProcessedStreamEvents() {
+  processedStreamEvents.clear()
+}
+
+function streamEventKey(eventType, payload = {}) {
+  if (!payload || typeof payload !== 'object') return ''
+  const identity = [
+    payload.timestamp ?? '',
+    payload.toolCallId ?? '',
+    payload.tool ?? '',
+    payload.question ?? '',
+    payload.text ?? '',
+    payload.artifactType ?? '',
+    payload.index ?? '',
+    payload.display ?? '',
+    payload.message ?? ''
+  ].join('|')
+  return identity ? `${currentSessionId.value}:${eventType}:${identity}` : ''
+}
+
+function shouldSkipStreamEvent(eventType, payload = {}) {
+  const key = streamEventKey(eventType, payload)
+  if (!key) return false
+  if (processedStreamEvents.has(key)) return true
+  processedStreamEvents.add(key)
+  if (processedStreamEvents.size > 400) {
+    const first = processedStreamEvents.values().next().value
+    if (first) processedStreamEvents.delete(first)
+  }
+  return false
+}
+
+// 提交澄清回答
+async function submitClarificationReply(msg) {
+  const reply = clarificationReplyText.value.trim()
+  if (!reply) return
+  clarificationReplyText.value = ''
+  msg.answered = true
+
+  pushMsg('user', reply)
+  waitingForClarification.value = false
+  isRunning.value = true
+
+  return new Promise(resolve => {
+    const done = () => { resolveCurrent = null; resolve() }
+    resolveCurrent = done
+
+    fetch(`/api/agent/${currentSessionId.value}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reply, apiKeys: settings.apiKeys })
+    }).then(r => r.json()).then(res => {
+      if (!res.success) throw new Error(res.message)
+      connectBrainSSE(res.streamUrl, done)
+    }).catch(err => {
+      pushMsg('ai', '', `回复失败：${err.message}`)
+      isRunning.value = false
+      done()
+    })
+  })
 }
 
 // ── 聊天消息 ────────────────────────────────────────────────────
@@ -681,14 +824,36 @@ function createMessageId(prefix = 'msg') {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`
 }
 
-function pushMsg(role, text, html) {
-  messages.value.push({
+function stripHtmlText(value = '') {
+  return String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function buildAiMessageMeta(text = '', html = '') {
+  const plainText = stripHtmlText(html || text)
+  const shouldCollapse = plainText.length > 220 || plainText.includes('1.') || plainText.includes('\n')
+  return {
+    summary: shouldCollapse
+      ? `${plainText.slice(0, 120)}${plainText.length > 120 ? '…' : ''}`
+      : '',
+    collapsed: shouldCollapse,
+    expanded: false
+  }
+}
+
+function pushMsg(role, text, html, extra = {}) {
+  const nextMessage = {
     id: createMessageId(role),
     role,
     text: text || '',
     html: html || text || '',
-    createdAt: new Date().toISOString()
-  })
+    createdAt: new Date().toISOString(),
+    ...extra
+  }
+  if (role === 'ai') Object.assign(nextMessage, buildAiMessageMeta(text, html))
+  messages.value.push(nextMessage)
   scheduleConversationPersist()
   nextTick(() => {
     if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
@@ -708,84 +873,14 @@ function pushAiMessage(message) {
   })
 }
 
-function createTaskCard(task) {
-  const taskCard = reactive({
-    title: task.topic || '策划任务',
-    subtitle: '正在启动任务...',
-    status: 'running',
-    progress: 0,
-    tagText: '执行中',
-    tagColor: 'arcoblue',
-    summary: currentTaskSummary.value,
-    stageLabel: '准备开始',
-    lastUpdate: formatLogTime(),
-    expanded: false,
-    logs: [],
-    steps: stepList.map(step => ({
-      key: step.key,
-      title: step.title,
-      status: step.status
-    })),
-    error: ''
+function formatTime(isoString) {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  return date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   })
-  currentTaskCard.value = taskCard
-  pushAiMessage({ kind: 'task-card', taskState: taskCard })
-}
-
-function createTaskLogGroup() {
-  const logGroup = reactive({
-    expanded: false,
-    previewCount: 5,
-    logs: []
-  })
-  currentTaskLogGroup.value = logGroup
-  pushAiMessage({ kind: 'task-log-group', group: logGroup })
-}
-
-function syncTaskCard() {
-  if (!currentTaskCard.value) return
-  currentTaskCard.value.title = currentTask.value?.topic || '策划任务'
-  currentTaskCard.value.subtitle = wsState.value === 'failed'
-    ? (failedReason.value || '任务执行中断')
-    : wsState.value === 'done'
-      ? '结果已生成，可在右侧实时预览'
-      : progressLabel.value
-  currentTaskCard.value.status = wsState.value === 'failed'
-    ? 'failed'
-    : wsState.value === 'done'
-      ? 'completed'
-      : wsState.value === 'streaming'
-        ? 'streaming'
-        : 'running'
-  currentTaskCard.value.progress = progress.value
-  currentTaskCard.value.tagText = wsState.value === 'failed'
-    ? '失败'
-    : wsState.value === 'done'
-      ? '已完成'
-      : wsState.value === 'streaming'
-        ? '生成中'
-        : wsState.value === 'document'
-          ? '待确认'
-          : '执行中'
-  currentTaskCard.value.tagColor = wsState.value === 'failed'
-    ? 'red'
-    : wsState.value === 'done'
-      ? 'green'
-      : wsState.value === 'document'
-        ? 'orange'
-        : 'arcoblue'
-  currentTaskCard.value.summary = currentTaskSummary.value
-  currentTaskCard.value.stageLabel = wsState.value === 'failed'
-    ? `中断于 ${failedStageLabel.value}`
-    : currentStageTitle.value
-  currentTaskCard.value.lastUpdate = formatLogTime()
-  currentTaskCard.value.error = failedReason.value
-  currentTaskCard.value.steps = stepList.map(step => ({
-    key: step.key,
-    title: step.title,
-    status: step.status
-  }))
-  scheduleConversationPersist()
 }
 
 // ── 工作区状态 ──────────────────────────────────────────────────
@@ -796,6 +891,7 @@ const resultSlides  = ref([])
 const resultDownloadUrl = ref('')
 const resultData    = ref(null)
 const previewWidth  = ref(760)
+const previewCollapsed = ref(false)
 const isResizing    = ref(false)
 const activePreviewTab = ref('strategy')
 const currentSlideIndex = ref(0)
@@ -803,34 +899,32 @@ const currentSlideIndex = ref(0)
 const isBuilding    = ref(false)
 const buildTotal    = ref(0)
 // 文档确认状态
-const docContent    = ref('')   // 文档 HTML 内容
-const docTitle      = ref('')   // 文档标题
-const currentTaskId = ref('')   // 当前任务 ID（用于 build-ppt 接口）
+const docContent    = ref('')
+const docTitle      = ref('')
 // SlideViewer 引用（用于调用 appendSlide）
 const slideViewerRef = ref(null)
 // 编辑器模式
 const editorVisible = ref(false)
 const currentTask = ref(null)
-const currentTaskCard = ref(null)
-const currentTaskLogGroup = ref(null)
-const pendingIntake = ref(null)
+const taskMode = ref('idle')
+const brainPlanItems = ref([])
 const failedReason = ref('')
 const failedStage = ref('')
 const artifacts = ref([])
 const executionLogs = ref([])
-
-const previewVisible = computed(() => wsState.value !== 'welcome')
+const PROCESS_MESSAGE_KINDS = new Set(['thinking', 'tool-call', 'task-log', 'narration'])
+const PROCESS_STREAM_VISIBLE_COUNT = 3
 
 // ── Steps ────────────────────────────────────────────────────────
-const stepList = reactive([
-  { key: 'orchestrator', icon: IconUnorderedList, title: '需求解析',  status: 'pending', message: '', subs: [] },
-  { key: 'research',     icon: IconSearch,        title: '素材搜索',  status: 'pending', message: '', subs: [] },
-  { key: 'strategy',     icon: IconBulb,          title: '方案策划',  status: 'pending', message: '', subs: [] },
-  { key: 'critic',       icon: IconStar,          title: '专家评审',  status: 'pending', message: '', subs: [], score: null, passed: false },
-  { key: 'building',     icon: IconLayers,        title: '生成 PPT', status: 'pending', message: '', subs: [] }
-])
-
-const summarySteps = computed(() => stepList.filter(s => s.status === 'completed'))
+const summarySteps = computed(() => {
+  if (taskMode.value === 'brain') {
+    const source = brainPlanItems.value.length ? brainPlanItems.value : defaultBrainPlan()
+    return source
+      .filter(item => item.status === 'completed')
+      .map(item => ({ key: item.content, title: item.content }))
+  }
+  return []
+})
 const currentTaskSummary = computed(() => {
   if (!currentTask.value) return []
   const task = currentTask.value
@@ -843,8 +937,9 @@ const currentTaskSummary = computed(() => {
     { label: '风格', value: task.style }
   ].filter(item => item.value)
 })
-const currentStage = computed(() => stepList.find(step => step.status === 'running') || null)
-const currentStageTitle = computed(() => currentStage.value?.title || '准备开始任务')
+const currentStageTitle = computed(() => {
+  return '执行任务中'
+})
 const latestArtifact = computed(() => artifacts.value[0] || null)
 const artifactTimeline = computed(() => artifacts.value.slice(0, 5))
 const latestTaskBrief = computed(() => artifacts.value.find(item => item.artifactType === 'task_brief') || null)
@@ -868,6 +963,12 @@ const planSectionArtifacts = computed(() => artifacts.value
 const latestPlanSection = computed(() => planSectionArtifacts.value.at(-1) || null)
 const latestReviewFeedback = computed(() => artifacts.value.find(item => item.artifactType === 'review_feedback') || null)
 const latestPptOutline = computed(() => artifacts.value.find(item => item.artifactType === 'ppt_outline') || null)
+const hasMatureStrategyPreview = computed(() =>
+  !!latestPlanDraft.value ||
+  planSectionArtifacts.value.length > 0 ||
+  !!latestReviewFeedback.value ||
+  !!latestPptOutline.value
+)
 const hasStrategyPreview = computed(() =>
   !!latestTaskBrief.value ||
   researchPreviewItems.value.length > 0 ||
@@ -876,6 +977,10 @@ const hasStrategyPreview = computed(() =>
   !!latestReviewFeedback.value ||
   !!latestPptOutline.value
 )
+const previewVisible = computed(() => {
+  if (docContent.value || resultSlides.value.length > 0) return true
+  return hasStrategyPreview.value
+})
 const strategySnapshotLabel = computed(() => {
   if (latestPptOutline.value) return '已进入 PPT 结构映射'
   if (latestReviewFeedback.value) return '已形成评审结论'
@@ -887,21 +992,20 @@ const strategySnapshotLabel = computed(() => {
 })
 const failedStageLabel = computed(() => {
   if (!failedStage.value) return '未知阶段'
-  return stepList.find(step => step.key === failedStage.value)?.title || failedStage.value
+  return failedStage.value
 })
 const currentPreviewHint = computed(() => {
   if (wsState.value === 'failed') {
     return '任务已中断，右侧保留当前阶段与最近产出，方便判断是配置问题还是方案质量问题。'
   }
-  const stageKey = currentStage.value?.key
-  const stageHints = {
-    orchestrator: '正在拆解需求和搜索方向，稍后会形成任务理解与主题重点。',
-    research: '正在并行收集行业趋势、竞品案例与创意素材，预览区会先展示可用方向。',
-    strategy: '正在组织策划方案结构，接下来会进入方案草稿与目录生成。',
-    critic: '正在评审当前方案质量，系统会根据反馈自动决定是否继续优化。',
-    building: '正在把方案转换成 PPT 页面，新的页面会在这里逐张出现。'
+  if (taskMode.value === 'brain') {
+    if (waitingForClarification.value) return '正在等待你补充一个关键信息，收到后会继续推进。'
+    if (isBuilding.value) return '正在把方案转换成 PPT 页面，新的页面会在这里逐张出现。'
+    if (brainPlanItems.value.some(item => item.status === 'in_progress')) {
+      return '系统正在按计划推进任务，会把结构化 brief、搜索结果和方案草稿同步展示在这里。'
+    }
   }
-  return stageHints[stageKey] || '系统正在准备可预览的中间产出。'
+  return '系统正在准备可预览的中间产出。'
 })
 
 function eventTypeLabel(eventType) {
@@ -914,14 +1018,7 @@ function eventTypeLabel(eventType) {
   }[eventType] || eventType
 }
 
-const STAGE_PROGRESS = { orchestrator: 15, research: 40, strategy: 65, critic: 80, building: 95 }
-const researchSummaryLogged = ref(false)
-
 function resetSteps() {
-  stepList.forEach(s => {
-    s.status = 'pending'; s.message = ''; s.subs = []
-    if ('score' in s) { s.score = null; s.passed = false }
-  })
   progress.value = 0
   progressLabel.value = '正在启动...'
   // 重置流式状态，避免第二次任务时显示上一次残留
@@ -930,33 +1027,18 @@ function resetSteps() {
   resultSlides.value      = []
   resultDownloadUrl.value = ''
   resultData.value        = null
+  docContent.value = ''
+  docTitle.value = ''
   failedReason.value = ''
   failedStage.value = ''
   artifacts.value = []
   executionLogs.value = []
-  currentTaskLogGroup.value = null
-  researchSummaryLogged.value = false
-  docContent.value = ''
-  docTitle.value   = ''
-}
-
-function defaultStepMessage(step) {
-  const messages = {
-    orchestrator: '系统会先判断需求重点，并拆成可执行的搜索与策划任务。',
-    research: '多个搜索 Agent 会并行补齐趋势、案例和创意参考。',
-    strategy: '系统会把素材整合成活动主线、目录和每页内容框架。',
-    critic: '评审 Agent 会检查创意、完整度和落地性，必要时触发重写。',
-    building: '通过评审后开始生成 PPT 页面，并在右侧实时展示。'
-  }
-  return messages[step.key] || '正在处理中...'
+  taskMode.value = 'idle'
+  brainPlanItems.value = []
 }
 
 function statusLabel(s) {
   return { pending: '等待中', running: '进行中', completed: '完成', failed: '失败' }[s] || s
-}
-
-function statusColor(s) {
-  return { pending: 'gray', running: 'blue', completed: 'green', failed: 'red' }[s] || 'gray'
 }
 
 function artifactTypeLabel(type) {
@@ -970,6 +1052,16 @@ function artifactTypeLabel(type) {
   }[type] || '中间产物'
 }
 
+function artifactMsgIcon(type) {
+  return {
+    task_brief: '📋',
+    research_result: '🔍',
+    plan_draft: '📝',
+    review_feedback: '✅',
+    ppt_outline: '📐'
+  }[type] || '📄'
+}
+
 function artifactTimelineText(item) {
   const payload = item.payload || {}
   if (item.artifactType === 'task_brief') return payload.parsedGoal || '已完成任务拆解'
@@ -979,6 +1071,19 @@ function artifactTimelineText(item) {
   if (item.artifactType === 'ppt_outline') return `已生成 ${payload.total || 0} 页 PPT 大纲`
   if (item.artifactType === 'ppt_page') return `第 ${payload.index + 1} / ${payload.total} 页：${payload.title}`
   return '已生成中间产物'
+}
+
+function processMessageLabel(message) {
+  if (!message) return ''
+  if (message.kind === 'thinking') return '正在思考下一步'
+  if (message.kind === 'tool-call') {
+    if (message.resultSummary) return `${message.display || message.tool} · ${message.resultSummary}`
+    if (message.progress) return `${message.display || message.tool} · ${message.progress}`
+    return message.display || message.tool || '执行工具'
+  }
+  if (message.kind === 'task-log') return message.text || '过程更新'
+  if (message.kind === 'narration') return stripHtmlText(message.html || message.text || '')
+  return message.text || ''
 }
 
 function formatLogTime(ts = Date.now()) {
@@ -991,6 +1096,9 @@ function formatLogTime(ts = Date.now()) {
 }
 
 function addExecutionLog(text, ts = Date.now()) {
+  if (!text) return
+  const prev = executionLogs.value[0]
+  if (prev?.text === text) return
   const log = {
     id: `${ts}_${Math.random().toString(16).slice(2, 8)}`,
     time: formatLogTime(ts),
@@ -998,19 +1106,16 @@ function addExecutionLog(text, ts = Date.now()) {
   }
   executionLogs.value.unshift(log)
   executionLogs.value = executionLogs.value.slice(0, 24)
-  if (currentTaskCard.value) {
-    currentTaskCard.value.logs.unshift(log)
-    currentTaskCard.value.logs = currentTaskCard.value.logs.slice(0, 12)
-  }
-  if (currentTaskLogGroup.value) {
-    currentTaskLogGroup.value.logs.unshift(log)
-    currentTaskLogGroup.value.logs = currentTaskLogGroup.value.logs.slice(0, 24)
-    if (currentTaskLogGroup.value.logs.length > 10 && currentTaskLogGroup.value.expanded) {
-      currentTaskLogGroup.value.expanded = false
-    }
-  }
-  syncTaskCard()
   scheduleConversationPersist()
+}
+
+function defaultBrainPlan() {
+  return [
+    { content: '整理需求与约束', status: 'in_progress' },
+    { content: '补充案例与趋势参考', status: 'pending' },
+    { content: '形成方案并确认方向', status: 'pending' },
+    { content: '确认后生成 PPT', status: 'pending' }
+  ]
 }
 
 // ── 工作空间 ────────────────────────────────────────────────────
@@ -1062,6 +1167,8 @@ loadSpaces()
 
 function serializeState() {
   return {
+    taskMode: taskMode.value,
+    brainPlanItems: brainPlanItems.value,
     wsState: wsState.value,
     progress: progress.value,
     progressLabel: progressLabel.value,
@@ -1074,35 +1181,25 @@ function serializeState() {
     buildTotal: buildTotal.value,
     docContent: docContent.value,
     docTitle: docTitle.value,
-    currentTaskId: currentTaskId.value,
     currentTask: currentTask.value,
     failedReason: failedReason.value,
     failedStage: failedStage.value,
     artifacts: artifacts.value,
-    executionLogs: executionLogs.value,
-    stepList: stepList.map(step => ({
-      key: step.key,
-      status: step.status,
-      message: step.message,
-      subs: step.subs,
-      score: step.score,
-      passed: step.passed
-    }))
+    executionLogs: executionLogs.value
   }
 }
 
 function serializeMessages() {
-  return messages.value.map((msg) => ({
-    id: msg.id || createMessageId('msg'),
-    role: msg.role,
-    text: msg.text || '',
-    html: msg.html || '',
-    kind: msg.kind || '',
-    time: msg.time || '',
-    createdAt: msg.createdAt || new Date().toISOString(),
-    taskState: msg.taskState ? JSON.parse(JSON.stringify(msg.taskState)) : null,
-    group: msg.group ? JSON.parse(JSON.stringify(msg.group)) : null
-  }))
+  return messages.value.map((msg) => {
+    const next = {
+      ...msg,
+      id: msg.id || createMessageId('msg'),
+      createdAt: msg.createdAt || new Date().toISOString()
+    }
+    if (msg.taskState) next.taskState = JSON.parse(JSON.stringify(msg.taskState))
+    if (msg.group) next.group = JSON.parse(JSON.stringify(msg.group))
+    return next
+  })
 }
 
 function restoreFromConversation(detail) {
@@ -1116,20 +1213,9 @@ function restoreFromConversation(detail) {
       }))
     : []
 
-  const restoredStepMap = new Map((state.stepList || []).map(item => [item.key, item]))
-  stepList.forEach(step => {
-    const restored = restoredStepMap.get(step.key)
-    step.status = restored?.status || 'pending'
-    step.message = restored?.message || ''
-    step.subs = restored?.subs || []
-    if ('score' in step) {
-      step.score = restored?.score ?? null
-      step.passed = !!restored?.passed
-    }
-  })
-
   currentTask.value = state.currentTask || null
-  currentTaskId.value = state.currentTaskId || ''
+  taskMode.value = state.taskMode || 'idle'
+  brainPlanItems.value = Array.isArray(state.brainPlanItems) ? state.brainPlanItems : []
   progress.value = state.progress || 0
   progressLabel.value = state.progressLabel || '已恢复历史对话'
   resultSlides.value = Array.isArray(state.resultSlides) ? state.resultSlides : []
@@ -1150,14 +1236,10 @@ function restoreFromConversation(detail) {
   wsState.value = ['execution', 'streaming', 'document'].includes(savedWsState)
     ? (resultSlides.value.length ? 'done' : 'failed')
     : savedWsState
-  if (['execution', 'streaming', 'document'].includes(savedWsState) && !failedReason.value) {
+  if (['execution', 'streaming'].includes(savedWsState) && !failedReason.value) {
     failedReason.value = '这是一次已恢复的历史会话，原任务执行过程不会自动继续。'
   }
 
-  const lastTaskCardMsg = [...messages.value].reverse().find(msg => msg.kind === 'task-card')
-  currentTaskCard.value = lastTaskCardMsg?.taskState || null
-  const lastTaskLogGroupMsg = [...messages.value].reverse().find(msg => msg.kind === 'task-log-group')
-  currentTaskLogGroup.value = lastTaskLogGroupMsg?.group || null
   isRunning.value = false
 
   nextTick(() => {
@@ -1170,11 +1252,8 @@ function clearConversationView() {
   restoringConversation.value = true
   messages.value = []
   currentTask.value = null
-  currentTaskId.value = ''
-  currentTaskCard.value = null
-  currentTaskLogGroup.value = null
-  pendingIntake.value = null
-  pendingLoading.value = null
+  taskMode.value = 'idle'
+  brainPlanItems.value = []
   resetSteps()
   wsState.value = 'welcome'
   currentSlideIndex.value = 0
@@ -1446,244 +1525,33 @@ function startResize() {
   window.addEventListener('mouseup', stopResize)
 }
 
-// ── AI 需求解析 ──────────────────────────────────────────────────
-async function parseTaskWithAI(text, draft = {}, round = 0) {
-  const response = await fetch('/api/ai/parse-task', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text,
-      draft,
-      round,
-      apiKeys: settings.apiKeys
-    })
-  })
-
-  let res
-  try {
-    res = await response.json()
-  } catch (err) {
-    console.error('[parse-task] invalid json', { status: response.status, err })
-    throw new Error(`需求解析接口返回异常（${response.status}）`)
-  }
-
-  if (!response.ok || !res.success) {
-    console.error('[parse-task] request failed', { status: response.status, response: res })
-    const error = new Error(res.error || `需求解析失败（${response.status}）`)
-    error.code = res.code || ''
-    throw error
-  }
-
-  return {
-    taskIntent: !!res.taskIntent,
-    decisionMode: res.decisionMode || (res.ready ? 'proceed' : 'clarify'),
-    confidence: Number(res.confidence || 0),
-    parsed: {
-      ...(res.parsed || {}),
-      assumptions: Array.isArray(res.assumptions) ? res.assumptions : []
-    },
-    missing: Array.isArray(res.missing) ? res.missing : [],
-    ready: !!res.ready
-  }
-}
-
-function missingFieldLabel(field) {
-  return {
-    brand: '品牌 / 项目名称',
-    productCategory: '产品类别',
-    eventType: '活动类型',
-    scale: '活动规模',
-    budget: '预算区间'
-  }[field] || field
-}
-
-async function generateIntakeMessage(mode, parsed, missing = [], round = 1, maxRounds = 3) {
-  const response = await fetch('/api/ai/intake-message', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      mode,
-      parsed,
-      missing,
-      round,
-      maxRounds,
-      apiKeys: settings.apiKeys
-    })
-  })
-
-  let res
-  try {
-    res = await response.json()
-  } catch (err) {
-    console.error('[intake-message] invalid json', { mode, status: response.status, err })
-    throw new Error(`接口返回异常（${response.status}）`)
-  }
-
-  if (!response.ok) {
-    console.error('[intake-message] request failed', {
-      mode,
-      status: response.status,
-      response: res
-    })
-    const error = new Error(res.error || `接口请求失败（${response.status}）`)
-    error.code = res.code || ''
-    throw error
-  }
-
-  if (res.success && res.reply) return res.reply
-  console.error('[intake-message] empty reply', { mode, response: res })
-  {
-    const error = new Error(res.error || '需求确认话术生成失败')
-    error.code = res.code || ''
-    throw error
-  }
-}
-
-async function summarizeSpaceContext(spaceId) {
-  const response = await fetch('/api/ai/space-context-summary', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      spaceId,
-      apiKeys: settings.apiKeys
-    })
-  })
-
-  let res
-  try {
-    res = await response.json()
-  } catch (err) {
-    console.error('[space-context-summary] invalid json', { status: response.status, err })
-    throw new Error(`空间内容接口返回异常（${response.status}）`)
-  }
-
-  if (!response.ok || !res.success) {
-    const error = new Error(res.error || `空间内容总结失败（${response.status}）`)
-    error.code = res.code || ''
-    throw error
-  }
-
-  return res
-}
-
-function humanizeIntakeError(errorLike = '', mode = 'clarify') {
-  const code = errorLike?.code || ''
-  const message = errorLike?.message || String(errorLike || '')
-
-  if (code === 'MINIMAX_KEY_MISSING' || /MINIMAX_API_KEY 未配置/.test(message)) {
-    return '我这边还没拿到可用的 MiniMax Key，先去配置中心补一下，就能继续需求确认。'
-  }
-  if (code === 'MINIMAX_AUTH_FAILED' || /401|login fail|Authorization|API secret key/i.test(message)) {
-    return '我这边调用确认话术时鉴权失败了，通常是 MiniMax Key 无效、过期，或没填完整。去配置中心更新一下就能继续。'
-  }
-  if (code === 'MODEL_EMPTY' || /模型返回为空/.test(message)) {
-    return mode === 'clarify'
-      ? '我刚才没拿到有效的确认话术，麻烦你再发一次，我这边重新确认。'
-      : '我刚才没拿到有效的启动确认话术，麻烦你再发一次，我这边重新启动。'
-  }
-  if (code === 'MODEL_REPLY_INVALID') {
-    return '我刚才组织这句确认话时不够稳定，麻烦你再发一次，我这边换一种更稳的方式确认。'
-  }
-  if (code === 'UPSTREAM_NETWORK_ERROR' || /接口请求失败|接口返回异常/.test(message)) {
-    return '我这边的确认接口刚才没有正常返回，你稍等一下再试一次。'
-  }
-  if (/Failed to fetch|NetworkError|网络/.test(message)) {
-    return '我这边和服务的连接刚才断了一下，你稍后再发一次就好。'
-  }
-  return mode === 'clarify'
-    ? `我刚才在整理需求确认时出了点问题：${message}`
-    : `我刚才在生成启动确认时出了点问题：${message}`
-}
-
-function humanizeParseError(errorLike = '') {
-  const code = errorLike?.code || ''
-  const message = errorLike?.message || String(errorLike || '')
-
-  if (code === 'MINIMAX_KEY_MISSING' || /MINIMAX_API_KEY 未配置/.test(message)) {
-    return '我这边还没拿到可用的 MiniMax Key，先去配置中心补一下，才能帮你判断和整理需求。'
-  }
-  if (code === 'MINIMAX_AUTH_FAILED' || /401|login fail|Authorization|API secret key/i.test(message)) {
-    return '我这边在理解需求时鉴权失败了，通常是 MiniMax Key 无效、过期，或没填完整。去配置中心更新一下就能继续。'
-  }
-  if (code === 'PARSE_JSON_INVALID' || code === 'PARSE_RESULT_UNSTABLE' || /JSON/.test(message)) {
-    return '我刚才在整理这条需求时结果有点飘，我先按当前信息重新收一下。'
-  }
-  if (code === 'UPSTREAM_NETWORK_ERROR' || /接口请求失败|接口返回异常|需求解析失败/.test(message)) {
-    return '我这边的需求解析接口刚才没有正常返回，你稍等一下再试一次。'
-  }
-  if (/Failed to fetch|NetworkError|网络/.test(message)) {
-    return '我这边和服务的连接刚才断了一下，你稍后再发一次就好。'
-  }
-  return `我刚才在理解这条需求时出了点问题：${message}`
-}
-
-function maybeSuggestSettings(errorLike = '') {
-  const code = errorLike?.code || ''
-  const message = errorLike?.message || String(errorLike || '')
-  if (code === 'MINIMAX_AUTH_FAILED' || code === 'MINIMAX_KEY_MISSING' || /401|login fail|Authorization|API secret key|MINIMAX_API_KEY/i.test(message)) {
-    return ' 你可以先去配置中心更新 MiniMax Key。'
-  }
-  return ''
-}
-
-function loadingMarkup(label = '正在思考', detail = '') {
-  return `<span class="chat-loading"><span class="chat-loading-orb"></span><span class="chat-loading-copy"><span class="chat-loading-text">${label}</span>${detail ? `<span class="chat-loading-detail">${detail}</span>` : ''}<span class="chat-loading-bar"><span class="chat-loading-bar-inner"></span></span></span></span>`
-}
-
-let pendingLoadingTicker = null
-let pendingLoadingStartedAt = 0
-
-function clearPendingLoadingTicker() {
-  if (pendingLoadingTicker) {
-    clearInterval(pendingLoadingTicker)
-    pendingLoadingTicker = null
-  }
-}
-
-function showPendingLoading(label = '正在思考', stages = []) {
-  clearPendingLoadingTicker()
-  pendingLoadingStartedAt = Date.now()
-  pendingLoading.value = { label, detail: '' }
-
-  if (!stages.length) return
-
-  let idx = 0
-  pendingLoadingTicker = setInterval(() => {
-    idx = Math.min(idx + 1, stages.length - 1)
-    const elapsed = Math.floor((Date.now() - pendingLoadingStartedAt) / 1000)
-    pendingLoading.value = {
-      label: stages[idx],
-      detail: elapsed >= 6 ? `已等待 ${elapsed}s，正在继续处理` : ''
-    }
-  }, 1400)
-}
-
-function updatePendingLoading(label = '正在思考', detail = '') {
-  pendingLoading.value = { label, detail }
-}
-
-async function resolvePendingLoading(text) {
-  clearPendingLoadingTicker()
-  pendingLoading.value = null
-  pushMsg('ai', '', text)
-  await nextTick()
-  if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
-}
-
-// ── 任务队列 ─────────────────────────────────────────────────────
-const taskQueue  = ref([])   // { id, type:'chat'|'agent', text, msgIdx }
-let   isBusy     = false     // 普通变量即可，JS 单线程保证同步读写安全
 let   sse        = null      // SSE 连接实例（必须声明，防止全局污染）
 let   resolveCurrent = null  // 当前 agent 任务的 resolve，用于外部终止
-const IDEAL_INTAKE_ROUNDS = 2
-const MAX_INTAKE_ROUNDS = 3
-const pendingLoading = ref(null)
 
-// 发送：消息立即显示，加入队列排队处理
+// 发送：直接走 Brain Agent，不再做前置意图解析
 async function send() {
   const text = inputText.value.trim()
-  if (!text) return
+  if (!text || isRunning.value) return
   inputText.value = ''
+
+  // 如果正在等待澄清回答
+  if (waitingForClarification.value) {
+    const clarificationMsg = messages.value.find(msg => 
+      msg.role === 'ai' && msg.kind === 'clarification' && !msg.answered
+    )
+    if (clarificationMsg) {
+      clarificationReplyText.value = text
+      await submitClarificationReply(clarificationMsg)
+      return
+    }
+  }
+
+  // 如果 PPT 已生成完成，开新对话；否则在同一对话内继续
+  const pptDone = wsState.value === 'done' && (resultDownloadUrl.value || resultSlides.value.length > 0)
+  if (pptDone || wsState.value === 'failed') {
+    activeConversationId.value = ''
+    currentSessionId.value = ''
+  }
 
   const conversationId = await ensureActiveConversation(text.slice(0, 24))
   if (!conversationId) {
@@ -1691,137 +1559,18 @@ async function send() {
     return
   }
 
-  // 消息立即出现在聊天区
   pushMsg('user', text)
-
-  showPendingLoading('正在理解需求', ['正在理解需求', '正在提取关键信息', '正在判断是否直接推进'])
   await nextTick()
   if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
 
-  let parseResult
-  const intakeRound = pendingIntake.value?.round || 0
-  try {
-    parseResult = await parseTaskWithAI(text, pendingIntake.value?.draft || {}, intakeRound)
-  } catch (err) {
-    await resolvePendingLoading(humanizeParseError(err) + maybeSuggestSettings(err))
-    return
-  }
-
-  if (parseResult.taskIntent) {
-    const candidateTask = parseResult.parsed
-    const nextRound = intakeRound + 1
-    const shouldProceed = parseResult.ready || parseResult.decisionMode === 'proceed'
-
-    if (!shouldProceed) {
-      pendingIntake.value = {
-        draft: candidateTask,
-        missing: parseResult.missing,
-        round: nextRound
-      }
-      try {
-        const reply = await generateIntakeMessage('clarify', candidateTask, parseResult.missing, nextRound, MAX_INTAKE_ROUNDS)
-        await resolvePendingLoading(reply)
-      } catch (err) {
-        await resolvePendingLoading(
-          humanizeIntakeError(err, 'clarify') + maybeSuggestSettings(err)
-        )
-      }
-      return
-    }
-
-    pendingIntake.value = null
-    clearPendingLoadingTicker()
-    pendingLoading.value = null
-    {
-      pushMsg('ai', '', selectedSpaceId.value
-        ? '我先快速看一下这个空间的索引和已有内容，也顺手把平台沉淀下来的经验过一遍，先把上下文对齐。'
-        : '我先把平台这边沉淀下来的经验过一遍；如果当前空间里没有额外上下文，我就按这次需求本身往下推进。')
-      showPendingLoading('正在读取空间内容', ['正在读取空间内容', '正在整理已有文档', '正在提炼可用上下文'])
-      try {
-        const contextRes = await summarizeSpaceContext(selectedSpaceId.value || '')
-        clearPendingLoadingTicker()
-        pendingLoading.value = null
-        if (contextRes.hasContext) {
-          candidateTask.spaceId = selectedSpaceId.value
-          candidateTask.spaceContextSummary = contextRes.summary || ''
-          candidateTask.spaceContextKeyPoints = contextRes.keyPoints || []
-          candidateTask.spaceContextDocs = contextRes.docs || []
-          if (contextRes.userConclusion) {
-            pushMsg('ai', '', contextRes.userConclusion)
-          }
-        } else {
-          candidateTask.spaceId = selectedSpaceId.value
-          pushMsg('ai', '', contextRes.userConclusion || '我看过了，这个空间里暂时没有能直接影响这次判断的有效内容，我就按这次需求本身往下推进。')
-        }
-      } catch (err) {
-        clearPendingLoadingTicker()
-        pendingLoading.value = null
-        candidateTask.spaceId = selectedSpaceId.value
-        pushMsg('ai', '', '我刚才想先回看一下空间里的内容，但这一步没有顺利拿到结果，我先按当前需求继续往下推进。')
-      }
-    }
-    candidateTask.spaceId = selectedSpaceId.value || ''
-
-    updatePendingLoading('正在整理 brief', '')
-    await nextTick()
-    if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
-    try {
-      const reply = await generateIntakeMessage('kickoff', candidateTask, [], Math.min(nextRound, MAX_INTAKE_ROUNDS), MAX_INTAKE_ROUNDS)
-      await resolvePendingLoading(reply)
-    } catch (err) {
-      await resolvePendingLoading(
-        humanizeIntakeError(err, 'kickoff') + maybeSuggestSettings(err)
-      )
-      pendingIntake.value = {
-        draft: candidateTask,
-        missing: parseResult.missing,
-        round: Math.min(nextRound, MAX_INTAKE_ROUNDS)
-      }
-      return
-    }
-    taskQueue.value.push({
-      id: Date.now() + Math.random(),
-      type: 'agent',
-      text: candidateTask.requirements,
-      parsed: candidateTask,
-      msgIdx: null
-    })
-
-    if (!isBusy) processQueue()
-    return
-  }
-
-  // 加入闲聊队列，复用当前 loading 气泡
-  taskQueue.value.push({
-    id:     Date.now() + Math.random(),
-    type:   'chat',
-    text,
-    parsed: null,
-    msgIdx: null
-  })
-
-  // 若空闲则立刻开始处理
-  if (!isBusy) processQueue()
-}
-
-function enqueueAgentTask(text) {
-  inputText.value = text
-  send()
+  await runBrainTask(text)
 }
 
 function retryCurrentTask() {
-  const parsed = currentTask.value
-  const text = parsed?.requirements
-  if (!text || isBusy) return
-  pushMsg('user', text)
-  taskQueue.value.push({
-    id: Date.now() + Math.random(),
-    type: 'agent',
-    text,
-    parsed: { ...parsed },
-    msgIdx: null
-  })
-  if (!isBusy) processQueue()
+  const text = currentTask.value?.requirements || currentTask.value?.topic
+  if (!text || isRunning.value) return
+  inputText.value = text
+  send()
 }
 
 function restoreTaskToInput() {
@@ -1830,34 +1579,9 @@ function restoreTaskToInput() {
   }
 }
 
-// 队列处理器：while 循环顺序执行，避免递归堆栈风险
-async function processQueue() {
-  if (isBusy) return   // 已有循环在跑，直接返回
-  isBusy = true
-
-  while (taskQueue.value.length > 0) {
-    const task = taskQueue.value[0]
-    try {
-      if (task.type === 'chat') {
-        await runChatTask(task)
-      } else {
-        await runAgentTask(task)
-      }
-    } catch (e) {
-      console.error('[Queue] task error:', e)
-    }
-    taskQueue.value.shift()
-  }
-
-  isBusy = false
-}
-
 // ── 终止当前任务 ───────────────────────────────────────────────────
 function stopTask() {
   if (sse) { sse.close(); sse = null }
-  // 清空等待队列（终止后续排队任务）
-  taskQueue.value = []
-  isBusy = false
   isRunning.value  = false
   isBuilding.value = false
   // resolve 挂起的 Promise，让队列处理器正常退出
@@ -1865,193 +1589,252 @@ function stopTask() {
   pushMsg('ai', '', '已终止当前任务。')
 }
 
-// ── 闲聊任务 ──────────────────────────────────────────────────────
-async function runChatTask(task) {
-  showPendingLoading('正在思考')
-  await nextTick()
-  if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
-
-  try {
-    const res = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: task.text,
-        history: messages.value.filter(m => m.text).map(m => ({ role: m.role, text: m.text })),
-        apiKeys: settings.apiKeys
-      })
-    }).then(r => r.json())
-
-    await resolvePendingLoading(res.reply || '抱歉，我没有理解你的意思。')
-  } catch {
-    await resolvePendingLoading('网络错误，请稍后重试。')
-  }
-
-  await nextTick()
-  if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
-}
-
-// ── Agent 策划任务 ────────────────────────────────────────────────
-async function runAgentTask(task) {
-  const parsed = task.parsed
-  if (!parsed) throw new Error('缺少结构化任务信息，无法启动策划任务')
-  currentTask.value = parsed
-  wsState.value = 'execution'
-  resetSteps()
-  createTaskCard(parsed)
-  createTaskLogGroup()
-  syncTaskCard()
+// ── Brain Agent 任务 ──────────────────────────────────────────────
+async function runBrainTask(text) {
+  const isContinuing = !!currentSessionId.value  // 是否复用现有 session
   isRunning.value = true
-  addExecutionLog(`项目简报确认完成，开始处理「${parsed.topic || parsed.requirements.slice(0, 18)}」`)
+  waitingForClarification.value = false
+  resetProcessedStreamEvents()
+  if (!isContinuing) {
+    resetSteps()
+    brainPlanItems.value = defaultBrainPlan()
+    currentTask.value = { topic: text.slice(0, 32), requirements: text }
+  }
+  taskMode.value = 'brain'
+  progress.value = isContinuing ? Math.max(progress.value, 8) : 8
+  progressLabel.value = isContinuing ? '继续推进...' : '正在理解需求...'
+  wsState.value = 'execution'
+  addExecutionLog(isContinuing ? `继续任务：${text.slice(0, 48)}` : `收到新任务：${text.slice(0, 48)}`)
 
   return new Promise(resolve => {
-    // 超时保护：30 分钟后强制 resolve，防止队列永久卡住
     const timeoutId = setTimeout(() => {
       if (sse) { sse.close(); sse = null }
-      failedReason.value = '任务执行超时，系统已自动中止。'
-      failedStage.value = stepList.find(step => step.status === 'running')?.key || failedStage.value
-      pushMsg('ai', '', failedReason.value)
-      addExecutionLog(failedReason.value)
       isRunning.value = false
-      isBuilding.value = false
-      wsState.value = 'failed'
+      wsState.value = wsState.value !== 'done' ? 'failed' : wsState.value
+      pushMsg('ai', '', '任务执行超时，已自动终止。')
       resolve()
     }, 30 * 60 * 1000)
 
     const done = () => { clearTimeout(timeoutId); resolveCurrent = null; resolve() }
     resolveCurrent = done
 
-    fetch('/api/multi-agent/generate', {
+    fetch('/api/agent/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...parsed, apiKeys: settings.apiKeys })
+      body: JSON.stringify({
+        message: text,
+        spaceId: selectedSpaceId.value,
+        apiKeys: settings.apiKeys,
+        sessionId: currentSessionId.value || undefined  // 复用已有 session（如有）
+      })
     }).then(r => r.json()).then(res => {
       if (!res.success) throw new Error(res.message || '启动失败')
-      currentTaskId.value = res.taskId
-      connectSSE(res.streamUrl, done)
+      currentSessionId.value = res.sessionId
+      connectBrainSSE(res.streamUrl, done)
     }).catch(err => {
       pushMsg('ai', '', `启动失败：${err.message}`)
-      const s = stepList.find(s => s.key === 'orchestrator')
-      if (s) s.status = 'failed'
       isRunning.value = false
-      failedReason.value = err.message
-      failedStage.value = 'orchestrator'
-      progressLabel.value = '任务启动失败'
-      wsState.value = 'failed'
-      addExecutionLog(`任务启动失败：${err.message}`)
+      wsState.value = 'welcome'
       done()
     })
   })
 }
 
-function connectSSE(url, resolve = () => {}) {
+function connectBrainSSE(url, resolve = () => {}) {
   if (sse) sse.close()
   sse = new EventSource(url)
 
-  sse.addEventListener('progress', e => handleProgress(JSON.parse(e.data)))
+  // 移除上一条 thinking 气泡的辅助函数
+  function popThinking() {
+    const last = messages.value[messages.value.length - 1]
+    if (last?.kind === 'thinking') messages.value.pop()
+  }
+
+  sse.addEventListener('thinking', () => {
+    popThinking()
+    pushAiMessage({ kind: 'thinking' })
+  })
+
+  sse.addEventListener('tool_call', e => {
+    const d = JSON.parse(e.data)
+    popThinking()
+    progress.value = Math.min(progress.value + 8, 92)
+    progressLabel.value = d.display || '正在执行工具...'
+    pushAiMessage({
+      kind: 'tool-call',
+      tool: d.tool,
+      display: d.display,
+      toolCallId: d.toolCallId,
+      progress: '',
+      resultSummary: '',
+      resultDetails: '',
+      expanded: false
+    })
+    if (['run_strategy', 'build_ppt'].includes(d.tool)) {
+      addExecutionLog(`开始${d.display || d.tool}`)
+    }
+  })
+
+  sse.addEventListener('tool_progress', e => {
+    const d = JSON.parse(e.data)
+    // 更新最后一个 tool-call 气泡的 progress 字段
+    const lastToolCall = [...messages.value].reverse().find(m => m.kind === 'tool-call')
+    if (lastToolCall) lastToolCall.progress = d.message
+    if (d.message) {
+      progressLabel.value = d.message
+    }
+  })
+
+  sse.addEventListener('text', e => {
+    const d = JSON.parse(e.data)
+    popThinking()
+    if (d.text) pushMsg('ai', '', d.text, { kind: 'narration' })
+  })
+
+  sse.addEventListener('clarification', e => {
+    const d = JSON.parse(e.data)
+    if (shouldSkipStreamEvent('clarification', d)) return
+    popThinking()
+    waitingForClarification.value = true
+    isRunning.value = false
+    pushAiMessage({ kind: 'clarification', question: d.question, questionType: d.type, answered: false })
+    scheduleConversationPersist()
+  })
+
+  sse.addEventListener('plan_update', e => {
+    const d = JSON.parse(e.data)
+    brainPlanItems.value = Array.isArray(d.items) ? d.items : []
+    progress.value = Math.max(progress.value, 15)
+    progressLabel.value = '正在执行计划'
+    if (brainPlanItems.value.length) {
+      addExecutionLog(`计划已更新，当前共 ${brainPlanItems.value.length} 步。`, d.timestamp || Date.now())
+    }
+  })
+
+  sse.addEventListener('brief_update', e => {
+    const d = JSON.parse(e.data)
+    currentTask.value = {
+      ...(currentTask.value || {}),
+      ...(d.brief || {})
+    }
+    if (currentTask.value?.topic || currentTask.value?.brand) {
+      addExecutionLog(`已整理任务简报：${currentTask.value.topic || currentTask.value.brand}`, d.timestamp || Date.now())
+    }
+  })
+
+  sse.addEventListener('tool_result', e => {
+    const d = JSON.parse(e.data)
+    const matched = [...messages.value].reverse().find((msg) => msg.kind === 'tool-call' && msg.tool === d.tool && !msg.resultSummary)
+    if (matched) {
+      matched.resultSummary = d.summary || (d.ok ? '执行完成' : '执行失败')
+      matched.resultDetails = d.details || ''
+    } else {
+      pushAiMessage({
+        kind: 'tool-call',
+        tool: d.tool,
+        display: d.tool,
+        progress: '',
+        resultSummary: d.summary || (d.ok ? '执行完成' : '执行失败'),
+        resultDetails: d.details || '',
+        expanded: false
+      })
+    }
+    if (!matched?.resultSummary || d.ok === false) {
+      addExecutionLog(d.summary || `${d.tool} 已完成`, d.timestamp || Date.now())
+    }
+    scheduleConversationPersist()
+  })
+
+  // 复用现有事件处理
   sse.addEventListener('artifact', e => handleArtifact(JSON.parse(e.data)))
-  sse.addEventListener('slide_added', e => handleSlideAdded(JSON.parse(e.data)))
   sse.addEventListener('doc_ready', e => handleDocReady(JSON.parse(e.data)))
+  sse.addEventListener('slide_added', e => handleSlideAdded(JSON.parse(e.data)))
   sse.addEventListener('done', e => {
+    popThinking()
     handleDone(JSON.parse(e.data))
-    sse.close()
+    sse.close(); sse = null
+    isRunning.value = false
     resolve()
   })
+
   sse.addEventListener('error', e => {
+    popThinking()
     if (e.data) {
       try {
         const d = JSON.parse(e.data)
-        failedReason.value = d.message || '生成失败'
-        failedStage.value = d.stage || failedStage.value
-        pushMsg('ai', '', failedReason.value)
-        addExecutionLog(`任务失败：${failedReason.value}`, d.timestamp || Date.now())
+        if (d.message) pushMsg('ai', '', d.message)
+        failedReason.value = d.message || '任务执行出错'
       } catch {}
     } else if (!failedReason.value) {
-      failedReason.value = '任务连接中断，请稍后重试。'
-      addExecutionLog(failedReason.value)
+      failedReason.value = '任务连接中断，请重试。'
     }
-    sse.close()
-    isRunning.value  = false
-    isBuilding.value = false
-    if (wsState.value !== 'done') {
-      progressLabel.value = '任务执行失败'
-      wsState.value = 'failed'
-    }
+    if (sse) { sse.close(); sse = null }
+    isRunning.value = false
+    if (wsState.value !== 'done') wsState.value = 'failed'
     resolve()
   })
 }
 
-function handleProgress(d) {
-  const { stage, agentId, status, message, score, passed, round, timestamp } = d
-  const step = stepList.find(s => s.key === stage)
-  if (!step) return
-
-  // Map status
-  const mapped = status === 'completed' ? 'completed' : status === 'failed' ? 'failed' : 'running'
-  step.status  = mapped
-  if (message) step.message = message
-  if (stage === 'critic' && score != null) { step.score = score; step.passed = passed }
-
-  // Research sub-agents
-  if (stage === 'research' && agentId) {
-    const idx = parseInt(agentId.split('-')[1] || '1', 10) - 1
-    if (!step.subs[idx]) step.subs[idx] = { label: `搜索 Agent ${idx + 1}`, done: false }
-    step.subs[idx].done = status === 'completed'
-  }
-
-  // Progress
-  if (status === 'completed' && STAGE_PROGRESS[stage]) {
-    progress.value = STAGE_PROGRESS[stage]
-    progressLabel.value = `${step.title}完成`
-  } else if (status === 'running') {
-    progressLabel.value = `正在${step.title}...`
-  }
-
-  if (stage === 'research' && status === 'running' && !researchSummaryLogged.value) {
-    researchSummaryLogged.value = true
-    addExecutionLog('已启动并行搜索，正在同步收集趋势、案例和玩法。', timestamp || Date.now())
-    return
-  }
-
-  if (stage === 'research' && agentId) {
-    const doneCount = step.subs.filter(Boolean).filter(item => item.done).length
-    const totalCount = step.subs.filter(Boolean).length || 3
-    if (status === 'completed' && doneCount === totalCount) {
-      addExecutionLog(`并行搜索已完成，收回 ${doneCount} 个方向的发现，开始汇总。`, timestamp || Date.now())
-    }
-    return
-  }
-
-  const stageName = step.title
-  let logText = message || `${stageName}${status === 'completed' ? '完成' : status === 'failed' ? '失败' : '开始'}`
-  if (stage === 'critic' && score != null) {
-    logText = `第 ${round || 1} 轮评审完成，得分 ${score}${passed ? '，通过' : '，继续优化'}`
-  }
-  if (stage === 'orchestrator' && status === 'completed') return
-  addExecutionLog(logText, timestamp || Date.now())
-}
-
 function handleArtifact(d) {
-  artifacts.value.unshift({
+  const artifact = {
     id: `${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
     artifactType: d.artifactType,
     payload: d.payload || {}
-  })
+  }
+  artifacts.value.unshift(artifact)
   if (d.artifactType === 'ppt_page') return
-  addExecutionLog(`${artifactTypeLabel(d.artifactType)}已更新：${artifactTimelineText({ artifactType: d.artifactType, payload: d.payload || {} })}`, d.timestamp || Date.now())
+
+  // 在对话流中插入产出物卡片
+  const cardTypes = ['task_brief', 'research_result', 'plan_draft', 'review_feedback', 'ppt_outline']
+  if (cardTypes.includes(d.artifactType)) {
+    pushAiMessage({
+      kind: 'artifact-card',
+      artifactType: d.artifactType,
+      artifactId: artifact.id,
+      title: artifactCardTitle(d.artifactType, d.payload || {}),
+      summary: artifactCardSummary(d.artifactType, d.payload || {}),
+      chips: artifactCardChips(d.artifactType, d.payload || {}),
+      payload: d.payload || {}
+    })
+  }
+  if (['plan_draft', 'review_feedback', 'ppt_outline'].includes(d.artifactType)) {
+    addExecutionLog(`${artifactTypeLabel(d.artifactType)}已更新：${artifactTimelineText({ artifactType: d.artifactType, payload: d.payload || {} })}`, d.timestamp || Date.now())
+  }
+}
+
+function artifactCardTitle(type, payload) {
+  if (type === 'task_brief') return `任务理解：${payload.brand || payload.topic || '已整理'}`
+  if (type === 'research_result') return `搜索发现：${payload.focus || '行业资讯'}`
+  if (type === 'plan_draft') return `方案草稿：${payload.planTitle || '已生成'}`
+  if (type === 'review_feedback') return `评审结果：第 ${payload.round || 1} 轮，评分 ${payload.score || 0}`
+  if (type === 'ppt_outline') return `PPT 大纲：共 ${payload.total || 0} 页`
+  return artifactTypeLabel(type)
+}
+
+function artifactCardSummary(type, payload) {
+  if (type === 'task_brief') return payload.parsedGoal || payload.goal || ''
+  if (type === 'research_result') return payload.summary || ''
+  if (type === 'plan_draft') return payload.coreStrategy || ''
+  if (type === 'review_feedback') return payload.passed ? '方案通过评审，进入下一步' : (payload.suggestions?.[0] || '方案待优化')
+  if (type === 'ppt_outline') return `${payload.title || ''}`
+  return ''
+}
+
+function artifactCardChips(type, payload) {
+  if (type === 'task_brief') return (payload.keyThemes || []).slice(0, 3)
+  if (type === 'plan_draft') return (payload.highlights || []).slice(0, 3)
+  return []
 }
 
 function handleDocReady(d) {
   docContent.value = d.docHtml || ''
-  docTitle.value   = d.title   || '策划方案'
-  progress.value   = 90
+  docTitle.value = d.title || currentTask.value?.topic || '策划方案'
+  progress.value = Math.max(progress.value, 88)
   progressLabel.value = '策划文档已生成，等待确认'
-  wsState.value    = 'document'
-  isRunning.value  = false
-  syncTaskCard()
-  addExecutionLog('策划文档已生成，请在右侧查看并确认后生成 PPT。')
-  pushMsg('ai', '', `策划文档已生成！请在右侧查看「${d.title}」，确认无误后点击「生成 PPT」。`)
-  // 注意：SSE 连接保持打开，等待 slide_added / done 事件
+  wsState.value = 'document'
+  isRunning.value = false
+  addExecutionLog('策划文档已生成，请先确认文档内容，再生成 PPT。', d.timestamp || Date.now())
+  pushMsg('ai', '', `策划文档已生成。请先在右侧确认「${docTitle.value}」，确认后再生成 PPT。`)
 }
 
 function handleSlideAdded(d) {
@@ -2081,51 +1864,75 @@ function handleSlideAdded(d) {
 }
 
 function handleDone(d) {
+  const isBrainOnly = d?.mode === 'brain' && !d?.previewSlides?.length && !d?.downloadUrl
   progress.value = 100
-  progressLabel.value = '策划方案生成完成！'
-  stepList.forEach(s => { if (s.status !== 'failed') s.status = 'completed' })
+  progressLabel.value = isBrainOnly ? '本轮任务已完成' : '策划方案生成完成！'
+  brainPlanItems.value = (brainPlanItems.value.length ? brainPlanItems.value : defaultBrainPlan()).map((item) => ({
+    ...item,
+    status: 'completed'
+  }))
 
   isBuilding.value = false
   resultSlides.value       = d.previewSlides || []
   resultDownloadUrl.value  = d.downloadUrl   || ''
   resultData.value         = d
+  if (d.brief) {
+    currentTask.value = {
+      ...(currentTask.value || {}),
+      ...d.brief
+    }
+  }
   if (d.previewData?.title && currentTask.value) {
     currentTask.value = { ...currentTask.value, topic: d.previewData.title }
   }
 
-  pushMsg('ai', '', '策划方案已生成完成！可在右侧预览，或点击"进入编辑器"精修。')
-  wsState.value   = 'done'
-  syncTaskCard()
-  addExecutionLog('任务已完成，支持预览、编辑和保存。')
+  if (isBrainOnly) {
+    pushMsg('ai', '', d.hasPlan
+      ? '方案方向已经整理完了，我会带着这版判断继续配合你细化，确认后也可以直接生成 PPT。'
+      : '这一轮信息我已经整理完了，你可以继续补充方向，我再往下推进。')
+    wsState.value = docContent.value
+      ? 'document'
+      : (hasStrategyPreview.value ? 'done' : 'welcome')
+  } else {
+    pushMsg('ai', '', '策划方案已生成完成！可在右侧预览，或点击"进入编辑器"精修。')
+    wsState.value = 'done'
+  }
+  addExecutionLog(isBrainOnly ? '本轮任务已完成，可继续补充要求或进入 PPT 生成。' : '任务已完成，支持预览、编辑和保存。')
   isRunning.value = false
+  waitingForClarification.value = false
   failedReason.value = ''
   failedStage.value = ''
   // resolve 由 connectSSE 的 done 监听器调用
 }
 
 async function triggerPptBuild({ content: editedHtml } = {}) {
-  if (!currentTaskId.value) {
-    Message.error('任务 ID 丢失，请重新生成')
+  if (!currentSessionId.value) {
+    Message.error('当前会话不存在，请重新开始')
     return
   }
-  isRunning.value  = true
+
+  isRunning.value = true
   isBuilding.value = false
-  wsState.value    = 'execution'
-  progress.value   = 90
-  progressLabel.value = '正在生成 PPT...'
+  wsState.value = 'execution'
+  progress.value = Math.max(progress.value, 90)
+  progressLabel.value = '正在基于文档生成 PPT...'
+  if (editedHtml) {
+    docContent.value = editedHtml
+  }
 
   try {
-    const res = await fetch(`/api/multi-agent/${currentTaskId.value}/build-ppt`, {
+    const res = await fetch(`/api/agent/${currentSessionId.value}/build-ppt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ docContent: editedHtml })
+      body: JSON.stringify({
+        docContent: docContent.value,
+        apiKeys: settings.apiKeys
+      })
     }).then(r => r.json())
 
     if (!res.success) throw new Error(res.message || '启动失败')
-    // SSE 连接已经开着，slide_added 事件会自动被现有监听器处理
-    // 但如果 SSE 断开了，需要重连
     if (!sse || sse.readyState === EventSource.CLOSED) {
-      connectSSE(res.streamUrl, () => {})
+      connectBrainSSE(res.streamUrl, () => {})
     }
   } catch (err) {
     Message.error('生成 PPT 失败：' + err.message)
@@ -2138,6 +1945,15 @@ async function triggerPptBuild({ content: editedHtml } = {}) {
 const showSaveModal = ref(false)
 const saveSpaceId   = ref('')
 const saveName      = ref('')
+
+// ── 产出物卡片详情 ─────────────────────────────────────────────────
+const showArtifactModal = ref(false)
+const selectedArtifact = ref(null)
+
+function openArtifactModal(msg) {
+  selectedArtifact.value = msg
+  showArtifactModal.value = true
+}
 
 function showSaveDialog() {
   if (!spaces.value.length) {
@@ -2191,7 +2007,6 @@ watch(wsState, (state) => {
   } else {
     activePreviewTab.value = 'strategy'
   }
-  syncTaskCard()
   scheduleConversationPersist()
 })
 
@@ -2216,6 +2031,617 @@ onUnmounted(() => {
   overflow: hidden;
   position: relative;
   background: #fff;
+}
+
+/* ── 思考过程分组 ── */
+.thinking-group {
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.thinking-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #475569;
+  transition: background 0.2s;
+}
+
+.thinking-toggle:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.thinking-icon {
+  font-size: 18px;
+}
+
+.thinking-steps {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thinking-step {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.thinking-step-time {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.thinking-step-content {
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* ── 工具调用分组 ── */
+.tool-calls-group {
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tool-calls-summary {
+  overflow: hidden;
+}
+
+.tool-calls-toggle {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 13px;
+  color: #64748b;
+  transition: background 0.2s;
+}
+
+.tool-calls-toggle:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.tool-calls-chevron {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.previous-tool-calls {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tool-call-mini {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.tool-call-mini-icon {
+  font-size: 14px;
+}
+
+.tool-call-mini-text {
+  color: #475569;
+  flex: 1;
+}
+
+.current-tool-call {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tool-call-card {
+  padding: 4px 0;
+  max-width: 85%;
+  transition: all 0.2s;
+}
+
+.tool-call-card.active {
+}
+
+.tool-call-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tool-call-card-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.tool-call-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-call-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.tool-call-card-progress {
+  font-size: 12px;
+  color: #6b7280;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.tool-call-card-result {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.tool-call-card-result-summary {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.tool-call-card-toggle {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tool-call-card-toggle:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #374151;
+}
+
+.tool-call-card-details {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  overflow-x: auto;
+  max-height: 280px;
+  line-height: 1.6;
+}
+
+/* ── AI 消息 ── */
+.ai-message-card {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+  padding: 4px 0;
+  max-width: 85%;
+  word-break: break-word;
+}
+
+.ai-message-card :deep(p) {
+  margin-bottom: 8px;
+}
+
+.ai-message-card :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.ai-message-card :deep(ul) {
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+.ai-message-card :deep(li) {
+  margin-bottom: 4px;
+}
+
+/* ── 澄清卡片 ── */
+.clarification-card {
+  padding: 4px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 85%;
+}
+
+.clarification-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.clarification-question {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  flex: 1;
+}
+
+/* ── 产出物消息卡片 ── */
+.artifact-msg-card {
+  max-width: 88%;
+  border: none;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.artifact-msg-card:hover .artifact-msg-card-arrow {
+  color: #3b82f6;
+}
+
+.artifact-msg-card--plan_draft,
+.artifact-msg-card--review_feedback {
+  background: transparent;
+  border-color: transparent;
+}
+
+.artifact-msg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.artifact-msg-card-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.artifact-msg-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  flex: 1;
+}
+
+.artifact-msg-card-arrow {
+  font-size: 18px;
+  color: #9ca3af;
+  font-weight: 300;
+  margin-left: auto;
+}
+
+.artifact-msg-card:hover .artifact-msg-card-arrow {
+  color: #3b82f6;
+}
+
+.artifact-msg-card-summary {
+  font-size: 12.5px;
+  color: #6b7280;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.artifact-msg-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.artifact-msg-chip {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(59, 130, 246, 0.08);
+  color: rgb(var(--arcoblue-6));
+  border-radius: 20px;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 产出物详情弹窗 ── */
+.artifact-modal-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.artifact-modal-section {
+  margin-bottom: 20px;
+}
+
+.artifact-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.artifact-modal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.artifact-modal-text {
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.artifact-modal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.artifact-modal-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(59, 130, 246, 0.08);
+  color: #2563eb;
+  border-radius: 20px;
+}
+
+.artifact-modal-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.artifact-modal-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8faff;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.highlight-num {
+  width: 20px;
+  height: 20px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.artifact-modal-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artifact-modal-section-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #f8faff;
+  border-radius: 8px;
+}
+
+.section-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.section-info {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.section-points {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.artifact-modal-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.8;
+}
+
+.artifact-modal-score {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 16px;
+  background: #fef3c7;
+  border-radius: 10px;
+}
+
+.artifact-modal-score.pass {
+  background: #d1fae5;
+}
+
+.score-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: #d97706;
+}
+
+.artifact-modal-score.pass .score-num {
+  color: #059669;
+}
+
+.score-label {
+  font-size: 14px;
+  color: #92400e;
+}
+
+.artifact-modal-score.pass .score-label {
+  color: #065f46;
+}
+
+.score-status {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 20px;
+}
+
+.artifact-modal-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.artifact-modal-page-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #f8faff;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.page-num {
+  width: 22px;
+  height: 22px;
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.page-layout {
+  padding: 2px 8px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.page-title {
+  flex: 1;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artifact-modal-json {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #374151;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+/* ── 任务摘要卡片 ── */
+.task-summary-card {
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: #ffffff;
+  padding: 16px;
+}
+
+.task-summary-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.task-summary-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.task-summary-dot.running {
+  background: #3b82f6;
+  animation: pulse 2s infinite;
+}
+
+.task-summary-dot.completed {
+  background: #059669;
+}
+
+.task-summary-dot.failed {
+  background: #dc2626;
+}
+
+.task-summary-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-summary-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.task-summary-subtitle {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.task-summary-progress {
+  margin-top: 8px;
 }
 
 .chat-layout.resizing {
@@ -2670,6 +3096,11 @@ onUnmounted(() => {
   background: transparent;
 }
 
+.panel-resizer--collapsed {
+  cursor: default;
+  width: 10px;
+}
+
 .panel-resizer-line {
   position: absolute;
   top: 0;
@@ -2687,15 +3118,53 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px rgba(var(--arcoblue-6), 0.08);
 }
 
+.panel-resizer-toggle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.panel-resizer:hover .panel-resizer-toggle,
+.panel-resizer--collapsed .panel-resizer-toggle {
+  opacity: 1;
+}
+
+.panel-resizer-toggle:hover {
+  color: rgb(var(--arcoblue-6));
+  border-color: rgba(var(--arcoblue-6), 0.4);
+}
+
 .chat-history {
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: none;
   width: 100%;
   max-width: 720px;
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.chat-history::-webkit-scrollbar {
+  display: none;
 }
 
 /* 气泡 */
@@ -2706,24 +3175,20 @@ onUnmounted(() => {
 .bubble-wrap.ai   { justify-content: flex-start; }
 
 .bubble {
-  max-width: 86%;
-  padding: 9px 13px;
-  border-radius: 14px;
-  font-size: 13px;
-  line-height: 1.55;
+  max-width: 85%;
+  padding: 4px 0;
+  font-size: 14px;
+  line-height: 1.6;
   word-break: break-word;
 }
 
 .bubble.user {
-  background: rgb(var(--arcoblue-6));
-  color: #fff;
-  border-bottom-right-radius: 4px;
+  color: #1e293b;
+  font-weight: 500;
 }
 
 .bubble.ai {
-  background: var(--color-fill-2);
-  color: var(--color-text-1);
-  border-bottom-left-radius: 4px;
+  color: #374151;
 }
 
 .task-card {
@@ -2823,6 +3288,60 @@ onUnmounted(() => {
   color: #86909c;
 }
 
+.task-card-focus {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(230, 238, 255, 0.5);
+}
+
+.task-card-focus-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #86909c;
+}
+
+.task-card-focus-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.task-card-focus-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1d2129;
+  font-weight: 600;
+}
+
+.task-card-focus-status {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #fff;
+  color: #86909c;
+  border: 1px solid #e5e7eb;
+}
+
+.task-card-focus-status.running {
+  color: rgb(var(--arcoblue-6));
+  border-color: rgba(var(--arcoblue-6), 0.22);
+}
+
+.task-card-focus-status.completed {
+  color: rgb(var(--green-6));
+  border-color: rgba(var(--green-6), 0.24);
+}
+
+.task-card-focus-status.failed {
+  color: rgb(var(--red-6));
+  border-color: rgba(var(--red-6), 0.24);
+}
+
 .task-card-toggle {
   margin-top: 12px;
   padding: 0;
@@ -2867,13 +3386,12 @@ onUnmounted(() => {
   padding: 8px 10px;
   border-radius: 10px;
   background: #fff;
-  border: 1px solid #e5e7eb;
 }
 
 .task-card-step.pending { opacity: 0.55; }
-.task-card-step.running { border-color: rgba(var(--arcoblue-6), 0.28); background: rgba(var(--arcoblue-1), 0.6); }
-.task-card-step.completed { border-color: rgba(var(--green-6), 0.24); }
-.task-card-step.failed { border-color: rgba(var(--red-6), 0.24); background: rgba(var(--red-1), 0.6); }
+.task-card-step.running { background: rgba(230, 238, 255, 0.6); }
+.task-card-step.completed { }
+.task-card-step.failed { background: rgba(255, 230, 230, 0.6); }
 
 .task-card-step-name,
 .task-card-log-text {
@@ -2894,8 +3412,7 @@ onUnmounted(() => {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #fff4f4;
-  border: 1px solid rgba(var(--red-6), 0.16);
+  background: rgba(255, 240, 240, 0.8);
   font-size: 12px;
   line-height: 1.6;
   color: #4e5969;
@@ -2906,55 +3423,6 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 10px;
   min-width: 240px;
-}
-
-.task-log-group {
-  min-width: 320px;
-}
-
-.task-log-group-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.task-log-group-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1d2129;
-}
-
-.task-log-group-toggle {
-  border: none;
-  background: transparent;
-  padding: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgb(var(--arcoblue-6));
-  cursor: pointer;
-}
-
-.task-log-group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.task-log-group-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.task-log-group-foot {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #86909c;
 }
 
 .task-log-time {
@@ -2969,6 +3437,34 @@ onUnmounted(() => {
   font-size: 12px;
   line-height: 1.6;
   color: #4e5969;
+}
+
+.ai-rich-message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ai-rich-message.collapsed {
+  max-width: 100%;
+}
+
+.ai-rich-summary {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #4e5969;
+}
+
+.ai-rich-toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgb(var(--arcoblue-6));
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* AI loading 动画 */
@@ -3443,7 +3939,6 @@ onUnmounted(() => {
   padding: 16px;
   border-radius: 14px;
   background: #fff;
-  border: 1px solid var(--color-border);
 }
 
 .exec-preview-card.preview-only {
@@ -3631,7 +4126,6 @@ onUnmounted(() => {
   padding: 14px;
   border-radius: 14px;
   background: #fff;
-  border: 1px solid #edf1f7;
 }
 
 .highlight-index {
@@ -3665,7 +4159,6 @@ onUnmounted(() => {
   padding: 10px 12px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #edf1f7;
 }
 
 .artifact-timeline-type {
@@ -3758,7 +4251,6 @@ onUnmounted(() => {
   padding: 14px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.78);
-  border: 1px solid #edf1f7;
 }
 
 .strategy-meta-card span {
@@ -3776,8 +4268,7 @@ onUnmounted(() => {
 .preview-block {
   padding: 14px;
   border-radius: 14px;
-  background: #fbfcff;
-  border: 1px solid #edf1f7;
+  background: rgba(251, 252, 255, 0.8);
 }
 
 .preview-block--plan {
@@ -3802,7 +4293,6 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #edf1f7;
 }
 
 .research-card-title {
@@ -3849,7 +4339,6 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #edf1f7;
 }
 
 .plan-outline-index {
@@ -3884,8 +4373,7 @@ onUnmounted(() => {
 }
 
 .review-block {
-  border-color: rgba(var(--orange-6), 0.16);
-  background: linear-gradient(180deg, #fffaf3 0%, #ffffff 100%);
+  background: rgba(255, 250, 243, 0.6);
 }
 
 .section-live-block {
@@ -3905,8 +4393,7 @@ onUnmounted(() => {
   margin-top: 14px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(var(--arcoblue-1), 0.68);
-  border: 1px solid rgba(var(--arcoblue-6), 0.12);
+  background: rgba(230, 238, 255, 0.5);
 }
 
 .section-live-eyebrow {
@@ -3948,12 +4435,10 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: 14px;
   background: #fff;
-  border: 1px solid #edf1f7;
 }
 
 .section-live-item.active {
-  border-color: rgba(var(--arcoblue-6), 0.22);
-  box-shadow: 0 0 0 3px rgba(var(--arcoblue-6), 0.08);
+  background: rgba(230, 238, 255, 0.6);
 }
 
 .section-live-item.final {
@@ -4314,5 +4799,214 @@ onUnmounted(() => {
   .ws-workspace {
     display: none;
   }
+}
+
+/* ── Brain Agent 新消息类型 ─────────────────────────── */
+
+/* thinking 气泡 */
+.thinking-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+}
+
+.thinking-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1d5db;
+  animation: thinking-bounce 1.2s infinite ease-in-out;
+}
+
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes thinking-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* tool-call 气泡 */
+.tool-call-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  border-left: 2px solid #e5e6eb;
+  font-size: 13px;
+  color: #4e5969;
+  max-width: 460px;
+}
+
+.tool-call-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.tool-call-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.tool-call-display {
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-call-progress {
+  font-size: 12px;
+  color: #86909c;
+  flex-shrink: 0;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-call-result {
+  width: 100%;
+  border-top: 1px solid #e5e6eb;
+  padding-top: 8px;
+}
+
+.tool-call-result-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: #1d2129;
+}
+
+.tool-call-toggle {
+  border: none;
+  background: transparent;
+  color: rgb(var(--arcoblue-6));
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.tool-call-result-details {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  color: #4e5969;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.process-summary-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 480px;
+  padding: 10px 12px;
+  background: rgba(247, 248, 250, 0.95);
+  border: 1px dashed #d9dde4;
+  border-radius: 12px;
+}
+
+.process-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.process-summary-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4e5969;
+}
+
+.process-summary-toggle {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(var(--arcoblue-6));
+}
+
+.process-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.process-summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #eef0f3;
+}
+
+.process-summary-time {
+  flex-shrink: 0;
+  min-width: 54px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #86909c;
+}
+
+.process-summary-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #4e5969;
+}
+
+/* clarification 气泡 */
+.clarification-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f2f7ff;
+  border-radius: 10px;
+  border: 1px solid #bedaff;
+  max-width: 480px;
+}
+
+.clarification-question {
+  font-size: 14px;
+  color: #1d2129;
+  line-height: 1.6;
+}
+
+.clarification-reply-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.clarification-input {
+  flex: 1;
+}
+
+.clarification-answered {
+  font-size: 12px;
+  color: #86909c;
 }
 </style>

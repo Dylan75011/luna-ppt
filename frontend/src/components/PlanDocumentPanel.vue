@@ -14,9 +14,9 @@
           <template #icon><icon-save /></template>
           保存到空间
         </a-button>
-        <a-button type="primary" size="small" :loading="generating" @click="handleGenerate">
+        <a-button type="primary" size="small" :loading="props.loading" @click="handleGenerate">
           <template #icon><icon-play-arrow /></template>
-          {{ generating ? '生成中...' : '生成 PPT' }}
+          {{ props.loading ? '生成中...' : '生成 PPT' }}
         </a-button>
       </div>
     </div>
@@ -56,9 +56,10 @@ import NotionEditor from './NotionEditor.vue'
 import { workspaceApi } from '../api/workspace.js'
 
 const props = defineProps({
-  content: { type: String, default: '' },
-  title:   { type: String, default: '策划方案' },
-  spaces:  { type: Array,  default: () => [] }
+  content:  { type: String,  default: '' },
+  title:    { type: String,  default: '策划方案' },
+  spaces:   { type: Array,   default: () => [] },
+  loading:  { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['generate-ppt', 'saved'])
@@ -67,10 +68,7 @@ const emit = defineEmits(['generate-ppt', 'saved'])
 const localContent = ref(props.content)
 watch(() => props.content, v => { if (v && !localContent.value) localContent.value = v })
 
-const generating = ref(false)
-
 function handleGenerate() {
-  generating.value = true
   emit('generate-ppt', { content: localContent.value })
 }
 

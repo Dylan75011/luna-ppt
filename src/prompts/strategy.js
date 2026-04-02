@@ -2,7 +2,7 @@
 function buildStrategyPrompt(input) {
   const { orchestratorOutput, researchResults, round, previousFeedback, userInput } = input;
   const {
-    brand, productCategory, eventType, topic, scale, budget, style, requirements,
+    brand, description, goal, audience, reference, tone, budget, requirements,
     spaceContextSummary, spaceContextKeyPoints, spaceContextDocs,
     platformMemorySummary, platformMemoryPrinciples, platformMemoryPatterns, platformMemoryPitfalls
   } = userInput;
@@ -28,12 +28,12 @@ function buildStrategyPrompt(input) {
 
 ## 活动基本信息
 品牌：${brand}
-产品类别：${productCategory}
-活动类型：${eventType}
-活动主题：${topic}
-规模：${scale}
-预算：${budget}
-风格：${style || '未指定'}
+需求描述：${description}
+活动目标：${goal || '未明确，由你根据描述推断'}
+目标受众：${audience || '未明确，由你根据品牌和活动类型推断'}
+参考活动：${reference || '无特定参考'}
+品牌调性：${tone || '未明确，由你根据品牌推断'}
+预算量级：${budget || '未明确'}
 补充需求：${requirements || '无'}
 空间已有内容摘要：${spaceContextSummary || '无'}
 空间已有关键线索：${(spaceContextKeyPoints || []).join('、') || '无'}
@@ -63,7 +63,7 @@ ${researchSummary}
     }
   ],
   "budget": {
-    "total": "${budget}",
+    "total": "${budget || '待定'}",
     "breakdown": [
       {"item": "预算项", "amount": "金额", "percentage": "占比", "rationale": "这样分配的理由"}
     ]
@@ -77,11 +77,17 @@ ${researchSummary}
   "kpis": [
     {"metric": "指标名称", "target": "目标值", "rationale": "为什么设这个目标"}
   ],
-  "riskMitigation": ["具体风险+具体应对，不要泛泛而谈"]
+  "riskMitigation": ["具体风险+具体应对，不要泛泛而谈"],
+  "visualTheme": {
+    "style": "活动整体视觉风格定位（1-2句话，如：科技感+未来主义、赛博朋克暗黑、极简现代北欧、奢华典雅东方、自然生态户外……根据活动内容和品牌气质判断）",
+    "colorMood": "色彩基调描述（如：深蓝金色光效、黑白灰极简、暖橙渐变、冷青科技色、莫兰迪大地色……）",
+    "imageKeywords": ["英文图片风格搜索词1（2-4个词）", "英文图片风格搜索词2", "英文图片风格搜索词3"]
+  }
 }
 
 sections 的数量和标题完全由你决定，根据这个活动的特点设计章节——该详述的地方展开，该精炼的地方收紧。
-narrative 字段是关键：写出你作为策划专家的判断和洞察，不只是列要点。`;
+narrative 字段是关键：写出你作为策划专家的判断和洞察，不只是列要点。
+visualTheme 字段必须根据活动的品牌调性、行业特点、目标受众来判断，不能照抄活动标题，要体现视觉美学主张。`;
 
 
   return { systemPrompt, userPrompt };

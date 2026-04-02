@@ -1,0 +1,795 @@
+(node:90769) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+╔═══════════════════════════════════════════════╗
+║                                               ║
+║   OpenClaw PPT 服务已启动                      ║
+║                                               ║
+║   本地访问: http://localhost:3000             ║
+║   API状态:  http://localhost:3000/api/health ║
+║                                               ║
+║   按 Ctrl+C 停止服务                          ║
+║                                               ║
+╚═══════════════════════════════════════════════╝
+  
+[webSearch] Tavily 搜索成功: "岚图汽车发布会 2024 2025 新车发布活动" → 6 条
+[webSearch] Tavily 搜索成功: "新能源汽车发布会 创意形式 2024 2025 案例" → 6 条
+[StrategyAgent] 开始制定方案（第1轮）...
+[StrategyAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or '}' after property value in JSON at position 113 (line 3 column 66)
+[StrategyAgent] 方案完成: 「同行者·四年」岚图FREE+用户共创发布会
+[CriticAgent] 开始评审（第1轮）...
+[CriticAgent] 评审完成，得分: 7.5，通过: true
+[DocWriterAgent] 开始生成策划文档...
+[DocWriterAgent] 文档生成完成
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 开始搜索配图...
+[ImageAgent] 使用方案 visualTheme: {
+  style: '科技感与温暖并存的新现代主义——不是冷冰冰的技术秀场，而是有温度的未来之家。借鉴高端新能源品牌发布会的沉浸式体验，但融入岚图独特的央企温暖底色',
+  colorMood: '深蓝+金色为主色调，辅以暖白灯光——深蓝体现科技与高端，金色传递尊贵与价值，暖白灯光营造「回家」的温馨感',
+  imageKeywords: [
+    'premium automotive launch ceremony',
+    'intelligent technology blue gold',
+    'warm minimalist future home',
+    'user co-creation experience space'
+  ]
+}
+[PptBuilderAgent] 开始生成 PPT...
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'blue gold abstract technology',
+    variations: [ 'premium automotive gradient', 'intelligent blue gold light' ]
+  },
+  content: {
+    primary: 'futuristic experience space',
+    variations: [ 'minimalist blue gradient', 'warm technology abstract' ]
+  },
+  end: {
+    primary: 'warm gold light abstract',
+    variations: [ 'blue gold celebration', 'minimalist warm glow' ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony visual, blue and gold color palette, abstract technology waves, minimalist futuristic aesthetic, warm glowing light effects, professional high-end design'
+}
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'luxury car blue light abstract',
+    variations: [
+      'premium automotive ceremony glow',
+      'futuristic car reveal blue gold'
+    ]
+  },
+  content: {
+    primary: 'modern space warm blue ambiance',
+    variations: [
+      'minimalist interior light effect',
+      'co-creation experience space'
+    ]
+  },
+  end: {
+    primary: 'warm home feeling blue glow',
+    variations: [ 'welcoming space golden light', 'journey home warm abstract' ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue and gold lighting, futuristic technology atmosphere, minimalist elegant style, photorealistic'
+}
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected end of JSON input
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or ']' after array element in JSON at position 4875 (line 1 column 4876)
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (1/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] 生成完成，共 12 页
+[PptBuilderAgent] 处理第 1/12 页：immersive_cover
+[PptBuilderAgent] 处理第 2/12 页：toc
+[PptBuilderAgent] 处理第 3/12 页：bento_grid
+[PptBuilderAgent] 处理第 4/12 页：bento_grid
+[PptBuilderAgent] 处理第 5/12 页：bento_grid
+[PptBuilderAgent] 处理第 6/12 页：timeline_flow
+[PptBuilderAgent] 处理第 7/12 页：data_cards
+[PptBuilderAgent] 处理第 8/12 页：data_cards
+[PptBuilderAgent] 处理第 9/12 页：bento_grid
+[PptBuilderAgent] 处理第 10/12 页：bento_grid
+[PptBuilderAgent] 处理第 11/12 页：bento_grid
+[PptBuilderAgent] 处理第 12/12 页：end_card
+[PptBuilderAgent] 全部 12 页处理完成
+[pptGenerator] 生成完成: ppt_1775062133861.pptx（12 页）
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ':' after property name in JSON at position 4208 (line 1 column 4209)
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or ']' after array element in JSON at position 332 (line 1 column 333)
+[PptBuilderAgent] 生成完成，共 15 页
+[PptBuilderAgent] 处理第 1/15 页：immersive_cover
+[PptBuilderAgent] 处理第 2/15 页：toc
+[PptBuilderAgent] 处理第 3/15 页：minimal_text
+[PptBuilderAgent] 处理第 4/15 页：bento_grid
+[PptBuilderAgent] 处理第 5/15 页：minimal_text
+[PptBuilderAgent] 处理第 6/15 页：bento_grid
+[PptBuilderAgent] 处理第 7/15 页：bento_grid
+[PptBuilderAgent] 处理第 8/15 页：split_content
+[PptBuilderAgent] 处理第 9/15 页：split_content
+[PptBuilderAgent] 处理第 10/15 页：timeline_flow
+[PptBuilderAgent] 处理第 11/15 页：data_cards
+[PptBuilderAgent] 处理第 12/15 页：data_cards
+[PptBuilderAgent] 处理第 13/15 页：bento_grid
+[PptBuilderAgent] 处理第 14/15 页：split_content
+[PptBuilderAgent] 处理第 15/15 页：end_card
+[PptBuilderAgent] 全部 15 页处理完成
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'luxury car blue gold lights',
+    variations: [
+      'premium automotive ceremony blue',
+      'futuristic car reveal warm lights'
+    ]
+  },
+  content: {
+    primary: 'blue gold gradient technology space',
+    variations: [
+      'intelligent tech abstract blue',
+      'modern minimalist technology warm'
+    ]
+  },
+  end: {
+    primary: 'warm home atmosphere glow',
+    variations: [
+      'cozy space blue gold sunset',
+      'welcoming home ambient lighting'
+    ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue and gold light rays, minimalist futuristic stage, warm inviting atmosphere, abstract technology elements, photorealistic style'
+}
+[PptBuilderAgent] 生成完成，共 11 页
+[PptBuilderAgent] 处理第 1/11 页：immersive_cover
+[PptBuilderAgent] 处理第 2/11 页：toc
+[PptBuilderAgent] 处理第 3/11 页：bento_grid
+[PptBuilderAgent] 处理第 4/11 页：split_content
+[PptBuilderAgent] 处理第 5/11 页：bento_grid
+[PptBuilderAgent] 处理第 6/11 页：timeline_flow
+[PptBuilderAgent] 处理第 7/11 页：data_cards
+[PptBuilderAgent] 处理第 8/11 页：data_cards
+[PptBuilderAgent] 处理第 9/11 页：split_content
+[PptBuilderAgent] 处理第 10/11 页：bento_grid
+[PptBuilderAgent] 处理第 11/11 页：end_card
+[PptBuilderAgent] 全部 11 页处理完成
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium blue gold lighting ceremony',
+    variations: [
+      'luxury automotive launch event',
+      'futuristic blue gold technology abstract'
+    ]
+  },
+  content: {
+    primary: 'smart car interior blue gold',
+    variations: [
+      'premium automobile experience space',
+      'minimalist technology warm background'
+    ]
+  },
+  end: {
+    primary: 'warm minimalist abstract space',
+    variations: [
+      'blue gold gradient atmospheric',
+      'premium welcoming ambient background'
+    ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue gold lighting, minimalist warm atmosphere, abstract technology elements, high-end futuristic aesthetic'
+}
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：split_content
+[PptBuilderAgent] 处理第 5/13 页：timeline_flow
+[PptBuilderAgent] 处理第 6/13 页：bento_grid
+[PptBuilderAgent] 处理第 7/13 页：data_cards
+[PptBuilderAgent] 处理第 8/13 页：timeline_flow
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：bento_grid
+[PptBuilderAgent] 处理第 11/13 页：bento_grid
+[PptBuilderAgent] 处理第 12/13 页：minimal_text
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or '}' after property value in JSON at position 5255 (line 1 column 5256)
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'blue gold light ceremony premium automotive',
+    variations: [
+      'luxury car reveal blue gold lighting',
+      'future technology launch elegant blue'
+    ]
+  },
+  content: {
+    primary: 'minimalist smart space blue gold warm',
+    variations: [
+      'modern experience center elegant lighting',
+      'co-creation space premium blue ambient'
+    ]
+  },
+  end: {
+    primary: 'warm welcome home blue gold atmosphere',
+    variations: [
+      'cozy gathering elegant blue lighting',
+      'homecoming warm minimalist blue gold'
+    ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue and gold ambient lighting, minimalist elegant stage, futuristic technology feel, warm welcoming atmosphere, photorealistic'
+}
+[ImageAgent] 搜索词生成失败，使用风格化默认值: [ImageAgent] JSON 解析失败（已重试 2 次）: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space dramatic dark',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space cinematic lights'
+    ]
+  },
+  content: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space abstract atmosphere',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space particles light',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space moody dark'
+    ]
+  },
+  end: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space minimalist elegant',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space stars night',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space horizon dark'
+    ]
+  },
+  coverGeneratePrompt: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark cinematic background'
+}
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or ']' after array element in JSON at position 2238 (line 1 column 2239)
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or ']' after array element in JSON at position 1153 (line 1 column 1154)
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] JSON 解析失败 (2/2)，重新请求: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ':' after property name in JSON at position 924 (line 1 column 925)
+[PptBuilderAgent] JSON 解析失败 (1/2)，重新请求: Expected ',' or ']' after array element in JSON at position 3351 (line 1 column 3352)
+[PptBuilderAgent] 生成完成，共 12 页
+[PptBuilderAgent] 处理第 1/12 页：immersive_cover
+[PptBuilderAgent] 处理第 2/12 页：toc
+[PptBuilderAgent] 处理第 3/12 页：bento_grid
+[PptBuilderAgent] 处理第 4/12 页：minimal_text
+[PptBuilderAgent] 处理第 5/12 页：bento_grid
+[PptBuilderAgent] 处理第 6/12 页：bento_grid
+[PptBuilderAgent] 处理第 7/12 页：minimal_text
+[PptBuilderAgent] 处理第 8/12 页：timeline_flow
+[PptBuilderAgent] 处理第 9/12 页：data_cards
+[PptBuilderAgent] 处理第 10/12 页：data_cards
+[PptBuilderAgent] 处理第 11/12 页：bento_grid
+[PptBuilderAgent] 处理第 12/12 页：end_card
+[PptBuilderAgent] 全部 12 页处理完成
+[imageSearch] 处理前：1280×720 0.2MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[pptGenerator] 生成完成: ppt_1775062140293.pptx（11 页）
+[pptGenerator] 生成完成: ppt_1775062141093.pptx（13 页）
+[pptGenerator] 生成完成: ppt_1775062139789.pptx（15 页）
+[pptGenerator] 生成完成: ppt_1775062142914.pptx（12 页）
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium automotive blue gold',
+    variations: [
+      'luxury car launch ceremony',
+      'futuristic automotive experience'
+    ]
+  },
+  content: {
+    primary: 'intelligent technology blue warm',
+    variations: [ 'premium car interior minimalist', 'technology modern minimal' ]
+  },
+  end: {
+    primary: 'warm welcome home atmosphere',
+    variations: [ 'premium ambient blue gold', 'cozy luxury space' ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue gold lighting, warm minimalist futuristic space, elegant tech atmosphere, 4K'
+}
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'blue gold abstract technology premium',
+    variations: [
+      'futuristic automotive lighting abstract',
+      'blue gold gradient luxury minimal'
+    ]
+  },
+  content: {
+    primary: 'blue warm abstract geometric premium',
+    variations: [
+      'minimalist technology blue gold shapes',
+      'abstract intelligent space warm lighting'
+    ]
+  },
+  end: {
+    primary: 'blue gold ambient gradient calm',
+    variations: [
+      'warm minimalist abstract atmosphere',
+      'futuristic home space glow abstract'
+    ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony abstract background, blue gold gradient, minimalist futuristic design, warm intelligent technology atmosphere, clean geometric shapes, elegant lighting'
+}
+[PptBuilderAgent] JSON 解析失败 (2/2)，重新请求: Expected ',' or ']' after array element in JSON at position 304 (line 1 column 305)
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'luxury blue gold abstract',
+    variations: [ 'premium automotive gradient', 'elegant technology glow' ]
+  },
+  content: {
+    primary: 'minimalist warm blue glow',
+    variations: [ 'futuristic abstract technology', 'golden light gradient' ]
+  },
+  end: {
+    primary: 'warm welcoming abstract',
+    variations: [ 'homecoming golden light', 'user experience glow' ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony with blue gold gradient, minimalist futuristic abstract, warm elegant technology atmosphere'
+}
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'luxury car launch ceremony blue gold',
+    variations: [
+      'premium automotive exhibition abstract',
+      'futuristic car reveal blue gradient'
+    ]
+  },
+  content: {
+    primary: 'intelligent technology space warm blue',
+    variations: [
+      'premium car interior minimal',
+      'user experience center elegant'
+    ]
+  },
+  end: {
+    primary: 'blue gold gradient abstract warmth',
+    variations: [ 'future home minimal space', 'welcoming atmosphere elegant' ]
+  },
+  coverGeneratePrompt: 'Premium automotive launch ceremony, blue gold lighting, minimalist elegant atmosphere, futuristic technology space, warm welcoming feel, professional photography'
+}
+[ImageAgent] 搜索词生成失败，使用风格化默认值: [ImageAgent] JSON 解析失败（已重试 2 次）: Unexpected end of JSON input
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space dramatic dark',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space cinematic lights'
+    ]
+  },
+  content: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space abstract atmosphere',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space particles light',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space moody dark'
+    ]
+  },
+  end: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space minimalist elegant',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space stars night',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space horizon dark'
+    ]
+  },
+  coverGeneratePrompt: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark cinematic background'
+}
+[ImageAgent] 搜索词生成失败，使用风格化默认值: [ImageAgent] JSON 解析失败（已重试 2 次）: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space dramatic dark',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space cinematic lights'
+    ]
+  },
+  content: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space abstract atmosphere',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space particles light',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space moody dark'
+    ]
+  },
+  end: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space minimalist elegant',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space stars night',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space horizon dark'
+    ]
+  },
+  coverGeneratePrompt: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark cinematic background'
+}
+[ImageAgent] 搜索词生成失败，使用风格化默认值: [ImageAgent] JSON 解析失败（已重试 2 次）: Unexpected token '`', "```json
+{
+"... is not valid JSON
+[ImageAgent] 搜索词: {
+  cover: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space dramatic dark',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space cinematic lights'
+    ]
+  },
+  content: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space abstract atmosphere',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space particles light',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space moody dark'
+    ]
+  },
+  end: {
+    primary: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space minimalist elegant',
+    variations: [
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space stars night',
+      'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space horizon dark'
+    ]
+  },
+  coverGeneratePrompt: 'premium automotive launch ceremony intelligent technology blue gold warm minimalist future home user co-creation experience space elegant dark cinematic background'
+}
+[PptBuilderAgent] JSON 解析失败 (2/2)，重新请求: Expected double-quoted property name in JSON at position 4643 (line 1 column 4644)
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：bento_grid
+[PptBuilderAgent] 处理第 5/13 页：bento_grid
+[PptBuilderAgent] 处理第 6/13 页：minimal_text
+[PptBuilderAgent] 处理第 7/13 页：split_content
+[PptBuilderAgent] 处理第 8/13 页：timeline_flow
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：data_cards
+[PptBuilderAgent] 处理第 11/13 页：bento_grid
+[PptBuilderAgent] 处理第 12/13 页：minimal_text
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[PptBuilderAgent] 生成完成，共 11 页
+[PptBuilderAgent] 处理第 1/11 页：immersive_cover
+[PptBuilderAgent] 处理第 2/11 页：toc
+[PptBuilderAgent] 处理第 3/11 页：split_content
+[PptBuilderAgent] 处理第 4/11 页：bento_grid
+[PptBuilderAgent] 处理第 5/11 页：bento_grid
+[PptBuilderAgent] 处理第 6/11 页：split_content
+[PptBuilderAgent] 处理第 7/11 页：data_cards
+[PptBuilderAgent] 处理第 8/11 页：timeline_flow
+[PptBuilderAgent] 处理第 9/11 页：data_cards
+[PptBuilderAgent] 处理第 10/11 页：bento_grid
+[PptBuilderAgent] 处理第 11/11 页：end_card
+[PptBuilderAgent] 全部 11 页处理完成
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[imageSearch] 处理前：1920×1080 0.1MB  undefined_cover_ai.jpg
+[PptBuilderAgent] JSON 解析失败 (2/2)，重新请求: Expected ',' or ']' after array element in JSON at position 1087 (line 1 column 1088)
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=4 end=6
+[pptGenerator] 生成完成: ppt_1775062156929.pptx（13 页）
+[pptGenerator] 生成完成: ppt_1775062157961.pptx（11 页）
+[imageSearch] 处理前：1920×1080 0.1MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=6 content=3 end=3
+[PptBuilderAgent] JSON 解析失败 (2/2)，重新请求: Expected ',' or ']' after array element in JSON at position 1172 (line 1 column 1173)
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：bento_grid
+[PptBuilderAgent] 处理第 4/13 页：minimal_text
+[PptBuilderAgent] 处理第 5/13 页：split_content
+[PptBuilderAgent] 处理第 6/13 页：bento_grid
+[PptBuilderAgent] 处理第 7/13 页：bento_grid
+[PptBuilderAgent] 处理第 8/13 页：timeline_flow
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：data_cards
+[PptBuilderAgent] 处理第 11/13 页：bento_grid
+[PptBuilderAgent] 处理第 12/13 页：minimal_text
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：bento_grid
+[PptBuilderAgent] 处理第 5/13 页：split_content
+[PptBuilderAgent] 处理第 6/13 页：bento_grid
+[PptBuilderAgent] 处理第 7/13 页：timeline_flow
+[PptBuilderAgent] 处理第 8/13 页：data_cards
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：bento_grid
+[PptBuilderAgent] 处理第 11/13 页：bento_grid
+[PptBuilderAgent] 处理第 12/13 页：split_content
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.2MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[pptGenerator] 生成完成: ppt_1775062161764.pptx（13 页）
+[pptGenerator] 生成完成: ppt_1775062162235.pptx（13 页）
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：bento_grid
+[PptBuilderAgent] 处理第 5/13 页：bento_grid
+[PptBuilderAgent] 处理第 6/13 页：split_content
+[PptBuilderAgent] 处理第 7/13 页：timeline_flow
+[PptBuilderAgent] 处理第 8/13 页：data_cards
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：bento_grid
+[PptBuilderAgent] 处理第 11/13 页：minimal_text
+[PptBuilderAgent] 处理第 12/13 页：data_cards
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[imageSearch] 处理前：1280×720 0.2MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[pptGenerator] 生成完成: ppt_1775062165769.pptx（13 页）
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=6 content=3 end=3
+[imageSearch] 处理前：1280×720 0.2MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=6 content=3 end=3
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：bento_grid
+[PptBuilderAgent] 处理第 5/13 页：bento_grid
+[PptBuilderAgent] 处理第 6/13 页：split_content
+[PptBuilderAgent] 处理第 7/13 页：timeline_flow
+[PptBuilderAgent] 处理第 8/13 页：data_cards
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：bento_grid
+[PptBuilderAgent] 处理第 11/13 页：minimal_text
+[PptBuilderAgent] 处理第 12/13 页：data_cards
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[pptGenerator] 生成完成: ppt_1775062169735.pptx（13 页）
+[imageSearch] 处理前：1280×720 0.3MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[imageSearch] 处理前：1280×720 0.2MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=6 content=3 end=3
+[PptBuilderAgent] 生成完成，共 13 页
+[PptBuilderAgent] 处理第 1/13 页：immersive_cover
+[PptBuilderAgent] 处理第 2/13 页：toc
+[PptBuilderAgent] 处理第 3/13 页：minimal_text
+[PptBuilderAgent] 处理第 4/13 页：bento_grid
+[PptBuilderAgent] 处理第 5/13 页：bento_grid
+[PptBuilderAgent] 处理第 6/13 页：split_content
+[PptBuilderAgent] 处理第 7/13 页：timeline_flow
+[PptBuilderAgent] 处理第 8/13 页：data_cards
+[PptBuilderAgent] 处理第 9/13 页：data_cards
+[PptBuilderAgent] 处理第 10/13 页：bento_grid
+[PptBuilderAgent] 处理第 11/13 页：bento_grid
+[PptBuilderAgent] 处理第 12/13 页：data_cards
+[PptBuilderAgent] 处理第 13/13 页：end_card
+[PptBuilderAgent] 全部 13 页处理完成
+[PptBuilderAgent] 生成完成，共 14 页
+[PptBuilderAgent] 处理第 1/14 页：immersive_cover
+[PptBuilderAgent] 处理第 2/14 页：toc
+[PptBuilderAgent] 处理第 3/14 页：minimal_text
+[PptBuilderAgent] 处理第 4/14 页：bento_grid
+[PptBuilderAgent] 处理第 5/14 页：bento_grid
+[PptBuilderAgent] 处理第 6/14 页：bento_grid
+[PptBuilderAgent] 处理第 7/14 页：split_content
+[PptBuilderAgent] 处理第 8/14 页：bento_grid
+[PptBuilderAgent] 处理第 9/14 页：data_cards
+[PptBuilderAgent] 处理第 10/14 页：data_cards
+[PptBuilderAgent] 处理第 11/14 页：timeline_flow
+[PptBuilderAgent] 处理第 12/14 页：data_cards
+[PptBuilderAgent] 处理第 13/14 页：bento_grid
+[PptBuilderAgent] 处理第 14/14 页：end_card
+[PptBuilderAgent] 全部 14 页处理完成
+[imageSearch] 处理前：1280×720 0.2MB  undefined_cover_ai.jpg
+[imageSearch] 处理后：1920×1080 0.1MB  undefined_cover_ai.jpg
+[ImageAgent] MiniMax 封面图已处理: /Users/yangdi/Documents/GitHub/openclaw-ppt/output/images/undefined_cover_ai.jpg
+[ImageAgent] 完成：cover=7 content=6 end=6
+[pptGenerator] 生成完成: ppt_1775062174695.pptx（13 页）
+[pptGenerator] 生成完成: ppt_1775062175000.pptx（14 页）

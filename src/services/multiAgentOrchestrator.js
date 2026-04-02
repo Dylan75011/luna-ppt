@@ -260,6 +260,11 @@ function autoSelectImages(imageCandidates) {
       map[category] = list[0].localPath;
     }
   }
+  map.pages = Object.fromEntries(
+    (imageCandidates?.pages || [])
+      .filter(item => item?.localPath && Number.isInteger(item.pageIndex))
+      .map(item => [item.pageIndex, item])
+  );
   return map;
 }
 
@@ -273,11 +278,6 @@ async function runPptBuilder(taskId, docContent) {
   if (!task) throw new Error('任务不存在');
 
   const { bestPlan, savedApiKeys: apiKeys, userInput } = task;
-
-  // 立即启动图片搜索（并行，不阻塞 outline 生成）
-  const imageSearchPromise = runImageSearch(taskId).catch(err => {
-    console.warn('[runPptBuilder] 配图搜索失败，将不带背景图生成:', err.message);
-  });
 
   // imageMap 是可变引用：outline 生成后、pages 生成前填充
   const imageMap = {};
@@ -295,10 +295,12 @@ async function runPptBuilder(taskId, docContent) {
       docContent,
       imageMap,  // 可变引用，onOutlineReady 中填充
       onOutlineReady: async (outline, total) => {
-        // 等待图片搜索完成（如果已完成则立即返回），然后填充 imageMap
-        await imageSearchPromise;
-        const updatedTask = taskManager.getTask(taskId);
-        const selected = autoSelectImages(updatedTask?.imageCandidates || {});
+        push(taskId, 'building', 'running', { message: '正在为每页匹配视觉背景...' });
+        const imageCandidates = await runImageSearch(taskId, outline).catch(err => {
+          console.warn('[runPptBuilder] 配图搜索失败，将不带背景图生成:', err.message);
+          return {};
+        });
+        const selected = autoSelectImages(imageCandidates || {});
         Object.assign(imageMap, selected);
         console.log('[runPptBuilder] 配图已注入:', Object.keys(imageMap));
 
@@ -369,7 +371,7 @@ async function runPptBuilder(taskId, docContent) {
  * 用户确认文档后手动触发配图搜索
  * 完成后通过 SSE 推送 images_ready 事件
  */
-async function runImageSearch(taskId) {
+async function runImageSearch(taskId, pptOutline = null) {
   const task = taskManager.getTask(taskId);
   if (!task) throw new Error('任务不存在');
 
@@ -377,47 +379,14 @@ async function runImageSearch(taskId) {
   const imageAgent = injectKeys(new ImageAgent(), apiKeys || {});
 
   try {
-    const imageCandidates = await imageAgent.run({ plan: bestPlan, userInput, taskId });
-
-    // 为每类 top-1 下载到本地 + sharp 处理为 PPT 规格（1920×1080, JPEG 82%）
-    const { downloadImage, processImageForPpt } = require('./imageSearch');
-    const outputBase = require('path').resolve(config.outputDir, 'images');
-    await Promise.all(['cover', 'content', 'end'].map(async category => {
-      const list = imageCandidates[category];
-      if (!list || list.length === 0) return;
-      const top = list[0];
-
-      // AI 图已有本地路径，但仍需 sharp 处理（尺寸不可控）
-      if (top.isAI || top.url?.startsWith('/output/')) {
-        if (!top.localPath) {
-          top.localPath = require('path').resolve('.', top.url.replace(/^\//, ''));
-        }
-        await processImageForPpt(top.localPath);
-        return;
-      }
-
-      if (top.localPath) {
-        await processImageForPpt(top.localPath);
-        return;
-      }
-
-      // Pexels 图：下载（已附 CDN 1920×1080 裁切参数）再经 sharp 统一处理
-      try {
-        const localName = `${taskId}_${category}_top.jpg`;
-        const localPath = require('path').join(outputBase, localName);
-        await downloadImage(top.url, localPath);
-        await processImageForPpt(localPath);
-        top.localPath = localPath;
-        console.log(`[runImageSearch] ${category} top-1 处理完成:`, localPath);
-      } catch (e) {
-        console.warn(`[runImageSearch] ${category} 处理失败:`, e.message);
-      }
-    }));
+    const imageCandidates = await imageAgent.run({ plan: bestPlan, userInput, taskId, pptOutline });
 
     taskManager.updateTask(taskId, { imageCandidates });
     console.log('[runImageSearch] 配图搜索完成');
+    return imageCandidates;
   } catch (err) {
     console.warn('[runImageSearch] 搜索失败:', err.message);
+    throw err;
   }
 }
 
