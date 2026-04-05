@@ -39,7 +39,8 @@ async function searchPexels(query, options = {}) {
             // 使用 original（或 large2x 作保底）去掉原有 CDN 参数，
             // 换成精确 1920×1080 裁切 + 压缩参数，让 Pexels Imgix CDN 处理
             const base = (p.src.original || p.src.large2x || p.src.large).split('?')[0];
-            const cdnUrl = `${base}?auto=compress&cs=tinysrgb&fit=crop&w=${PPT_WIDTH}&h=${PPT_HEIGHT}`;
+            // 不用 auto=compress，指定 q=92 保留高质量，避免 CDN 自动降级
+            const cdnUrl = `${base}?cs=tinysrgb&fit=crop&w=${PPT_WIDTH}&h=${PPT_HEIGHT}&q=92`;
             return {
               id:              p.id,
               url:             cdnUrl,

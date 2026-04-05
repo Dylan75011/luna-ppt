@@ -53,6 +53,25 @@ function extractPlanContext(plan) {
     plan.riskMitigation.forEach(r => lines.push(`- ${r}`));
   }
 
+  if (plan.visualExecutionHints?.sceneTone) {
+    lines.push(`\n现场视觉气质：${plan.visualExecutionHints.sceneTone}`);
+  }
+
+  if (plan.visualExecutionHints?.mustRenderScenes?.length) {
+    lines.push('\n建议提前出效果图的场景：');
+    plan.visualExecutionHints.mustRenderScenes.forEach(item => lines.push(`- ${item}`));
+  }
+
+  if (plan.visualExecutionHints?.onsiteDesignSuggestions?.length) {
+    lines.push('\n现场效果设计建议：');
+    plan.visualExecutionHints.onsiteDesignSuggestions.forEach((item) => {
+      lines.push(`- ${item.scene || '重点场景'}：${item.designSuggestion || item.goal || ''}`);
+      if (item.visualFocus?.length) {
+        lines.push(`  视觉重点：${item.visualFocus.join('、')}`);
+      }
+    });
+  }
+
   return lines.join('\n');
 }
 
@@ -76,7 +95,8 @@ function buildDocWriterPrompt(plan, userInput, reviewFeedback) {
 - 用第一人称视角（「我们建议」「我们判断」），不要「本方案」「本次活动」这类官样文体
 - 每个章节开头先给出判断或结论，再展开说明，不要流水账式铺陈
 - 数字和案例要具体，模糊表述宁可不写
-- 章节结构由你根据这份方案的逻辑自主设计，不要套固定模板`;
+- 章节结构由你根据这份方案的逻辑自主设计，不要套固定模板
+- 如果方案里包含现场视觉或效果图建议，请单独写出“现场效果设计建议”相关章节，明确哪些场景值得提前出图，以及各自该怎么设计`;
 
   const userPrompt = `品牌：${brand}
 活动类型：${eventType}

@@ -307,10 +307,16 @@ class PptBuilderAgent extends BaseAgent {
       const useBackground = page?.imageStrategy?.useBackground !== false;
       if (useBackground && pageImage?.localPath) {
         page.bgImagePath = pageImage.localPath;
+        if (pageImage?.insertMode && page?.imagePlacement) {
+          page.imagePlacement = { ...page.imagePlacement, mode: pageImage.insertMode };
+        }
         page.imageMeta = {
           query: pageImage.query || '',
           treatment: pageImage.treatment || '',
-          source: pageImage.source || ''
+          source: pageImage.source || '',
+          sceneType: pageImage.sceneType || '',
+          assetType: pageImage.assetType || '',
+          insertMode: pageImage.insertMode || ''
         };
       } else if (useBackground && imageMap[bgCategory]) {
         page.bgImagePath = imageMap[bgCategory];
@@ -341,6 +347,13 @@ class PptBuilderAgent extends BaseAgent {
   async refinePagesWithImages({ plan, userInput, result, imageMap }) {
     const pages = Array.isArray(result?.pages) ? result.pages : [];
     if (!pages.length) return;
+
+    // 没有任何图片时跳过二轮 LLM，避免无意义的额外调用
+    const hasAnyImage = Object.keys(imageMap).some(k => {
+      if (k === 'pages') return Object.keys(imageMap.pages || {}).length > 0;
+      return !!imageMap[k];
+    });
+    if (!hasAnyImage) return;
 
     const pagesWithImages = pages.map((page, index) => {
       const layout = page.layout || page.type || 'bento_grid';

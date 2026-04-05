@@ -1,0 +1,55 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e335]
+      - button [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+    - navigation [ref=e14]:
+      - button [ref=e507] [cursor=pointer]:
+        - img [ref=e17]
+      - button [ref=e508] [cursor=pointer]:
+        - img [ref=e24]
+      - button [ref=e509] [cursor=pointer]:
+        - img [ref=e31]
+      - button [ref=e510] [cursor=pointer]:
+        - img [ref=e38]
+  - generic [ref=e706]:
+    - complementary [ref=e707]:
+      - generic [ref=e708]:
+        - generic [ref=e710]:
+          - generic [ref=e711]: 当前空间
+          - generic "华为" [ref=e712] [cursor=pointer]:
+            - textbox "选择工作空间"
+            - generic [ref=e713]: 华为
+            - img [ref=e716]
+        - button "+" [ref=e718] [cursor=pointer]
+      - generic [ref=e719]:
+        - generic [ref=e720]: 历史对话
+        - generic [ref=e722]:
+          - img [ref=e724]
+          - textbox "搜索历史对话" [ref=e726]
+        - generic [ref=e728]:
+          - generic [ref=e729]: 今天
+          - generic [ref=e730]:
+            - button "我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、 2 条消息 · 1 分钟前 •••" [ref=e768] [cursor=pointer]:
+              - generic [ref=e732]:
+                - generic [ref=e733]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、
+                - generic [ref=e734]: 2 条消息 · 1 分钟前
+              - generic [ref=e735]: •••
+            - button "我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、 3 条消息 · 8 分钟前 •••" [ref=e767] [cursor=pointer]:
+              - generic [ref=e737]:
+                - generic [ref=e738]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、
+                - generic [ref=e739]: 3 条消息 · 8 分钟前
+              - generic [ref=e740]: •••
+            - button "可以开始生成 PPT 5 小时前 •••" [ref=e741] [cursor=pointer]:
+              - generic [ref=e742]:
+                - generic [ref=e743]: 可以开始生成 PPT
+                - generic [ref=e744]: 5 小时前
+              - generic [ref=e745]: •••
+    - button "‹" [ref=e746] [cursor=pointer]
+    - generic [ref=e747]:
+      - generic [ref=e771]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、出片一点。先别出完整方案，先帮我想两个不同方向。
+      - generic [ref=e751]:
+        - textbox "描述需求、上传策划方案文档，或输入 @ 引用空间文档..." [active] [ref=e753]
+        - button [ref=e777] [cursor=pointer]:
+          - img [ref=e778]

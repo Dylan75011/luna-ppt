@@ -161,10 +161,10 @@ class ImageAgent extends BaseAgent {
   }
 
   /**
-   * @param {{ plan, userInput, taskId, pptOutline }} input
+   * @param {{ plan, userInput, taskId, pptOutline, visualPlan }} input
    * @returns {Promise<{ cover: Candidate[], content: Candidate[], end: Candidate[], pages: object[] }>}
    */
-  async run({ plan, userInput, taskId = `img_${Date.now()}`, pptOutline = null }) {
+  async run({ plan, userInput, taskId = `img_${Date.now()}`, pptOutline = null, visualPlan = null }) {
     console.log('[ImageAgent] 开始搜索配图...');
 
     // ─── Step 1: 确定视觉风格方向 ────────────────────────────────
@@ -248,10 +248,25 @@ class ImageAgent extends BaseAgent {
     ].filter(Boolean);
 
     // 并行搜索多个方向
-    const pagePlans = Array.isArray(queries.pages) ? queries.pages.slice(0, 16) : [];
+    const visualPages = this.normalizeVisualPlans(visualPlan, pptOutline);
+    const pagePlans = Array.isArray(queries.pages) ? queries.pages.slice(0, 16).map((pagePlan, index) => {
+      const visualPage = visualPages[index] || {};
+      return {
+        ...pagePlan,
+        generateImage: !!visualPage.generateImage,
+        generatePrompt: String(visualPage.prompt || '').trim(),
+        fallbackQuery: String(visualPage.fallbackQuery || '').trim(),
+        sceneType: String(visualPage.sceneType || '').trim(),
+        insertMode: String(visualPage.insertMode || '').trim(),
+        assetType: String(visualPage.assetType || '').trim(),
+        reason: String(visualPage.reason || '').trim(),
+        shotIntent: String(visualPage.shotIntent || '').trim(),
+      };
+    }) : [];
     const pageSearchPromises = pagePlans.map(async (pagePlan, index) => {
       const roleDrivenQueries = buildRoleDrivenQueries(pagePlan, styleAnalysis);
       const rawTerms = [
+        sanitizeQuery(pagePlan.fallbackQuery),
         sanitizeQuery(pagePlan.query),
         ...(pagePlan.variations || []).slice(0, 2).map(sanitizeQuery),
         ...roleDrivenQueries
@@ -263,6 +278,14 @@ class ImageAgent extends BaseAgent {
         role: pagePlan.role || 'content',
         query: pagePlan.query || '',
         treatment: pagePlan.treatment || 'ambient-texture',
+        generateImage: !!pagePlan.generateImage,
+        generatePrompt: pagePlan.generatePrompt || '',
+        fallbackQuery: pagePlan.fallbackQuery || '',
+        sceneType: pagePlan.sceneType || '',
+        insertMode: pagePlan.insertMode || 'background',
+        assetType: pagePlan.assetType || '',
+        reason: pagePlan.reason || '',
+        shotIntent: pagePlan.shotIntent || '',
         searchTerms,
       };
     });
@@ -308,7 +331,7 @@ class ImageAgent extends BaseAgent {
     }
 
     const normalizedCover = aiCandidate ? [aiCandidate, ...coverPhotos] : coverPhotos;
-    const preparedPageCandidates = await this.collectPageCandidates(pageResults, taskId, outputBase);
+    const preparedPageCandidates = await this.collectPageCandidates(pageResults, taskId, outputBase, minimaxKey);
     const selectedPages = await this.selectPageImages(preparedPageCandidates, styleAnalysis);
     const result = {
       cover:   await this.prepareTopCandidates(normalizedCover, 'cover', taskId, outputBase),
@@ -445,14 +468,11 @@ ${pageSummary.length ? JSON.stringify(pageSummary, null, 2) : '暂未提供页�
   }
 
   async prepareTopCandidates(candidates, category, taskId, outputBase) {
-    const normalized = [];
-    for (let i = 0; i < Math.min(candidates.length, 3); i++) {
-      const item = candidates[i];
-      if (!item) continue;
-      const prepared = await this.prepareCandidate(item, `${taskId}_${category}_${i}`, outputBase);
-      normalized.push(prepared || item);
-    }
-    return normalized;
+    const top = candidates.slice(0, 3).filter(Boolean);
+    const results = await Promise.all(
+      top.map((item, i) => this.prepareCandidate(item, `${taskId}_${category}_${i}`, outputBase))
+    );
+    return results.map((prepared, i) => prepared || top[i]);
   }
 
   async prepareCandidate(candidate, baseName, outputBase) {
@@ -479,36 +499,97 @@ ${pageSummary.length ? JSON.stringify(pageSummary, null, 2) : '暂未提供页�
     }
   }
 
-  async collectPageCandidates(pagePlans, taskId, outputBase) {
-    const preparedPages = [];
-    for (let index = 0; index < pagePlans.length; index++) {
-      const pagePlan = pagePlans[index];
-      const resultSets = await Promise.all((pagePlan.searchTerms || []).map(async (q) => {
-        const photos = await searchPexels(q, { perPage: 8 });
-        return photos.map(photo => ({ ...photo, originQuery: q }));
-      }));
-      const rawCandidates = [...new Map(resultSets.flat().map(p => [p.id, p])).values()].slice(0, 12);
-      const candidates = [];
-      for (let i = 0; i < rawCandidates.length; i++) {
-        const prepared = await this.prepareCandidate(
-          rawCandidates[i],
-          `${taskId}_page_${String(index).padStart(2, '0')}_${slugify(pagePlan.pageTitle || pagePlan.role)}_${i}`,
-          outputBase
-        );
-        if (!prepared?.localPath) continue;
-        const analysis = await analyzeImageForLayout(prepared.localPath).catch(() => null);
-        candidates.push({
-          ...prepared,
-          originQuery: rawCandidates[i].originQuery || '',
-          analysis,
-        });
-      }
-      preparedPages.push({
-        ...pagePlan,
-        candidates,
-      });
+  normalizeVisualPlans(visualPlan = null, pptOutline = null) {
+    const outlinePages = Array.isArray(pptOutline?.pages) ? pptOutline.pages : [];
+    const visualPages = Array.isArray(visualPlan?.pages) ? visualPlan.pages : [];
+    const byIndex = new Map(
+      visualPages
+        .filter(item => Number.isInteger(item?.pageIndex))
+        .map(item => [item.pageIndex, item])
+    );
+    return outlinePages.slice(0, 16).map((page, index) => {
+      const visual = byIndex.get(index) || {};
+      return {
+        pageIndex: index,
+        pageTitle: visual.pageTitle || page?.content?.title || page?.title || `Page ${index + 1}`,
+        generateImage: !!visual.generateImage,
+        prompt: String(visual.prompt || '').trim(),
+        fallbackQuery: String(visual.fallbackQuery || '').trim(),
+        sceneType: String(visual.sceneType || '').trim(),
+        insertMode: String(visual.insertMode || 'background').trim(),
+        assetType: String(visual.assetType || '').trim(),
+        reason: String(visual.reason || '').trim(),
+        shotIntent: String(visual.shotIntent || '').trim(),
+      };
+    });
+  }
+
+  async createAiCandidateForPage(pagePlan, taskId, outputBase, minimaxKey) {
+    if (!pagePlan?.generateImage || !pagePlan?.generatePrompt || !minimaxKey) return null;
+    try {
+      const aiImageUrl = await generateMiniMaxImage(pagePlan.generatePrompt, minimaxKey);
+      if (!aiImageUrl) return null;
+      const localPath = path.join(
+        outputBase,
+        `${taskId}_page_ai_${String(pagePlan.pageIndex).padStart(2, '0')}_${slugify(pagePlan.pageTitle || pagePlan.sceneType)}.jpg`
+      );
+      await downloadImage(aiImageUrl, localPath);
+      await processImageForPpt(localPath);
+      const analysis = await analyzeImageForLayout(localPath).catch(() => null);
+      return {
+        id: `ai_generated_${pagePlan.pageIndex}`,
+        url: toOutputUrl(localPath),
+        thumb: toOutputUrl(localPath),
+        localPath,
+        photographer: 'MiniMax AI',
+        photographerUrl: '',
+        isAI: true,
+        originQuery: pagePlan.generatePrompt,
+        analysis
+      };
+    } catch (err) {
+      console.warn(`[ImageAgent] 第 ${pagePlan.pageIndex + 1} 页 AI 生图失败:`, err.message);
+      return null;
     }
-    return preparedPages;
+  }
+
+  async collectPageCandidates(pagePlans, taskId, outputBase, minimaxKey = '') {
+    // 并发处理各页，最多 5 页同时进行（避免触发 Pexels 限流）
+    const CONCURRENCY = 5;
+    const results = [];
+    for (let start = 0; start < pagePlans.length; start += CONCURRENCY) {
+      const batch = pagePlans.slice(start, start + CONCURRENCY);
+      const batchResults = await Promise.all(batch.map(async (pagePlan, batchIdx) => {
+        const index = start + batchIdx;
+        const resultSets = await Promise.all((pagePlan.searchTerms || []).map(async (q) => {
+          const photos = await searchPexels(q, { perPage: 8 });
+          return photos.map(photo => ({ ...photo, originQuery: q }));
+        }));
+        const rawCandidates = [...new Map(resultSets.flat().map(p => [p.id, p])).values()].slice(0, 6);
+        const aiCandidate = await this.createAiCandidateForPage(pagePlan, taskId, outputBase, minimaxKey);
+
+        // 候选图片并行下载 + 分析（每页最多 6 张，并行）
+        const candidateResults = await Promise.all(
+          rawCandidates.map(async (raw, i) => {
+            const prepared = await this.prepareCandidate(
+              raw,
+              `${taskId}_page_${String(index).padStart(2, '0')}_${slugify(pagePlan.pageTitle || pagePlan.role)}_${i}`,
+              outputBase
+            );
+            if (!prepared?.localPath) return null;
+            const analysis = await analyzeImageForLayout(prepared.localPath).catch(() => null);
+            return { ...prepared, originQuery: raw.originQuery || '', analysis };
+          })
+        );
+
+        return {
+          ...pagePlan,
+          candidates: [aiCandidate, ...candidateResults].filter(Boolean)
+        };
+      }));
+      results.push(...batchResults);
+    }
+    return results;
   }
 
   scoreCandidateForPage(pagePlan, candidate, styleAnalysis) {
@@ -564,6 +645,11 @@ ${pageSummary.length ? JSON.stringify(pageSummary, null, 2) : '暂未提供页�
         role: pagePlan.role,
         query: pagePlan.query,
         treatment: pagePlan.treatment,
+        sceneType: pagePlan.sceneType || '',
+        insertMode: pagePlan.insertMode || 'background',
+        assetType: pagePlan.assetType || '',
+        reason: pagePlan.reason || '',
+        shotIntent: pagePlan.shotIntent || '',
         source: picked?.isAI ? 'minimax' : (picked ? 'pexels' : ''),
         localPath: picked?.localPath || '',
         analysis: picked?.analysis || null,

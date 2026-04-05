@@ -81,7 +81,7 @@
         <iframe
           :srcdoc="slideSrc(slide)"
           scrolling="no"
-          style="width:960px;height:540px;border:none;transform:scale(0.125);transform-origin:top left;pointer-events:none"
+          style="width:960px;height:540px;border:none;zoom:0.125;pointer-events:none"
         />
         <span class="sv-thumb-num">{{ i + 1 }}</span>
       </div>
@@ -453,6 +453,7 @@ onUnmounted(() => {
   width: 120px;
   height: 68px;
   flex-shrink: 0;
+  will-change: transform;
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;

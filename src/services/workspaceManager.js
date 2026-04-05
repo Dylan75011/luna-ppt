@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { callMinimax } = require('./llmClients');
+const { htmlToTiptap } = require('./richText');
+const { toOutputRelative, toOutputUrl, resolveOutputRelative } = require('./outputPaths');
 
 const DATA_DIR = path.resolve('./data');
 const WORKSPACE_FILE = path.join(DATA_DIR, 'workspaces.json');
@@ -148,6 +150,54 @@ function collectDocumentNodes(node) {
     }
   }
   return docs;
+}
+
+function normalizeManagedFilePath(filePath = '') {
+  const input = String(filePath || '').trim();
+  if (!input) return '';
+  if (path.isAbsolute(input)) return path.resolve(input);
+  const relative = input
+    .replace(/^\/api\/files\/download\//, '')
+    .replace(/^\/output\//, '');
+  if (!relative) return '';
+  return resolveOutputRelative(relative);
+}
+
+function extractManagedFilePathsFromData(data = {}) {
+  const candidates = [
+    data.filePath,
+    data.localPath,
+    data.outputRelativePath,
+    data.downloadUrl,
+    data.previewUrl,
+  ]
+    .map(normalizeManagedFilePath)
+    .filter(Boolean);
+  return [...new Set(candidates)];
+}
+
+function removeManagedFiles(docIds = []) {
+  const paths = new Set();
+  docIds.forEach((docId) => {
+    const f = path.join(DOCS_DIR, docId + '.json');
+    if (!fs.existsSync(f)) return;
+    try {
+      const data = JSON.parse(fs.readFileSync(f, 'utf8'));
+      extractManagedFilePathsFromData(data).forEach((item) => paths.add(item));
+    } catch (error) {
+      console.warn('[workspaceManager] 读取待删除产出物失败:', error.message);
+    }
+  });
+
+  paths.forEach((targetPath) => {
+    try {
+      if (targetPath && fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
+        fs.unlinkSync(targetPath);
+      }
+    } catch (error) {
+      console.warn('[workspaceManager] 删除产出物文件失败:', targetPath, error.message);
+    }
+  });
 }
 
 function ensureAllSpaceIndexes(tree) {
@@ -532,6 +582,7 @@ function deleteNode(id) {
   if (spaceIdx !== -1) {
     const node = tree.spaces[spaceIdx];
     const docIds = collectDocIds(node);
+    removeManagedFiles(docIds);
     docIds.forEach(docId => {
       const f = path.join(DOCS_DIR, docId + '.json');
       if (fs.existsSync(f)) fs.unlinkSync(f);
@@ -545,6 +596,7 @@ function deleteNode(id) {
   const found = findNode(tree.spaces, id);
   if (!found) throw new Error('节点不存在: ' + id);
   const docIds = collectDocIds(found.node);
+  removeManagedFiles(docIds);
   docIds.forEach(docId => {
     const f = path.join(DOCS_DIR, docId + '.json');
     if (fs.existsSync(f)) fs.unlinkSync(f);
@@ -562,6 +614,15 @@ function getContent(id) {
   const data = JSON.parse(fs.readFileSync(f, 'utf8'));
   if (data.docType === 'document' && !data.contentFormat) {
     data.contentFormat = typeof data.content === 'object' ? 'tiptap-json' : 'legacy-html';
+  }
+  if (data.docType === 'document' && data.contentFormat === 'legacy-html' && typeof data.content === 'string' && data.content.trim()) {
+    try {
+      data.content = htmlToTiptap(data.content);
+      data.contentFormat = 'tiptap-json';
+      fs.writeFileSync(f, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.warn('[workspaceManager] legacy-html 转 tiptap-json 失败:', error.message);
+    }
   }
   return data;
 }
@@ -586,12 +647,42 @@ function saveContent(id, content, contentFormat = 'tiptap-json') {
   return data.updatedAt;
 }
 
-// 保存 Agent 生成的 PPT 到指定 Space
-function savePptToSpace({ spaceId, name, pptData, downloadUrl, previewSlides }) {
-  const node = createNode({ parentId: spaceId, name, type: 'document', docType: 'ppt' });
+// 确保任务文件夹存在（按名称查找或创建）
+function ensureTaskFolder(spaceId, folderName) {
+  const tree = readTree();
+  const found = findNode(tree.spaces, spaceId);
+  if (!found) throw new Error('空间不存在: ' + spaceId);
+  const parent = found.node;
+  // 在直接子节点中找同名文件夹
+  const existing = (parent.children || []).find(
+    c => c.type === 'folder' && c.name === folderName && !c.system
+  );
+  if (existing) return existing;
+  // 新建文件夹
+  const now = new Date().toISOString();
+  const folder = {
+    id: 'folder_' + uuidv4().replace(/-/g, '').slice(0, 12),
+    type: 'folder',
+    name: folderName,
+    children: [],
+    createdAt: now,
+    updatedAt: now
+  };
+  if (!parent.children) parent.children = [];
+  parent.children.push(folder);
+  writeTree(tree);
+  return folder;
+}
+
+// 保存 Agent 生成的 PPT 到指定位置（parentId 优先，默认 spaceId）
+function savePptToSpace({ spaceId, parentId, name, pptData, downloadUrl, previewSlides }) {
+  const targetParent = parentId || spaceId;
+  const node = createNode({ parentId: targetParent, name, type: 'document', docType: 'ppt' });
   const f = path.join(DOCS_DIR, node.id + '.json');
-  const pptxFilename = downloadUrl
-    ? decodeURIComponent(String(downloadUrl).replace(/^.*\/api\/files\/download\//, ''))
+  const filePath = normalizeManagedFilePath(downloadUrl);
+  const outputRelativePath = filePath ? toOutputRelative(filePath) : '';
+  const pptxFilename = outputRelativePath
+    ? path.basename(outputRelativePath)
     : '';
   const content = {
     id: node.id,
@@ -600,9 +691,35 @@ function savePptToSpace({ spaceId, name, pptData, downloadUrl, previewSlides }) 
     pptData,
     previewSlides: previewSlides || [],
     pptxFilename,
-    downloadUrl: downloadUrl || '',
+    filePath,
+    outputRelativePath,
+    downloadUrl: outputRelativePath ? `/api/files/download/${outputRelativePath}` : (downloadUrl || ''),
     createdAt: node.createdAt,
     updatedAt: node.updatedAt
+  };
+  fs.writeFileSync(f, JSON.stringify(content, null, 2));
+  return node;
+}
+
+function saveAssetToSpace({ spaceId, parentId, name, docType = 'file', filePath = '', previewUrl = '', downloadUrl = '', meta = {} }) {
+  const targetParent = parentId || spaceId;
+  const node = createNode({ parentId: targetParent, name, type: 'document', docType });
+  const f = path.join(DOCS_DIR, node.id + '.json');
+  const resolvedFilePath = normalizeManagedFilePath(filePath || downloadUrl || previewUrl);
+  const outputRelativePath = resolvedFilePath ? toOutputRelative(resolvedFilePath) : '';
+  const normalizedPreviewUrl = previewUrl || (resolvedFilePath ? toOutputUrl(resolvedFilePath) : '');
+  const normalizedDownloadUrl = downloadUrl || (outputRelativePath ? `/api/files/download/${outputRelativePath}` : '');
+  const content = {
+    id: node.id,
+    docType,
+    name,
+    filePath: resolvedFilePath,
+    outputRelativePath,
+    previewUrl: normalizedPreviewUrl,
+    downloadUrl: normalizedDownloadUrl,
+    createdAt: node.createdAt,
+    updatedAt: node.updatedAt,
+    ...meta
   };
   fs.writeFileSync(f, JSON.stringify(content, null, 2));
   return node;
@@ -621,7 +738,9 @@ function getSpaceContext(spaceId) {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
       const rawText = data.docType === 'ppt'
         ? extractPlainText((data.previewSlides || []).join(' '))
-        : extractPlainText(data.content);
+        : data.docType === 'image'
+          ? extractPlainText([data.name, data.caption, data.sourcePageTitle, data.outputRelativePath].filter(Boolean).join(' '))
+          : extractPlainText(data.content);
       return {
         id: node.id,
         name: node.name,
@@ -663,6 +782,8 @@ module.exports = {
   getContent,
   saveContent,
   savePptToSpace,
+  saveAssetToSpace,
+  ensureTaskFolder,
   getSpaceContext,
   ensureSpaceIndex,
   getSpaceIndex,

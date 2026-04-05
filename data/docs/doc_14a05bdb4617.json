@@ -1,0 +1,1200 @@
+{
+  "id": "doc_14a05bdb4617",
+  "docType": "ppt",
+  "name": "岚图汽车 PPT.pptx",
+  "pptData": {
+    "title": "五感共鸣·岚图山海——岚图汽车2026-2028年132站区域车展沉浸式体验方案",
+    "globalStyle": "dark_tech",
+    "theme": {
+      "primary": "1A1A1A",
+      "secondary": "C6A86A",
+      "brand": "岚图汽车",
+      "globalStyle": "dark_tech"
+    },
+    "pages": [
+      {
+        "layout": "immersive_cover",
+        "style": "dark_tech",
+        "composition": "hero-asymmetric",
+        "regions": [
+          {
+            "name": "header",
+            "x": 7,
+            "y": 12,
+            "w": 38,
+            "h": 24,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "body",
+            "x": 7,
+            "y": 46,
+            "w": 30,
+            "h": 16,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "rail",
+            "x": 64,
+            "y": 18,
+            "w": 22,
+            "h": 22,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "title": "五感共鸣·岚图山海——岚图汽车2026-2028年132站区域车展沉...",
+        "subtitle": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注入132站车展全链路，通过标准化S...",
+        "brand": "岚图汽车",
+        "date": "2026",
+        "location": "Launch Proposal",
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "岚图汽车"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "五感共鸣·岚图山海——岚图汽车2026-2028年132站区域车...",
+            "size": 42
+          },
+          {
+            "region": "header",
+            "kind": "subtitle",
+            "text": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注...",
+            "size": 14,
+            "lineHeight": 1.75
+          },
+          {
+            "region": "body",
+            "kind": "body",
+            "text": "让产品发布、品牌气质与传播引爆在同一条叙事线上完成闭环。",
+            "size": 13,
+            "lineHeight": 1.7,
+            "clamp": 5
+          },
+          {
+            "region": "rail",
+            "kind": "fact-list",
+            "items": [
+              "四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...",
+              "四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...",
+              "132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4..."
+            ],
+            "variant": "editorial-list"
+          }
+        ],
+        "visualIntent": {
+          "role": "cover",
+          "mood": "高端、克制、沉浸",
+          "density": "airy",
+          "composition": "left-weighted",
+          "reason": "用更像发布会 KV 的封面定调"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 flagship launch cinematic key visual premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "full-bleed-dark",
+          "overlay": 0.5,
+          "focalPoint": "right-center",
+          "textPlacement": "top"
+        },
+        "type": "immersive_cover",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "facts": [],
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_00_五感共鸣-岚图山海-岚图汽车2026-2028年132站区域车展沉_0.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#645651",
+          "overallBrightness": 89,
+          "contrast": 42,
+          "quadrantBrightness": {
+            "left": 85,
+            "right": 92,
+            "top": 80,
+            "bottom": 98,
+            "center": 110
+          },
+          "safestTextPlacement": "top",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #645651, brightness 89, contrast 42, darker side top, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_00_五感共鸣-岚图山海-岚图汽车2026-2028年132站区域车展沉_0.jpg",
+        "imageMeta": {
+          "query": "storm clouds dramatic key visual minimal",
+          "treatment": "full-bleed-dark",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "toc",
+        "style": "dark_tech",
+        "composition": "split-editorial",
+        "title": "目录",
+        "textBlocks": [
+          {
+            "region": "left",
+            "kind": "eyebrow",
+            "text": "CONTENTS"
+          },
+          {
+            "region": "left",
+            "kind": "title",
+            "text": "目录"
+          },
+          {
+            "region": "right",
+            "kind": "fact-list",
+            "items": [
+              "一、品牌定位与五感体验策略",
+              "二、展台空间规划：四区递进动线设计",
+              "三、创新互动活动设计",
+              "四、132站分级配置与标准化SOP体系"
+            ],
+            "variant": "editorial-list"
+          }
+        ],
+        "visualIntent": {
+          "role": "toc",
+          "mood": "清晰、简洁、建立结构",
+          "density": "medium",
+          "composition": "sidebar",
+          "reason": "让后续内容节奏更有组织"
+        },
+        "imageStrategy": {
+          "useBackground": false,
+          "query": "",
+          "treatment": "none",
+          "overlay": 0,
+          "focalPoint": "center",
+          "textPlacement": "left"
+        },
+        "type": "toc",
+        "subtitle": "",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "facts": [],
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": []
+      },
+      {
+        "layout": "editorial_quote",
+        "style": "dark_tech",
+        "composition": "annotation-runway",
+        "regions": [
+          {
+            "name": "header",
+            "x": 8,
+            "y": 12,
+            "w": 24,
+            "h": 16,
+            "stack": "vertical",
+            "gap": 8,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "quote",
+            "x": 8,
+            "y": 32,
+            "w": 38,
+            "h": 38,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "facts",
+            "x": 58,
+            "y": 34,
+            "w": 28,
+            "h": 38,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "title": "核心策略",
+        "subtitle": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注...",
+        "quote": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注入132站车展全链路，通过标准化SOP确保服务品质一致性的同时，让每一站都成为传递「央国企高端新能源第一品牌」价值主张的沉浸式品牌...",
+        "facts": [
+          "四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进，确...",
+          "四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑战赛（...",
+          "132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级44站..."
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "STRATEGY"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "核心策略",
+            "size": 34
+          },
+          {
+            "region": "quote",
+            "kind": "quote",
+            "text": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注入132站车展全链路，通过标准化SOP确保服务品质一致性的同时，让每一站都成为传递「央国企高端新能源第一品牌」价值主张的沉...",
+            "size": 24,
+            "lineHeight": 1.42,
+            "clamp": 4
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "items": [
+              "四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...",
+              "四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...",
+              "132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4..."
+            ],
+            "variant": "compact-notes"
+          }
+        ],
+        "visualIntent": {
+          "role": "manifesto",
+          "mood": "宣言感、克制、有压迫感",
+          "density": "airy",
+          "composition": "editorial",
+          "reason": "把方案中心命题立住"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 premium keynote atmosphere premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "editorial-fade",
+          "overlay": 0.4,
+          "focalPoint": "right-center",
+          "textPlacement": "left"
+        },
+        "type": "editorial_quote",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_02_核心策略_11.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#418d98",
+          "overallBrightness": 125,
+          "contrast": 62,
+          "quadrantBrightness": {
+            "left": 108,
+            "right": 143,
+            "top": 125,
+            "bottom": 126,
+            "center": 134
+          },
+          "safestTextPlacement": "left",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.4,
+          "summary": "average color #418d98, brightness 125, contrast 62, darker side left, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_02_核心策略_11.jpg",
+        "imageMeta": {
+          "query": "sculptural light beams abstract minimal",
+          "treatment": "editorial-fade",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "data_cards",
+        "style": "dark_tech",
+        "composition": "highlights-board",
+        "title": "活动亮点总览",
+        "metrics": [
+          {
+            "value": "01",
+            "label": "四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层...",
+            "sub": "Key Highlight"
+          },
+          {
+            "value": "02",
+            "label": "四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充...",
+            "sub": "Key Highlight"
+          },
+          {
+            "value": "03",
+            "label": "132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、...",
+            "sub": "Key Highlight"
+          },
+          {
+            "value": "04",
+            "label": "「1+3+N」标准化SOP体系：1套总纲手册 + 3级执行标准 + N站适...",
+            "sub": "Key Highlight"
+          },
+          {
+            "value": "05",
+            "label": "「薪酬现结」激励机制：日结服务费+满意度奖金池，快速调动...",
+            "sub": "Key Highlight"
+          }
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "HIGHLIGHTS"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "活动亮点总览"
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "variant": "floating-tags",
+            "items": [
+              "四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...",
+              "四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...",
+              "132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4...",
+              "「1+3+N」标准化SOP体系：1套总纲手册 + 3级执行标准 + N站适应性...",
+              "「薪酬现结」激励机制：日结服务费+满意度奖金池，快速调动执行..."
+            ]
+          }
+        ],
+        "visualIntent": {
+          "role": "highlights",
+          "mood": "有秩序但不平庸",
+          "density": "medium",
+          "composition": "mosaic",
+          "reason": "把亮点变成一面有层次的战报墙"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 premium texture lighting premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "subtle-grid",
+          "overlay": 0.5,
+          "focalPoint": "center",
+          "textPlacement": "right"
+        },
+        "type": "data_cards",
+        "subtitle": "",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "facts": [],
+        "leftItems": [],
+        "rightItems": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_03_活动亮点总览_11.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#211e1c",
+          "overallBrightness": 30,
+          "contrast": 27,
+          "quadrantBrightness": {
+            "left": 41,
+            "right": 20,
+            "top": 34,
+            "bottom": 27,
+            "center": 31
+          },
+          "safestTextPlacement": "right",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #211e1c, brightness 30, contrast 27, darker side right, recommended light text"
+        },
+        "regions": [
+          {
+            "name": "header",
+            "x": 7,
+            "y": 10,
+            "w": 34,
+            "h": 15,
+            "stack": "vertical",
+            "gap": 8,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "facts",
+            "x": 7,
+            "y": 27,
+            "w": 84,
+            "h": 30,
+            "stack": "vertical",
+            "gap": 14,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_03_活动亮点总览_11.jpg",
+        "imageMeta": {
+          "query": "graphite grid texture macro editorial luxury",
+          "treatment": "subtle-grid",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "editorial-left",
+        "title": "一、品牌定位与五感体验策略",
+        "subtitle": "",
+        "facts": [
+          "岚图是央国企高端新能源第一品牌，需要在车展场景中建立「可信赖的高端」...",
+          "五感体验（安全感/舒适感/尊重感/愉悦感/品位感）是差异化竞争的核心..."
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "SECTION 01"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "一、品牌定位与五感体验策略",
+            "size": 42
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "items": [
+              "岚图是央国企高端新能源第一品牌，需要在车展场景中建立「可信...",
+              "五感体验（安全感/舒适感/尊重感/愉悦感/品位感）是差异化竞争..."
+            ],
+            "variant": "compact-notes",
+            "size": 13,
+            "lineHeight": 1.6,
+            "clamp": 3
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "editorial-left",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 一、品牌定位与五感体验策略 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "editorial-fade",
+          "overlay": 0.5,
+          "focalPoint": "right-center",
+          "textPlacement": "bottom"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_04_一-品牌定位与五感体验策略_8.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#607761",
+          "overallBrightness": 113,
+          "contrast": 37,
+          "quadrantBrightness": {
+            "left": 118,
+            "right": 107,
+            "top": 145,
+            "bottom": 81,
+            "center": 116
+          },
+          "safestTextPlacement": "bottom",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #607761, brightness 113, contrast 37, darker side bottom, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_04_一-品牌定位与五感体验策略_8.jpg",
+        "imageMeta": {
+          "query": "atmospheric abstract depth dark editorial luxury",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "split-editorial",
+        "title": "二、展台空间规划：四区递进动线设计",
+        "subtitle": "",
+        "facts": [
+          "吸引区（入口）：用视觉冲击力和品牌符号吸引目光，停留时间决定后续转化",
+          "体验区（核心展位）：新车亮相与核心技术展示，解决「这是什么车」的核心...",
+          "沉浸区（互动区）：用非遗、AI、充能挑战赛等创新互动创造记忆点，解决..."
+        ],
+        "textBlocks": [
+          {
+            "region": "left",
+            "kind": "eyebrow",
+            "text": "SECTION 02"
+          },
+          {
+            "region": "left",
+            "kind": "title",
+            "text": "二、展台空间规划：四区递进动线设计",
+            "size": 42
+          },
+          {
+            "region": "right",
+            "kind": "fact-list",
+            "items": [
+              "吸引区（入口）：用视觉冲击力和品牌符号吸引目光，停留时间决定...",
+              "体验区（核心展位）：新车亮相与核心技术展示，解决「这是什么车」...",
+              "沉浸区（互动区）：用非遗、AI、充能挑战赛等创新互动创造记忆点，..."
+            ],
+            "variant": "compact-notes",
+            "size": 13,
+            "lineHeight": 1.6,
+            "clamp": 3
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "split-editorial",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 二、展台空间规划：四区递进动线设计 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "split-atmosphere",
+          "overlay": 0.5,
+          "focalPoint": "center",
+          "textPlacement": "left"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_05_二-展台空间规划-四区递进动线设计_6.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#1d1c14",
+          "overallBrightness": 28,
+          "contrast": 40,
+          "quadrantBrightness": {
+            "left": 16,
+            "right": 39,
+            "top": 26,
+            "bottom": 29,
+            "center": 29
+          },
+          "safestTextPlacement": "left",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #1d1c14, brightness 28, contrast 40, darker side left, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_05_二-展台空间规划-四区递进动线设计_6.jpg",
+        "imageMeta": {
+          "query": "soft volumetric light moody minimal",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "annotation-runway",
+        "title": "三、创新互动活动设计",
+        "subtitle": "",
+        "facts": [
+          "非遗工坊：将漆扇/茶艺/苏绣等非遗体验与岚图「中式优雅」品牌调性绑定...",
+          "AI智驾画卷：用AI生成技术将参观者的驾驶愿景转化为艺术画卷，解决「...",
+          "充能挑战赛：用互动游戏模拟岚图超充技术，寓教于乐，解决「产品功能」的..."
+        ],
+        "regions": [
+          {
+            "name": "header",
+            "x": 44,
+            "y": 12,
+            "w": 36,
+            "h": 20,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "body",
+            "x": 44,
+            "y": 38,
+            "w": 32,
+            "h": 24,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "rail",
+            "x": 8,
+            "y": 18,
+            "w": 24,
+            "h": 44,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "SECTION 03"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "三、创新互动活动设计",
+            "size": 42
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "items": [
+              "非遗工坊：将漆扇/茶艺/苏绣等非遗体验与岚图「中式优雅」品牌...",
+              "AI智驾画卷：用AI生成技术将参观者的驾驶愿景转化为艺术画卷，...",
+              "充能挑战赛：用互动游戏模拟岚图超充技术，寓教于乐，解决「产品..."
+            ],
+            "variant": "compact-notes",
+            "size": 13,
+            "lineHeight": 1.6,
+            "clamp": 3
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "annotation-runway",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 三、创新互动活动设计 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "editorial-fade",
+          "overlay": 0.5,
+          "focalPoint": "right-center",
+          "textPlacement": "right"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_06_三-创新互动活动设计_1.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#4d5044",
+          "overallBrightness": 79,
+          "contrast": 33,
+          "quadrantBrightness": {
+            "left": 95,
+            "right": 62,
+            "top": 83,
+            "bottom": 74,
+            "center": 85
+          },
+          "safestTextPlacement": "right",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #4d5044, brightness 79, contrast 33, darker side right, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_06_三-创新互动活动设计_1.jpg",
+        "imageMeta": {
+          "query": "minimal cinematic environment editorial luxury",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "hero-asymmetric",
+        "title": "四、132站分级配置与标准化SOP体系",
+        "subtitle": "",
+        "facts": [
+          "B级站（8站）：800㎡顶配展台+全互动+高端茶歇+媒体日发布会+P...",
+          "C级站（44站）：400㎡标配展台+核心互动（选2个）+基础茶歇+标...",
+          "DE级站（80站）：200㎡紧凑展台+标准化展示+无茶歇+简版传播，..."
+        ],
+        "regions": [
+          {
+            "name": "header",
+            "x": 44,
+            "y": 12,
+            "w": 36,
+            "h": 20,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "body",
+            "x": 44,
+            "y": 38,
+            "w": 32,
+            "h": 24,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "rail",
+            "x": 8,
+            "y": 18,
+            "w": 24,
+            "h": 44,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "SECTION 04"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "四、132站分级配置与标准化SOP体系",
+            "size": 38
+          },
+          {
+            "region": "rail",
+            "kind": "fact-list",
+            "items": [
+              "B级站（8站）：800㎡顶配展台+全互动+高端茶歇+媒体日发布会+P...",
+              "C级站（44站）：400㎡标配展台+核心互动（选2个）+基础茶歇+标...",
+              "DE级站（80站）：200㎡紧凑展台+标准化展示+无茶歇+简版传播，..."
+            ],
+            "variant": "compact-notes",
+            "size": 12,
+            "lineHeight": 1.52,
+            "clamp": 2
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "hero-asymmetric",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 四、132站分级配置与标准化SOP体系 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "split-atmosphere",
+          "overlay": 0.4,
+          "focalPoint": "center",
+          "textPlacement": "right"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_07_四-132站分级配置与标准化sop体系_4.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#16252b",
+          "overallBrightness": 34,
+          "contrast": 65,
+          "quadrantBrightness": {
+            "left": 48,
+            "right": 20,
+            "top": 46,
+            "bottom": 22,
+            "center": 53
+          },
+          "safestTextPlacement": "right",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.4,
+          "summary": "average color #16252b, brightness 34, contrast 65, darker side right, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_07_四-132站分级配置与标准化sop体系_4.jpg",
+        "imageMeta": {
+          "query": "atmospheric abstract depth dark editorial luxury",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "editorial-left",
+        "title": "五、整合传播策略：三阶段内容规划",
+        "subtitle": "",
+        "facts": [
+          "展前预热：悬念海报+媒体邀约+本地KOL种草，制造「岚图来了」的期待...",
+          "展中引爆：实时短视频+现场PRPhoto+媒体直播，让无法到场的人也...",
+          "展后长尾：车主证言+活动精剪+数据复盘，延续热度并为下一站积累素材"
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "SECTION 05"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "五、整合传播策略：三阶段内容规划",
+            "size": 42
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "items": [
+              "展前预热：悬念海报+媒体邀约+本地KOL种草，制造「岚图来了」的...",
+              "展中引爆：实时短视频+现场PRPhoto+媒体直播，让无法到场的人也...",
+              "展后长尾：车主证言+活动精剪+数据复盘，延续热度并为下一站积..."
+            ],
+            "variant": "compact-notes",
+            "size": 13,
+            "lineHeight": 1.6,
+            "clamp": 3
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "editorial-left",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 五、整合传播策略：三阶段内容规划 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "editorial-fade",
+          "overlay": 0.4,
+          "focalPoint": "right-center",
+          "textPlacement": "top"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_08_五-整合传播策略-三阶段内容规划_2.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#5a5544",
+          "overallBrightness": 85,
+          "contrast": 45,
+          "quadrantBrightness": {
+            "left": 89,
+            "right": 81,
+            "top": 77,
+            "bottom": 93,
+            "center": 103
+          },
+          "safestTextPlacement": "top",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.4,
+          "summary": "average color #5a5544, brightness 85, contrast 45, darker side top, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_08_五-整合传播策略-三阶段内容规划_2.jpg",
+        "imageMeta": {
+          "query": "soft volumetric light moody minimal",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "asymmetrical_story",
+        "style": "dark_tech",
+        "composition": "split-editorial",
+        "title": "六、预算分配与投资回报逻辑",
+        "subtitle": "",
+        "facts": [
+          "展台搭建与硬装占总预算45%，这是品牌形象的物理载体，不能省",
+          "互动装置与物料占总预算25%，创新互动是差异化体验的核心",
+          "人员与服务占总预算20%，五感体验的「尊重感」和「舒适感」由服务承载"
+        ],
+        "textBlocks": [
+          {
+            "region": "left",
+            "kind": "eyebrow",
+            "text": "SECTION 06"
+          },
+          {
+            "region": "left",
+            "kind": "title",
+            "text": "六、预算分配与投资回报逻辑",
+            "size": 42
+          },
+          {
+            "region": "right",
+            "kind": "fact-list",
+            "items": [
+              "展台搭建与硬装占总预算45%，这是品牌形象的物理载体，不能省",
+              "互动装置与物料占总预算25%，创新互动是差异化体验的核心",
+              "人员与服务占总预算20%，五感体验的「尊重感」和「舒适感」由服务..."
+            ],
+            "variant": "compact-notes",
+            "size": 13,
+            "lineHeight": 1.6,
+            "clamp": 3
+          }
+        ],
+        "visualIntent": {
+          "role": "section",
+          "mood": "坚定、专业、发布会式叙事",
+          "density": "medium",
+          "composition": "split-editorial",
+          "reason": "按章节建立连续但不重复的叙事页"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 六、预算分配与投资回报逻辑 premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "split-atmosphere",
+          "overlay": 0.5,
+          "focalPoint": "center",
+          "textPlacement": "left"
+        },
+        "type": "asymmetrical_story",
+        "quote": "",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_09_六-预算分配与投资回报逻辑_2.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#1e2e31",
+          "overallBrightness": 43,
+          "contrast": 27,
+          "quadrantBrightness": {
+            "left": 46,
+            "right": 41,
+            "top": 44,
+            "bottom": 42,
+            "center": 46
+          },
+          "safestTextPlacement": "left",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.5,
+          "summary": "average color #1e2e31, brightness 43, contrast 27, darker side left, recommended light text"
+        },
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_09_六-预算分配与投资回报逻辑_2.jpg",
+        "imageMeta": {
+          "query": "minimal cinematic environment editorial luxury",
+          "treatment": "ambient-texture",
+          "source": "pexels"
+        }
+      },
+      {
+        "layout": "end_card",
+        "style": "dark_tech",
+        "composition": "annotation-runway",
+        "title": "谢谢观看",
+        "subtitle": "岚图汽车 新品发布会活动策划提案",
+        "quote": "让一次发布，不止完成产品亮相，更完成品牌高度的再确认。",
+        "facts": [
+          "2026",
+          "传递\"央国企高端新能源第一品牌\"形象，实现品牌高端市场渗透率提..."
+        ],
+        "textBlocks": [
+          {
+            "region": "header",
+            "kind": "eyebrow",
+            "text": "岚图汽车"
+          },
+          {
+            "region": "header",
+            "kind": "title",
+            "text": "谢谢观看"
+          },
+          {
+            "region": "quote",
+            "kind": "quote",
+            "text": "让一次发布，不止完成产品亮相，更完成品牌高度的再确认。"
+          },
+          {
+            "region": "facts",
+            "kind": "fact-list",
+            "variant": "editorial-list",
+            "items": [
+              "2026",
+              "传递\"央国企高端新能源第一品牌\"形象，实现品牌高端市场渗透..."
+            ]
+          }
+        ],
+        "visualIntent": {
+          "role": "closing",
+          "mood": "收束、沉稳、余韵",
+          "density": "airy",
+          "composition": "centered-close",
+          "reason": "用简洁结束页收住整份提案"
+        },
+        "imageStrategy": {
+          "useBackground": true,
+          "query": "岚图汽车 night skyline premium finale premium automotive launch cinematic stage lighting luxury technology atmosphere future mobility",
+          "treatment": "quiet-finale",
+          "overlay": 0.4,
+          "focalPoint": "center",
+          "textPlacement": "right"
+        },
+        "type": "end_card",
+        "body": "",
+        "story": "",
+        "leftItems": [],
+        "rightItems": [],
+        "metrics": [],
+        "phases": [],
+        "imageAnalysis": {
+          "imagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_10_谢谢观看_1.jpg",
+          "size": {
+            "width": 96,
+            "height": 54
+          },
+          "averageColor": "#7d6652",
+          "overallBrightness": 105,
+          "contrast": 70,
+          "quadrantBrightness": {
+            "left": 143,
+            "right": 67,
+            "top": 134,
+            "bottom": 76,
+            "center": 88
+          },
+          "safestTextPlacement": "right",
+          "recommendedTextTone": "light",
+          "recommendedOverlay": 0.4,
+          "summary": "average color #7d6652, brightness 105, contrast 70, darker side right, recommended light text"
+        },
+        "regions": [
+          {
+            "name": "header",
+            "x": 48,
+            "y": 12,
+            "w": 26,
+            "h": 16,
+            "stack": "vertical",
+            "gap": 8,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "quote",
+            "x": 42,
+            "y": 34,
+            "w": 34,
+            "h": 24,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "start",
+            "valign": "start"
+          },
+          {
+            "name": "facts",
+            "x": 10,
+            "y": 24,
+            "w": 24,
+            "h": 18,
+            "stack": "vertical",
+            "gap": 10,
+            "align": "stretch",
+            "valign": "start"
+          }
+        ],
+        "bgImagePath": "/Users/yangdi/Documents/GitHub/openclaw-ppt/output/runs/img_1775400323241/images/img_1775400323241_page_10_谢谢观看_1.jpg",
+        "imageMeta": {
+          "query": "quiet cinematic horizon dark editorial luxury",
+          "treatment": "quiet-finale",
+          "source": "pexels"
+        }
+      }
+    ]
+  },
+  "previewSlides": [
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_00_五感共鸣-岚图山海-岚图汽车2026-2028年132站区域车展沉_0.jpg');background-size:cover;background-position:74% center;opacity:0.9;filter:saturate(1.08) contrast(1.06) brightness(0.88);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:54%;background:linear-gradient(90deg, rgba(9,14,22,0.62) 0%, rgba(9,14,22,0.30) 62%, rgba(9,14,22,0.06) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(9,14,22,0.06) 0%, rgba(9,14,22,0.28) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:7%;top:12%;width:38%;height:24%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">岚图汽车</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">五感共鸣·岚图山海——岚图汽车2026-2028年132站区域车...</div><div class=\"sc-block\" style=\"font-size:14px;line-height:1.75;color:var(--text-muted);max-width:100%;text-wrap:pretty;\">以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注...</div></div>\n  </div><div class=\"sc-region\" style=\"left:7%;top:46%;width:30%;height:16%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:13px;line-height:1.7;color:var(--text-muted);max-width:100%;text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;\">让产品发布、品牌气质与传播引爆在同一条叙事线上完成闭环。</div></div>\n  </div><div class=\"sc-region\" style=\"left:64%;top:18%;width:22%;height:22%;padding:0px;overflow:hidden;border-left:1px solid rgba(255,255,255,0.12);padding-left:18px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n        <div class=\"sc-block\" style=\"padding:0 0;border-top:none;\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 01</div>\n          <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 02</div>\n          <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 03</div>\n          <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4...</div>\n        </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  \n  <div class=\"sc-region\" style=\"left:6%;top:10%;width:38%;height:72%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">CONTENTS</div><div class=\"sc-block\" style=\"font-size:36px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">目录</div></div>\n  </div><div class=\"sc-region\" style=\"left:58%;top:18%;width:28%;height:56%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:stretch;\">\n        <div class=\"sc-block\" style=\"padding:0 0;border-top:none;\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 01</div>\n          <div style=\"font-size:14px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">一、品牌定位与五感体验策略</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 02</div>\n          <div style=\"font-size:14px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">二、展台空间规划：四区递进动线设计</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 03</div>\n          <div style=\"font-size:14px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">三、创新互动活动设计</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 04</div>\n          <div style=\"font-size:14px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">四、132站分级配置与标准化SOP体系</div>\n        </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_02_核心策略_11.jpg');background-size:cover;background-position:74% center;opacity:0.74;filter:saturate(1.08) contrast(1.08) brightness(0.82);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:52%;background:linear-gradient(90deg, rgba(9,14,22,0.72) 0%, rgba(9,14,22,0.28) 72%, rgba(9,14,22,0.04) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(10,14,24,0.04) 0%, rgba(10,14,24,0.18) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:8%;top:12%;width:24%;height:16%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">STRATEGY</div><div class=\"sc-block\" style=\"font-size:34px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">核心策略</div></div>\n  </div><div class=\"sc-region\" style=\"left:8%;top:32%;width:38%;height:38%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"padding-left:18px;border-left:2px solid #C0A062;font-size:24px;line-height:1.42;color:#fff;text-wrap:balance;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;\">以「五感体验」为锚点，将岚图「中式优雅+高端科技」的品牌基因注入132站车展全链路，通过标准化SOP确保服务品质一致性的同时，让每一站都成为传递「央国企高端新能源第一品牌」价值主张的沉...</div></div>\n  </div><div class=\"sc-region\" style=\"left:58%;top:34%;width:28%;height:38%;padding:0px;overflow:hidden;border-left:1px solid rgba(255,255,255,0.12);padding-left:18px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:13px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_03_活动亮点总览_11.jpg');background-size:cover;background-position:center center;opacity:0.18;filter:grayscale(0.04) saturate(0.92) contrast(1.04);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(9,14,22,0.34) 0%, rgba(9,14,22,0.24) 100%);\"></div>\n  <div style=\"position:absolute;inset:18px;border:1px solid rgba(255,255,255,0.06);pointer-events:none;\"></div>\n  \n  <div class=\"sc-region\" style=\"left:7%;top:10%;width:34%;height:15%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">HIGHLIGHTS</div><div class=\"sc-block\" style=\"font-size:40px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">活动亮点总览</div></div>\n  </div><div class=\"sc-region\" style=\"left:7%;top:27%;width:84%;height:30%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:stretch;\"><div class=\"sc-block\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 24px;align-content:flex-start;width:100%;\">\n          \n            <div style=\"display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding-top:0;border-top:1px solid rgba(255,255,255,0.12);\">\n              <span style=\"font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;padding-top:2px;flex-shrink:0;\">01</span>\n              <span style=\"font-size:13px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">四区递进动线设计：从吸引→体验→沉浸→转化，逻辑清晰，层层递进...</span>\n            </div>\n            <div style=\"display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding-top:0;border-top:1px solid rgba(255,255,255,0.12);\">\n              <span style=\"font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;padding-top:2px;flex-shrink:0;\">02</span>\n              <span style=\"font-size:13px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">四大创新互动装置：非遗工坊（触觉）、AI智驾画卷（视觉）、充能挑...</span>\n            </div>\n            <div style=\"display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding-top:0;border-top:1px solid rgba(255,255,255,0.12);\">\n              <span style=\"font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;padding-top:2px;flex-shrink:0;\">03</span>\n              <span style=\"font-size:13px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">132站分级配置模型：B级8站做标杆（800㎡+全互动+高端茶歇）、C级4...</span>\n            </div>\n            <div style=\"display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);\">\n              <span style=\"font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;padding-top:2px;flex-shrink:0;\">04</span>\n              <span style=\"font-size:13px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">「1+3+N」标准化SOP体系：1套总纲手册 + 3级执行标准 + N站适应性...</span>\n            </div>\n            <div style=\"display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);\">\n              <span style=\"font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;padding-top:2px;flex-shrink:0;\">05</span>\n              <span style=\"font-size:13px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">「薪酬现结」激励机制：日结服务费+满意度奖金池，快速调动执行...</span>\n            </div>\n        </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_04_一-品牌定位与五感体验策略_8.jpg');background-size:cover;background-position:74% center;opacity:0.74;filter:saturate(1.08) contrast(1.08) brightness(0.82);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:52%;background:linear-gradient(90deg, rgba(9,14,22,0.72) 0%, rgba(9,14,22,0.32) 72%, rgba(9,14,22,0.04) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(10,14,24,0.04) 0%, rgba(10,14,24,0.18) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:6%;top:10%;width:42%;height:38%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:16px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 01</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">一、品牌定位与五感体验策略</div></div>\n  </div><div class=\"sc-region\" style=\"left:66%;top:46%;width:24%;height:32%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">岚图是央国企高端新能源第一品牌，需要在车展场景中建立「可信...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">五感体验（安全感/舒适感/尊重感/愉悦感/品位感）是差异化竞争...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_05_二-展台空间规划-四区递进动线设计_6.jpg');background-size:cover;background-position:center center;opacity:0.62;filter:saturate(1.06) contrast(1.08) brightness(0.84);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:54%;background:linear-gradient(90deg, rgba(9,14,22,0.68) 0%, rgba(9,14,22,0.50) 68%, rgba(9,14,22,0.08) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(110deg, rgba(9,14,22,0.02) 0%, rgba(9,14,22,0.12) 54%, rgba(9,14,22,0.24) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:6%;top:10%;width:38%;height:72%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 02</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">二、展台空间规划：四区递进动线设计</div></div>\n  </div><div class=\"sc-region\" style=\"left:58%;top:18%;width:28%;height:56%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">吸引区（入口）：用视觉冲击力和品牌符号吸引目光，停留时间决定...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">体验区（核心展位）：新车亮相与核心技术展示，解决「这是什么车」...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">沉浸区（互动区）：用非遗、AI、充能挑战赛等创新互动创造记忆点，...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_06_三-创新互动活动设计_1.jpg');background-size:cover;background-position:74% center;opacity:0.74;filter:saturate(1.08) contrast(1.08) brightness(0.82);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:52%;background:linear-gradient(90deg, rgba(9,14,22,0.72) 0%, rgba(9,14,22,0.32) 72%, rgba(9,14,22,0.04) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(10,14,24,0.04) 0%, rgba(10,14,24,0.18) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:44%;top:12%;width:36%;height:20%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 03</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">三、创新互动活动设计</div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_07_四-132站分级配置与标准化sop体系_4.jpg');background-size:cover;background-position:center center;opacity:0.62;filter:saturate(1.06) contrast(1.08) brightness(0.84);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:54%;background:linear-gradient(90deg, rgba(9,14,22,0.68) 0%, rgba(9,14,22,0.40) 68%, rgba(9,14,22,0.08) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(110deg, rgba(9,14,22,0.02) 0%, rgba(9,14,22,0.12) 54%, rgba(9,14,22,0.24) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:44%;top:12%;width:36%;height:20%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 04</div><div class=\"sc-block\" style=\"font-size:38px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">四、132站分级配置与标准化SOP体系</div></div>\n  </div><div class=\"sc-region\" style=\"left:8%;top:18%;width:24%;height:44%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:12px;line-height:1.52;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">B级站（8站）：800㎡顶配展台+全互动+高端茶歇+媒体日发布会+P...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:12px;line-height:1.52;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">C级站（44站）：400㎡标配展台+核心互动（选2个）+基础茶歇+标...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:12px;line-height:1.52;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">DE级站（80站）：200㎡紧凑展台+标准化展示+无茶歇+简版传播，...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_08_五-整合传播策略-三阶段内容规划_2.jpg');background-size:cover;background-position:74% center;opacity:0.74;filter:saturate(1.08) contrast(1.08) brightness(0.82);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:52%;background:linear-gradient(90deg, rgba(9,14,22,0.72) 0%, rgba(9,14,22,0.28) 72%, rgba(9,14,22,0.04) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(180deg, rgba(10,14,24,0.04) 0%, rgba(10,14,24,0.18) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:6%;top:10%;width:42%;height:38%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:16px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 05</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">五、整合传播策略：三阶段内容规划</div></div>\n  </div><div class=\"sc-region\" style=\"left:66%;top:46%;width:24%;height:32%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">展前预热：悬念海报+媒体邀约+本地KOL种草，制造「岚图来了」的...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">展中引爆：实时短视频+现场PRPhoto+媒体直播，让无法到场的人也...</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">展后长尾：车主证言+活动精剪+数据复盘，延续热度并为下一站积...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_09_六-预算分配与投资回报逻辑_2.jpg');background-size:cover;background-position:center center;opacity:0.62;filter:saturate(1.06) contrast(1.08) brightness(0.84);\"></div>\n  <div style=\"position:absolute;left:0;top:0;bottom:0;width:54%;background:linear-gradient(90deg, rgba(9,14,22,0.68) 0%, rgba(9,14,22,0.50) 68%, rgba(9,14,22,0.08) 100%);\"></div>\n  <div style=\"position:absolute;inset:0;background:linear-gradient(110deg, rgba(9,14,22,0.02) 0%, rgba(9,14,22,0.12) 54%, rgba(9,14,22,0.24) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:6%;top:10%;width:38%;height:72%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">SECTION 06</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">六、预算分配与投资回报逻辑</div></div>\n  </div><div class=\"sc-region\" style=\"left:58%;top:18%;width:28%;height:56%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:14px;justify-content:flex-start;align-items:stretch;\">\n          <div class=\"sc-block\" style=\"padding:0 0 8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">展台搭建与硬装占总预算45%，这是品牌形象的物理载体，不能省</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">互动装置与物料占总预算25%，创新互动是差异化体验的核心</div>\n          </div>\n          <div class=\"sc-block\" style=\"padding:8px 0;\">\n            <div style=\"font-size:13px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">人员与服务占总预算20%，五感体验的「尊重感」和「舒适感」由服务...</div>\n          </div></div>\n  </div>\n</div>",
+    "<div class=\"slide structured\" style=\"--primary:#1A1A1A;--secondary:#C6A86A;--accent:#C0A062;--bg:#0A0F1A;--bg-alt:#111827;--surface:#1E293B;--text:#F8FAFC;--text-muted:#94A3B8;--border:rgba(255,255,255,0.08);--font-display:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--font-body:'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;--weight-normal:400;--weight-medium:500;--weight-bold:700;--weight-black:800;--radius-sm:4px;--radius-md:8px;--radius-lg:16px;--radius-xl:24px;--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 8px 24px rgba(0,0,0,0.4);--shadow-lg:0 20px 48px rgba(0,0,0,0.5);--shadow-glow:0 0 60px rgba(37,99,235,0.2);--shadow-accent-glow:0 0 40px rgba(192,160,98,0.3);background:var(--bg);\">\n  \n  <div style=\"position:absolute;inset:0;background-image:url('/output/runs/img_1775400323241/images/img_1775400323241_page_10_谢谢观看_1.jpg');background-size:cover;background-position:center center;opacity:0.74;filter:saturate(1.04) contrast(1.05);\"></div>\n  <div style=\"position:absolute;inset:0;background:radial-gradient(circle at center, rgba(9,14,22,0.20) 0%, rgba(9,14,22,0.28) 56%, rgba(9,14,22,0.46) 100%);\"></div>\n  \n  <div class=\"sc-region\" style=\"left:48%;top:12%;width:26%;height:16%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:8px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"font-size:11px;font-weight:var(--weight-bold);letter-spacing:0.14em;text-transform:uppercase;color:#C0A062;\">岚图汽车</div><div class=\"sc-block\" style=\"font-size:42px;font-weight:var(--weight-black);line-height:1.04;letter-spacing:-0.035em;color:var(--text);text-wrap:balance;\">谢谢观看</div></div>\n  </div><div class=\"sc-region\" style=\"left:42%;top:34%;width:34%;height:24%;padding:0px;overflow:hidden;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:flex-start;\"><div class=\"sc-block\" style=\"padding-left:18px;border-left:2px solid #C0A062;font-size:24px;line-height:1.42;color:#fff;text-wrap:balance;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;\">让一次发布，不止完成产品亮相，更完成品牌高度的再确认。</div></div>\n  </div><div class=\"sc-region\" style=\"left:10%;top:24%;width:24%;height:18%;padding:0px;overflow:hidden;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;\">\n    <div class=\"sc-stack\" style=\"display:flex;flex-direction:column;gap:10px;justify-content:flex-start;align-items:stretch;\">\n        <div class=\"sc-block\" style=\"padding:0 0;border-top:none;\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 01</div>\n          <div style=\"font-size:12px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">2026</div>\n        </div>\n        <div class=\"sc-block\" style=\"padding:12px 0 0 0;border-top:1px solid rgba(255,255,255,0.08);\">\n          <div style=\"font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#C0A062;margin-bottom:7px;\">Point 02</div>\n          <div style=\"font-size:12px;line-height:1.6;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;\">传递&quot;央国企高端新能源第一品牌&quot;形象，实现品牌高端市场渗透...</div>\n        </div></div>\n  </div>\n</div>"
+  ],
+  "pptxFilename": "runs/space_c3b5dce94dbb/exports/ppt_1775400992290.pptx",
+  "downloadUrl": "/api/files/download/runs/space_c3b5dce94dbb/exports/ppt_1775400992290.pptx",
+  "createdAt": "2026-04-05T14:56:40.377Z",
+  "updatedAt": "2026-04-05T14:56:40.377Z"
+}

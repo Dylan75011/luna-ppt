@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-05T10:15:38.711Z",
+  "updatedAt": "2026-04-05T15:21:56.463Z",
   "spaces": [
     {
       "id": "space_c3b5dce94dbb",
@@ -23,7 +23,7 @@
           "type": "document",
           "name": "122",
           "createdAt": "2026-03-28T15:44:28.056Z",
-          "updatedAt": "2026-04-05T10:15:38.710Z",
+          "updatedAt": "2026-04-05T14:22:17.300Z",
           "docType": "document"
         },
         {
@@ -31,8 +31,41 @@
           "type": "document",
           "name": "「跨越·共生」华为Mate70新品发布会策划方案",
           "createdAt": "2026-04-03T15:11:40.620Z",
-          "updatedAt": "2026-04-05T10:15:20.093Z",
+          "updatedAt": "2026-04-05T14:33:52.351Z",
           "docType": "document"
+        },
+        {
+          "id": "folder_d2c2c040702c",
+          "type": "folder",
+          "name": "五感共鸣·岚图山海——岚图汽车2026-",
+          "children": [
+            {
+              "id": "doc_5a6f9d2ffa6f",
+              "type": "document",
+              "name": "策划方案",
+              "createdAt": "2026-04-05T14:43:14.248Z",
+              "updatedAt": "2026-04-05T14:54:14.546Z",
+              "docType": "document"
+            },
+            {
+              "id": "doc_082e5010cb03",
+              "type": "document",
+              "name": "岚图汽车 PPT.pptx",
+              "createdAt": "2026-04-05T14:54:41.570Z",
+              "updatedAt": "2026-04-05T14:54:41.570Z",
+              "docType": "ppt"
+            }
+          ],
+          "createdAt": "2026-04-05T14:43:14.243Z",
+          "updatedAt": "2026-04-05T14:43:14.243Z"
+        },
+        {
+          "id": "doc_14a05bdb4617",
+          "type": "document",
+          "name": "岚图汽车 PPT.pptx",
+          "createdAt": "2026-04-05T14:56:40.377Z",
+          "updatedAt": "2026-04-05T14:56:40.377Z",
+          "docType": "ppt"
         }
       ],
       "indexDocId": "doc_e25fc617fdbe"
@@ -66,7 +99,7 @@
           "type": "document",
           "name": "岚图汽车区域车展运营项目方案_v2",
           "createdAt": "2026-04-05T07:44:25.918Z",
-          "updatedAt": "2026-04-05T07:51:20.738Z",
+          "updatedAt": "2026-04-05T15:21:56.458Z",
           "docType": "document"
         }
       ],

@@ -60,9 +60,10 @@ Taste 设计规则（必须落实到每页）：
 5. 色彩保持单一体系，避免紫色 AI 光效。优先深石墨、暖中性色、深蓝灰，搭配一个控制过的强调色。
 6. 文案必须来源于策划方案，但表达可提炼得更像高端发布会或展览叙事。
 7. 每页都要写清 imageStrategy：是否需要背景图、搜索方向、文字避让区域、遮罩强度。
-8. 页面布局要形成“张弛关系”：信息页之间插入 statement / editorial / image-led 页面，避免连续同构。
-9. 优先生成能落地的专业版式，不要为炫技牺牲信息密度与可读性。
-10. 文案允许提炼、缩写、重写，但必须忠于原策划方案，不要扩写空话。`;
+8. 每页都尽量补充 visualAssetPlan：这一页更适合用现场效果图、搜图背景，还是纯版式。
+9. 页面布局要形成“张弛关系”：信息页之间插入 statement / editorial / image-led 页面，避免连续同构。
+10. 优先生成能落地的专业版式，不要为炫技牺牲信息密度与可读性。
+11. 文案允许提炼、缩写、重写，但必须忠于原策划方案，不要扩写空话。`;
 
   const systemPrompt = `你是一位顶级PPT设计师，擅长将活动策划方案转化为视觉冲击力强、风格独特的PPT。
 你需要为每一页选择最合适的设计：优先输出结构化版式(composition / regions / imagePlacement / textBlocks)，其次才是布局(layout) + 风格(style) + 内容。
@@ -121,6 +122,13 @@ ${planText}
         "composition": "left-weighted",
         "reason": "为什么适合做封面"
       },
+      "visualAssetPlan": {
+        "assetType": "generated_scene",
+        "priority": "high",
+        "reason": "封面需要更强的场景想象和发布会氛围",
+        "sceneType": "main_stage",
+        "insertMode": "full_page"
+      },
       "imageStrategy": {
         "useBackground": true,
         "query": "英文搜图词，和品牌气质相关",
@@ -160,6 +168,13 @@ ${planText}
         "density": "medium",
         "composition": "sidebar",
         "reason": "目录页不抢戏，只负责建立结构"
+      },
+      "visualAssetPlan": {
+        "assetType": "none",
+        "priority": "low",
+        "reason": "目录页以结构信息为主，不需要生图",
+        "sceneType": "data",
+        "insertMode": "background"
       },
       "imageStrategy": {
         "useBackground": false,
@@ -370,9 +385,10 @@ ${planText}
 2. globalStyle 是全局风格约束，但页面结构必须形成节奏变化，不能连续 3 页使用同一个 composition
 3. 优先输出 composition / regions / imagePlacement / textBlocks。layout 只是兜底，不要把设计思考压缩成模板名
 4. imageStrategy.query 必须是可以直接用于搜图的英文短语，和该页内容相关，但偏氛围、材质、空间、光影，不要直白描述具体会议场景
-5. 如果某页信息很多，先提炼，不要把所有要点都塞进去；一页最多一个主要观点
-6. dark_tech 风格的 bg 用深色，content 背景图会叠加半透明遮罩
-7. 第一页必须是 immersive_cover，最后一页必须是 end_card，第二页必须是 toc`;
+5. visualAssetPlan 要明确回答：这页是否值得提前做活动现场效果图建议
+6. 如果某页信息很多，先提炼，不要把所有要点都塞进去；一页最多一个主要观点
+7. dark_tech 风格的 bg 用深色，content 背景图会叠加半透明遮罩
+8. 第一页必须是 immersive_cover，最后一页必须是 end_card，第二页必须是 toc`;
 
   return { systemPrompt, userPrompt };
 }

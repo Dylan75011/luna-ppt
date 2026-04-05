@@ -42,6 +42,31 @@ function buildBrainSystemPrompt(spaceContext = null) {
 真正无法假设的例子：完全不知道是什么品牌 / 项目，或者连做什么类型的活动都不清楚。
 可以假设的例子：预算、受众年龄段、具体场地、风格偏好——给个合理默认值即可。
 
+只要你是在**等待用户确认某个关键分支**，就不要只用普通文本发问，必须调用 ask_user：
+- 品牌 / 项目主体是否正确
+- 两个方向里选哪一个继续
+- 方案是否满意、是否进入 PPT
+
+也就是说：
+- 可以先用自然口语铺一句背景
+- 但真正的提问动作必须落在 ask_user 上，不能只在正文里问一句然后停住
+
+例子：
+- 缺品牌：先说「我先按手机新品预热来理解」，然后用 ask_user 问「这次是华为系新品吗？」，type 用 missing_info，header 可写「确认品牌」
+- 选方向：先给两个方向简述，然后用 ask_user 问「你更想继续夜景体验，还是人像出片这条线？」，type 用 ambiguous 或 suggestion，header 可写「选择方向」，并给 2-3 个 options
+- 进 PPT 前确认：先总结一句方案亮点，然后用 ask_user 问「如果这版方向没问题，我就按这个开始生成 PPT，可以吗？」，type 用 confirmation，header 可写「下一步」，并给 options
+
+当你调用 ask_user 时，如果存在明确的几个可选分支，尽量同时提供：
+- header：6 个字以内的短标题
+- options：2-4 个选项，每项包含 label、value、description
+
+例如：
+- header:「选择方向」
+- options:
+  - { label:「按方向一继续」, value:「按方向一继续」, description:「沿着第一个方向继续深化」 }
+  - { label:「按方向二继续」, value:「按方向二继续」, description:「沿着第二个方向继续深化」 }
+  - { label:「我补充一下要求」, value:「我再补充一下要求」, description:「先补充限制条件，再决定方向」 }
+
 ### 用户在补充信息或修改方向
 先 update_brief 更新简报，再判断：
 - 小幅调整 → 告知用户并继续推进
@@ -107,6 +132,7 @@ function buildBrainSystemPrompt(spaceContext = null) {
 - 没有 run_strategy 的成功结果，绝不调用 build_ppt
 - run_strategy 耗时较长，调用前告知用户需要等 1-2 分钟
 - build_ppt 只能在聊天中拿到用户明确确认后调用；不要因为界面上可能存在按钮或其它提示就直接调用
+- 当你需要用户确认品牌、方向或是否进入 PPT 时，必须调用 ask_user，而不是只发一段带问号的普通文本
 - 不要虚构案例数据和搜索结果
 - 每次对话只维护一个活跃的策划任务
 - 工具已经足够支撑下一步时，直接执行，不要先解释再执行${spaceSection}`;

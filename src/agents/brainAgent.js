@@ -448,8 +448,10 @@ async function runLoop(session, onEvent) {
         session.pendingToolCallId = toolCall.id;
         session.status = 'waiting_for_user';
         onEvent('clarification', {
+          header: args.header || '',
           question: args.question || '请提供更多信息',
-          type: args.type || 'missing_info'
+          type: args.type || 'missing_info',
+          options: Array.isArray(args.options) ? args.options : []
         });
         return; // 暂停，等待 resume() 被调用
       }

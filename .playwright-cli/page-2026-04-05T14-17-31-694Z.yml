@@ -1,0 +1,66 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: Luna
+        - generic [ref=e9]: 活动策划助手
+      - button [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+    - navigation [ref=e14]:
+      - button "策划空间" [ref=e388] [cursor=pointer]:
+        - img [ref=e17]
+        - generic [ref=e21]: 策划空间
+      - button "智能助手" [ref=e389] [cursor=pointer]:
+        - img [ref=e24]
+        - generic [ref=e28]: 智能助手
+      - button "模版中心" [ref=e390] [cursor=pointer]:
+        - img [ref=e31]
+        - generic [ref=e35]: 模版中心
+      - button "配置中心" [ref=e391] [cursor=pointer]:
+        - img [ref=e38]
+        - generic [ref=e42]: 配置中心
+  - generic [ref=e392]:
+    - complementary [ref=e393]:
+      - generic [ref=e394]:
+        - generic [ref=e396]:
+          - generic [ref=e397]: 当前空间
+          - generic "华为" [ref=e398] [cursor=pointer]:
+            - textbox "选择工作空间"
+            - generic [ref=e399]: 华为
+            - img [ref=e402]
+        - button "+" [ref=e404] [cursor=pointer]
+      - generic [ref=e405]:
+        - generic [ref=e406]: 历史对话
+        - generic [ref=e408]:
+          - img [ref=e410]
+          - textbox "搜索历史对话" [ref=e412]
+        - generic [ref=e414]:
+          - generic [ref=e415]: 今天
+          - generic [ref=e416]:
+            - button "我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、 2 条消息 · 1 分钟前 •••" [ref=e461] [cursor=pointer]:
+              - generic [ref=e418]:
+                - generic [ref=e419]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、
+                - generic [ref=e420]: 2 条消息 · 1 分钟前
+              - generic [ref=e421]: •••
+            - button "我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、 3 条消息 · 16 分钟前 •••" [ref=e460] [cursor=pointer]:
+              - generic [ref=e423]:
+                - generic [ref=e424]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、
+                - generic [ref=e425]: 3 条消息 · 16 分钟前
+              - generic [ref=e426]: •••
+            - button "华为新车发布会 21 条消息 · 4 小时前 •••" [ref=e427] [cursor=pointer]:
+              - generic [ref=e428]:
+                - generic [ref=e429]: 华为新车发布会
+                - generic [ref=e430]: 21 条消息 · 4 小时前
+              - generic [ref=e431]: •••
+            - button "可以开始生成 PPT 5 小时前 •••" [ref=e432] [cursor=pointer]:
+              - generic [ref=e433]:
+                - generic [ref=e434]: 可以开始生成 PPT
+                - generic [ref=e435]: 5 小时前
+              - generic [ref=e436]: •••
+    - button "‹" [ref=e437] [cursor=pointer]
+    - generic [ref=e438]:
+      - generic [ref=e464]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、出片一点。先别出完整方案，先帮我想两个不同方向。
+      - generic [ref=e442]:
+        - textbox "描述需求、上传策划方案文档，或输入 @ 引用空间文档..." [active] [ref=e444]
+        - button [ref=e470] [cursor=pointer]:
+          - img [ref=e471]

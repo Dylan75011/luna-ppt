@@ -1,0 +1,55 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e335]
+      - button [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+    - navigation [ref=e14]:
+      - button [ref=e339] [cursor=pointer]:
+        - img [ref=e17]
+      - button [ref=e340] [cursor=pointer]:
+        - img [ref=e24]
+      - button [ref=e341] [cursor=pointer]:
+        - img [ref=e31]
+      - button [ref=e342] [cursor=pointer]:
+        - img [ref=e38]
+  - generic [ref=e44]:
+    - complementary [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 当前空间
+          - generic "华为" [ref=e50] [cursor=pointer]:
+            - textbox "选择工作空间"
+            - generic [ref=e51]: 华为
+            - img [ref=e54]
+        - button "+" [ref=e56] [cursor=pointer]
+      - generic [ref=e57]:
+        - generic [ref=e58]: 历史对话
+        - generic [ref=e60]:
+          - img [ref=e62]
+          - textbox "搜索历史对话" [ref=e64]
+        - generic [ref=e66]:
+          - generic [ref=e67]: 今天
+          - generic [ref=e68]:
+            - button "我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、 2 条消息 · 1 分钟前 •••" [ref=e348] [cursor=pointer]:
+              - generic [ref=e344]:
+                - generic [ref=e345]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、
+                - generic [ref=e346]: 2 条消息 · 1 分钟前
+              - generic [ref=e347]: •••
+            - button "华为新车发布会 21 条消息 · 4 小时前 •••" [ref=e69] [cursor=pointer]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: 华为新车发布会
+                - generic [ref=e72]: 21 条消息 · 4 小时前
+              - generic [ref=e73]: •••
+            - button "可以开始生成 PPT 4 小时前 •••" [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]:
+                - generic [ref=e76]: 可以开始生成 PPT
+                - generic [ref=e77]: 4 小时前
+              - generic [ref=e78]: •••
+    - button "‹" [ref=e79] [cursor=pointer]
+    - generic [ref=e80]:
+      - generic [ref=e351]: 我们这边想做一个手机新品线下预热活动，预算别太重，风格年轻一点、出片一点。先别出完整方案，先帮我想两个不同方向。
+      - generic [ref=e249]:
+        - textbox "描述需求、上传策划方案文档，或输入 @ 引用空间文档..." [active] [ref=e251]
+        - button [ref=e357] [cursor=pointer]:
+          - img [ref=e358]

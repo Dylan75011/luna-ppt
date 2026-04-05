@@ -3,7 +3,14 @@ const router  = express.Router();
 const multer  = require('multer');
 const wm      = require('../services/workspaceManager');
 const conversationStore = require('../services/conversationStore');
-const { docxToTiptapJson } = require('../services/docxPreviewConverter');
+// lazy require: docx-preview is browser-only, only load when actually needed
+let _docxToTiptapJson = null;
+function getDocxConverter() {
+  if (!_docxToTiptapJson) {
+    _docxToTiptapJson = require('../services/docxPreviewConverter').docxToTiptapJson;
+  }
+  return _docxToTiptapJson;
+}
 
 // multer：内存模式，不落盘（Word 文件通常 < 10MB）
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
@@ -169,12 +176,12 @@ router.post('/:id/import-word', upload.single('file'), async (req, res) => {
       return res.status(400).json({ success: false, message: '仅支持 .docx 格式' });
     }
 
-    const tiptapJson = await docxToTiptapJson(req.file.buffer);
+    const tiptapJson = await getDocxConverter()(req.file.buffer);
 
     // 如果是真实节点 ID，直接保存内容
     const { id } = req.params;
     if (id !== '_new') {
-      wm.saveContent(id, tiptapJson, 'tiptap');
+      wm.saveContent(id, tiptapJson, 'tiptap-json');
     }
 
     res.json({ success: true, content: tiptapJson });

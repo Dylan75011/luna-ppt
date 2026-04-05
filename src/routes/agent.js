@@ -7,7 +7,14 @@ const multer = require('multer');
 const agentSession = require('../services/agentSession');
 const brainAgent   = require('../agents/brainAgent');
 const { executeTool } = require('../services/toolRegistry');
-const { parseUploadedDocuments } = require('../services/documentParser');
+// lazy require: pdf-parse is problematic in Node.js without full DOM
+let _parseUploadedDocuments = null;
+function getDocumentParser() {
+  if (!_parseUploadedDocuments) {
+    _parseUploadedDocuments = require('../services/documentParser').parseUploadedDocuments;
+  }
+  return _parseUploadedDocuments;
+}
 const wm = require('../services/workspaceManager');
 
 // 从工作空间读取被引用文档的内容
@@ -110,6 +117,7 @@ function restoreSessionFromSnapshot(session, snapshot = {}) {
   session.docHtml = typeof snapshot.docHtml === 'string' ? snapshot.docHtml : '';
   session.brief = snapshot.brief || null;
   session.planItems = Array.isArray(snapshot.planItems) ? snapshot.planItems : [];
+  session.researchStore = Array.isArray(snapshot.researchStore) ? snapshot.researchStore : [];
   session.attachments = Array.isArray(snapshot.attachments)
     ? snapshot.attachments.map((att) => ({
         id: att.id,
@@ -180,7 +188,7 @@ router.post('/start', upload.array('images', 5), async (req, res) => {
     const apiKeys = safeJsonParse(req.body.apiKeys, {});
     const restoreSession = safeJsonParse(req.body.restoreSession, null);
     const attachments = await persistUploadedImages(req.files || []);
-    const documents = await parseUploadedDocuments(req.files || []);
+    const documents = await getDocumentParser()(req.files || []);
     const workspaceRefIds = safeJsonParse(req.body.workspaceRefs, []);
     const workspaceDocs = resolveWorkspaceDocs(workspaceRefIds);
 
@@ -291,7 +299,7 @@ router.post('/:sessionId/reply', upload.array('images', 5), async (req, res) => 
     const { reply } = req.body;
     const apiKeys = safeJsonParse(req.body.apiKeys, {});
     const attachments = await persistUploadedImages(req.files || []);
-    const documents = await parseUploadedDocuments(req.files || []);
+    const documents = await getDocumentParser()(req.files || []);
     const workspaceRefIds = safeJsonParse(req.body.workspaceRefs, []);
     const workspaceDocs = resolveWorkspaceDocs(workspaceRefIds);
 

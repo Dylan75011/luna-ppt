@@ -1,0 +1,244 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: Luna
+        - generic [ref=e9]: 活动策划助手
+      - button [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+    - navigation [ref=e14]:
+      - button "策划空间" [ref=e15] [cursor=pointer]:
+        - img [ref=e17]
+        - generic [ref=e21]: 策划空间
+      - button "智能助手" [ref=e22] [cursor=pointer]:
+        - img [ref=e24]
+        - generic [ref=e28]: 智能助手
+      - button "模版中心" [ref=e29] [cursor=pointer]:
+        - img [ref=e31]
+        - generic [ref=e35]: 模版中心
+      - button "配置中心" [ref=e36] [cursor=pointer]:
+        - img [ref=e38]
+        - generic [ref=e42]: 配置中心
+  - generic [ref=e44]:
+    - complementary [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 当前空间
+          - generic "华为" [ref=e50] [cursor=pointer]:
+            - textbox "选择工作空间"
+            - generic [ref=e51]: 华为
+            - img [ref=e54]
+        - button "+" [ref=e56] [cursor=pointer]
+      - generic [ref=e57]:
+        - generic [ref=e58]: 历史对话
+        - generic [ref=e60]:
+          - img [ref=e62]
+          - textbox "搜索历史对话" [ref=e64]
+        - generic [ref=e66]:
+          - generic [ref=e67]: 今天
+          - generic [ref=e68]:
+            - button "华为新车发布会 21 条消息 · 4 小时前 •••" [ref=e69] [cursor=pointer]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: 华为新车发布会
+                - generic [ref=e72]: 21 条消息 · 4 小时前
+              - generic [ref=e73]: •••
+            - button "可以开始生成 PPT 4 小时前 •••" [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]:
+                - generic [ref=e76]: 可以开始生成 PPT
+                - generic [ref=e77]: 4 小时前
+              - generic [ref=e78]: •••
+    - button "‹" [ref=e79] [cursor=pointer]
+    - generic [ref=e80]:
+      - generic [ref=e81]:
+        - generic [ref=e84]: 你好
+        - paragraph [ref=e87]: 你好！有什么活动策划的需求吗？可以说说品牌或项目，我来帮你规划~
+        - paragraph [ref=e90]: 这一轮信息我已经整理完了，你可以继续补充方向，我再往下推进。
+        - generic [ref=e93]: 你是谁
+        - generic [ref=e95]:
+          - paragraph [ref=e96]: 我是 OpenClaw 的智能活动策划顾问，可以帮你：
+          - list [ref=e97]:
+            - listitem [ref=e98]: 制定完整的活动策划方案（发布会、展会、招商会等）
+            - listitem [ref=e99]: 搜索行业案例和竞品动态
+            - listitem [ref=e100]: 生成 PPT 方案文件
+          - paragraph [ref=e101]: 有活动策划需求的话，直接告诉我是哪个品牌、做什么类型的活动，我就能开始工作~
+        - paragraph [ref=e104]: 这一轮信息我已经整理完了，你可以继续补充方向，我再往下推进。
+        - generic [ref=e107]: 做一个华为新车活动策划方案
+        - generic [ref=e109]:
+          - paragraph [ref=e110]: 好的，华为新车发布活动策划马上开始！
+          - paragraph [ref=e111]: 先整理信息并搜索行业动态。
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - generic [ref=e115]: 🔧
+            - generic [ref=e117]: 整理任务简报
+          - generic [ref=e118]:
+            - generic [ref=e119]: 已整理任务简报：华为
+            - button "查看详情" [ref=e120] [cursor=pointer]
+        - generic [ref=e122] [cursor=pointer]:
+          - generic [ref=e123]:
+            - img [ref=e125]
+            - generic [ref=e127]:
+              - generic [ref=e128]: 任务理解
+              - generic [ref=e129]: 任务理解：华为
+          - generic [ref=e130]: 发布华为新款智能汽车，展示技术实力，提升品牌影响力
+          - generic [ref=e131]:
+            - generic [ref=e132]: product_launch
+            - generic [ref=e133]: 500-1000人规模
+            - generic [ref=e134]: 1000-2000万
+          - generic [ref=e136]: 在右侧查看
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - generic [ref=e140]: 🔧
+            - generic [ref=e142]: 更新计划（4 项）
+          - generic [ref=e143]:
+            - generic [ref=e144]: 已更新 4 项计划
+            - button "查看详情" [ref=e145] [cursor=pointer]
+        - generic [ref=e147]:
+          - generic [ref=e148]:
+            - generic [ref=e149]: 🔍
+            - generic [ref=e150]:
+              - generic [ref=e151]: 搜索：华为新车发布会 2024 问界
+              - generic [ref=e152]: 找到 5 条结果（minimax）
+          - generic [ref=e153]:
+            - generic [ref=e154]: 找到 5 条搜索结果（minimax）
+            - button "查看详情" [ref=e155] [cursor=pointer]
+        - generic [ref=e157] [cursor=pointer]:
+          - generic [ref=e158]:
+            - img [ref=e160]
+            - generic [ref=e162]:
+              - generic [ref=e163]: 搜索研究
+              - generic [ref=e164]: 搜索研究：华为新车发布会 2024 问界
+          - generic [ref=e165]: 华为将发布最新一代高阶智能辅助驾驶系统ADS 4!问界M9、M8全系升级；问界M9 2024款超燃升级,华为ADS小蓝灯服务等你体验；B华为春季发布会连发8款新车!重构25-40万市场格局
+          - generic [ref=e167]: 在右侧查看
+        - generic [ref=e169]:
+          - generic [ref=e170]:
+            - generic [ref=e171]: 🔍
+            - generic [ref=e172]:
+              - generic [ref=e173]: 搜索：智能汽车发布会创意形式 活动策划
+              - generic [ref=e174]: 找到 5 条结果（minimax）
+          - generic [ref=e175]:
+            - generic [ref=e176]: 找到 5 条搜索结果（minimax）
+            - button "查看详情" [ref=e177] [cursor=pointer]
+        - generic [ref=e179] [cursor=pointer]:
+          - generic [ref=e180]:
+            - img [ref=e182]
+            - generic [ref=e184]:
+              - generic [ref=e185]: 搜索研究
+              - generic [ref=e186]: 搜索研究：智能汽车发布会创意形式 活动策划
+          - generic [ref=e187]: 如果公司产品即将上市,您认为应该如何策划一场成功的发布会?；活动策划:2021年如何策划汽车新品发布会活动? - 知乎；新车上市发布会活动策划方案.doc_文档猫
+          - generic [ref=e189]: 在右侧查看
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - generic [ref=e193]: 🔍
+            - generic [ref=e194]:
+              - generic [ref=e195]: 搜索：蔚来小鹏理想汽车发布会案例 创意活动
+              - generic [ref=e196]: 找到 5 条结果（minimax）
+          - generic [ref=e197]:
+            - generic [ref=e198]: 找到 5 条搜索结果（minimax）
+            - button "查看详情" [ref=e199] [cursor=pointer]
+        - generic [ref=e201] [cursor=pointer]:
+          - generic [ref=e202]:
+            - img [ref=e204]
+            - generic [ref=e206]:
+              - generic [ref=e207]: 搜索研究
+              - generic [ref=e208]: 搜索研究：蔚来小鹏理想汽车发布会案例 创意活动
+          - generic [ref=e209]: 2021理想汽车春季发布会；蔚来小鹏理想三大汽车品牌创始人来到su7发布会-参考财经网；营销策划 -2024理想新能源汽车海外上市发布品鉴会策划方案.pptx-原创力文档
+          - generic [ref=e211]: 在右侧查看
+        - paragraph [ref=e214]: 搜索完成，获取到了华为最新发布会动态和行业案例。现在开始制定策划方案~
+        - generic [ref=e216]:
+          - generic [ref=e217]:
+            - generic [ref=e218]: 🔧
+            - generic [ref=e220]: 更新计划（4 项）
+          - generic [ref=e221]:
+            - generic [ref=e222]: 已更新 4 项计划
+            - button "查看详情" [ref=e223] [cursor=pointer]
+        - generic [ref=e226]:
+          - generic [ref=e227]: 📋
+          - generic [ref=e228]:
+            - generic [ref=e229]: 制定策划方案：华为
+            - generic [ref=e230]: 正在整理策划文档...
+        - generic [ref=e232] [cursor=pointer]:
+          - generic [ref=e233]:
+            - img [ref=e235]
+            - generic [ref=e237]:
+              - generic [ref=e238]: 方案草稿
+              - generic [ref=e239]: 方案草稿：「智启·万象」华为智能汽车新品发布会
+          - generic [ref=e240]: 华为智能汽车的最大挑战不是产品力不足，而是外界对华为'能否真正定义汽车智能化标准'的认知鸿沟。本次活动的核心命题是：通过一场'技术即信仰'的沉浸式发布，让受众从'观看者'变成'见证者'，用不可辩驳的技术震撼完成品牌心智的重新锚定。
+          - generic [ref=e241]:
+            - generic [ref=e242]: 全球首次在发布会场景中实现'真车全程无接管城市智驾'演示，挑战真实复杂路况而非预设路线
+            - generic [ref=e243]: 首创'技术溶解'叙事结构——将ADS 4技术能力拆解为3个真实用户痛点场景，让技术自己'说话'
+            - generic [ref=e244]: 华为鸿蒙智行生态首次以'车是超级终端'理念完整呈现，手机-车-家居的无缝流转成为主角而非配角
+          - generic [ref=e246]: 在右侧查看
+      - generic [ref=e249]:
+        - textbox "描述需求、上传策划方案文档，或输入 @ 引用空间文档..." [ref=e251]
+        - generic [ref=e252]:
+          - button "引用空间文档" [ref=e254] [cursor=pointer]:
+            - img [ref=e255]
+          - button [ref=e258] [cursor=pointer]:
+            - img [ref=e259]
+          - button [disabled] [ref=e261]:
+            - img [ref=e262]
+    - button "›" [ref=e266] [cursor=pointer]
+    - generic [ref=e268]:
+      - generic [ref=e269]:
+        - generic [ref=e270]:
+          - img [ref=e271]
+          - generic [ref=e273]: 方案草稿：「智启·万象」华为智能汽车新品发布会
+        - button "保存" [ref=e275] [cursor=pointer]
+      - generic [ref=e276]:
+        - generic [ref=e277]:
+          - generic [ref=e278]: 「智启·万象」华为智能汽车新品发布会
+          - generic [ref=e279]: 华为智能汽车的最大挑战不是产品力不足，而是外界对华为'能否真正定义汽车智能化标准'的认知鸿沟。本次活动的核心命题是：通过一场'技术即信仰'的沉浸式发布，让受众从'观看者'变成'见证者'，用不可辩驳的技术震撼完成品牌心智的重新锚定。
+        - generic [ref=e280]:
+          - generic [ref=e281]: 活动亮点
+          - generic [ref=e282]:
+            - generic [ref=e283]: "1"
+            - generic [ref=e284]: 全球首次在发布会场景中实现'真车全程无接管城市智驾'演示，挑战真实复杂路况而非预设路线
+          - generic [ref=e285]:
+            - generic [ref=e286]: "2"
+            - generic [ref=e287]: 首创'技术溶解'叙事结构——将ADS 4技术能力拆解为3个真实用户痛点场景，让技术自己'说话'
+          - generic [ref=e288]:
+            - generic [ref=e289]: "3"
+            - generic [ref=e290]: 华为鸿蒙智行生态首次以'车是超级终端'理念完整呈现，手机-车-家居的无缝流转成为主角而非配角
+          - generic [ref=e291]:
+            - generic [ref=e292]: "4"
+            - generic [ref=e293]: 发布场地本身成为技术道具：展馆穹顶定制全息投影，实时呈现车辆感知数据流，构建'被科技包裹'的沉浸场域
+          - generic [ref=e294]:
+            - generic [ref=e295]: "5"
+            - generic [ref=e296]: 刘亦菲等明星非代言站台，而是作为'真实用户'分享用车体验，强化'高端人群选择'的社会认同
+        - generic [ref=e297]:
+          - generic [ref=e298]: 方案结构
+          - generic [ref=e299]:
+            - generic [ref=e300]: "01"
+            - generic [ref=e301]:
+              - generic [ref=e302]: 一、命题重塑：华为汽车发布会应该'反油腻'
+              - generic [ref=e303]: 传统汽车发布会三件套（领导致辞、车型亮相、价格公布）正在失效，华为需要建立新的发布范式 · 高端受众对'被教育'天然抵触，但愿意'被说服'——关键是提供不可辩驳的体验证据 · 华为的品牌资产是技术可信度，活动设计的每一步都要强化而非消耗这个资产
+          - generic [ref=e304]:
+            - generic [ref=e305]: "02"
+            - generic [ref=e306]:
+              - generic [ref=e307]: 二、叙事结构：从'产品发布'到'技术信仰的具象化'
+              - generic [ref=e308]: 打破'品牌开场-产品讲解-价格公布'的线性结构，采用'技术震撼→生态印证→情感收束'的三幕式 · 第一幕：智能驾驶是主角，用真实路况演示建立技术公信力；第二幕：鸿蒙生态是底气，用场景串联证明这不是孤立的单品；第三幕：人是终极尺度，用真实用户故事完成情感闭环
+          - generic [ref=e309]:
+            - generic [ref=e310]: "03"
+            - generic [ref=e311]:
+              - generic [ref=e312]: 三、空间设计：展馆成为技术的延伸而非背景板
+              - generic [ref=e313]: 展馆不是活动发生的'容器'，而是技术叙事的'道具'——每一处空间设计都要服务于'科技震撼'的体验目标 · 主舞台采用360°环幕+地面互动投影，车辆行驶时产生的感知数据流实时投射在观众脚下 · 功能区域设计遵循'从已知到未知'的认知路径：先让受众在'信任区'建立基础认知，再引导进入'震撼区'体验技术高点
+          - generic [ref=e314]:
+            - generic [ref=e315]: "04"
+            - generic [ref=e316]:
+              - generic [ref=e317]: 四、技术演示：真车实测是最大的信任状
+              - generic [ref=e318]: 不做预录视频，不做预设路线——这是华为对自己技术最大的自信宣言 · 演示场景选择体现策略：既有'炫技级'的复杂路况（鬼探头、环岛、拥堵加塞），也有'日常级'的停车召唤、车位到车位 · 技术演示与演讲节奏严格配合：演示开始时全场灯光配合暗下来，演示结束时用光效爆发完成情绪高点
+          - generic [ref=e319]:
+            - generic [ref=e320]: "05"
+            - generic [ref=e321]:
+              - generic [ref=e322]: 五、生态叙事：让'车是超级终端'从概念变成体验
+              - generic [ref=e323]: 鸿蒙智行生态不是'功能叠加'，而是'体验重构'——发布会要展示的不是'有哪些功能'，而是'体验发生了什么质变' · 用'一个清晨'的叙事串联手机-车-家居：用户起床时车辆已预热、行驶中会议无缝切换、到家后音乐自动流转到音响 · 生态展示要克制：只选3个'华为独有'的场景，避免贪多求全导致的注意力分散
+          - generic [ref=e324]:
+            - generic [ref=e325]: "06"
+            - generic [ref=e326]:
+              - generic [ref=e327]: 六、传播策略：线下500人，线上5000万
+              - generic [ref=e328]: 线下活动的核心价值是'不可替代的仪式感'和'高质量的圈层渗透'，而非人头数 · 线上直播的目标不是'让更多人看到'，而是'让关键人群看到并行动'——媒体、KOL、潜在购买者 · 传播节奏遵循'悬念-释放-引爆'：发布会前预埋技术悬念，发布会中实时制造金句和名场面，发布会后引导深度解读
+          - generic [ref=e329]:
+            - generic [ref=e330]: "07"
+            - generic [ref=e331]:
+              - generic [ref=e332]: 七、风险预案：技术发布会最怕的不是'翻车'是'冷场'
+              - generic [ref=e333]: 最大的风险不是技术演示失败（可以切换备份），而是现场情绪节奏失控——观众注意力流失后难以拉回 · 演示环节必须有'Plan B'甚至'Plan C'，但呈现上要做到'天衣无缝'，不能让受众感知到备用方案的存在 · 嘉宾演讲要控制时长，避免'超长待机'导致受众疲劳，理想节奏是'每15分钟有一个情绪高点'

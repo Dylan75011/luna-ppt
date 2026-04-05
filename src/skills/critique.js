@@ -17,7 +17,7 @@ async function critique({ plan, round, userInput }, apiKeys) {
     {
       model: 'deepseek-reasoner',
       runtimeKey: apiKeys.deepseekApiKey,
-      maxTokens: 4096,
+      maxTokens: 2048,
       temperature: 0.5,
       name: 'critique'
     }

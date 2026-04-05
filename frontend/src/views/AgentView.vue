@@ -174,7 +174,10 @@
             <template v-else-if="msg.kind === 'clarification'">
               <div class="clarification-card">
                 <div class="clarification-icon">💬</div>
-                <div class="clarification-question">{{ msg.question }}</div>
+                <div class="clarification-copy">
+                  <div v-if="msg.header" class="clarification-header">{{ msg.header }}</div>
+                  <div class="clarification-question">{{ msg.question }}</div>
+                </div>
               </div>
             </template>
 
@@ -200,6 +203,13 @@
               </div>
             </template>
 
+            <template v-else-if="msg.kind === 'task-log'">
+              <div class="task-log">
+                <span class="task-log-time">{{ msg.time || formatLogTime(msg.timestamp || Date.now()) }}</span>
+                <span class="task-log-text">{{ msg.text }}</span>
+              </div>
+            </template>
+
             <!-- 普通AI消息 -->
             <template v-else>
               <div class="ai-message-card" v-html="msg.html" />
@@ -214,7 +224,9 @@
         <div class="input-card-outer">
           <div v-if="quickReplyOptions.length" class="quick-reply-bar">
             <div class="quick-reply-label">{{ quickReplyLabel }}</div>
-            <div class="quick-reply-list" role="listbox" aria-label="下一步选择">
+            <div v-if="quickReplyQuestion" class="quick-reply-question">{{ quickReplyQuestion }}</div>
+            <div class="quick-reply-helper">选一项继续，或直接在下方输入你自己的要求。</div>
+            <div class="quick-reply-list" role="listbox" :aria-label="quickReplyLabel || '下一步选择'">
               <button
                 v-for="item in quickReplyOptions"
                 :key="item.label"
@@ -430,7 +442,7 @@
             :content="docContent"
             :title="docTitle || displayedArtifact?.title || '策划方案'"
             :spaces="spaces"
-            :loading="isRunning"
+            :loading="isRunning || isDocStreaming"
           />
         </div>
       </template>
@@ -546,18 +558,102 @@
 
             <!-- ppt_outline -->
             <template v-else-if="displayedArtifact.artifactType === 'ppt_outline'">
-              <div class="pane-section">
-                <div class="pane-plan-title">{{ displayedArtifact.payload?.title || 'PPT 大纲' }}</div>
-                <div class="pane-text">共 {{ displayedArtifact.payload?.total || 0 }} 页</div>
-              </div>
-              <div v-if="displayedArtifact.payload?.pages?.length" class="pane-section">
-                <div class="pane-label">页面结构</div>
-                <div v-for="(p, i) in displayedArtifact.payload.pages" :key="i" class="pane-page-item">
-                  <span class="pane-page-num">{{ i + 1 }}</span>
-                  <span class="pane-page-layout">{{ pptLayoutLabel(p.layout || p.type) }}</span>
-                  <span class="pane-page-title">{{ pptPageTitleLabel(p, i) }}</span>
+              <template v-if="isBuilding || resultSlides.length === 0">
+                <div class="ppt-build-board">
+                  <div class="ppt-build-hero">
+                    <div class="ppt-build-hero-copy">
+                      <div class="ppt-build-eyebrow">PPT 正在生成</div>
+                      <div class="ppt-build-title">{{ displayedArtifact.payload?.title || 'PPT 大纲已确认' }}</div>
+                      <div class="ppt-build-desc">
+                        页面不会等全部完成后再一起出现。
+                        现在会先展示整套页面骨架，再随着渲染完成逐页点亮。
+                      </div>
+                    </div>
+                    <div class="ppt-build-metrics">
+                      <div class="ppt-build-metric">
+                        <span>已完成</span>
+                        <strong>{{ resultSlides.length }} / {{ pptBuildPageCount }}</strong>
+                      </div>
+                      <div class="ppt-build-metric">
+                        <span>当前进度</span>
+                        <strong>{{ pptBuildProgress }}%</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ppt-build-progress">
+                    <div class="ppt-build-progress-track">
+                      <div class="ppt-build-progress-fill" :style="{ width: `${pptBuildProgress}%` }" />
+                    </div>
+                    <div class="ppt-build-progress-text">
+                      <template v-if="currentBuildingCard">
+                        正在生成第 {{ currentBuildingCard.index + 1 }} 页：{{ currentBuildingCard.title }}
+                      </template>
+                      <template v-else>
+                        正在准备页面渲染...
+                      </template>
+                    </div>
+                  </div>
+
+                  <div v-if="currentBuildingCard" class="ppt-build-stage">
+                    <div class="ppt-build-stage-kicker">当前页面</div>
+                    <div class="ppt-build-stage-title">{{ currentBuildingCard.title }}</div>
+                    <div class="ppt-build-stage-meta">{{ currentBuildingCard.layout }}</div>
+                    <div class="ppt-build-stage-shell">
+                      <div class="ppt-build-stage-bar" />
+                      <div class="ppt-build-stage-line short" />
+                      <div class="ppt-build-stage-line" />
+                      <div class="ppt-build-stage-grid">
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ppt-build-grid">
+                    <div
+                      v-for="card in pptBuildCards"
+                      :key="card.index"
+                      class="ppt-build-card"
+                      :class="{
+                        built: card.built,
+                        active: card.active,
+                        pending: card.pending
+                      }"
+                    >
+                      <div class="ppt-build-card-head">
+                        <span class="ppt-build-card-num">{{ card.index + 1 }}</span>
+                        <span class="ppt-build-card-status">
+                          {{ card.built ? '已完成' : (card.active ? '生成中' : '排队中') }}
+                        </span>
+                      </div>
+                      <div class="ppt-build-card-layout">{{ card.layout }}</div>
+                      <div class="ppt-build-card-title">{{ card.title }}</div>
+                      <div class="ppt-build-card-shell">
+                        <div class="ppt-build-card-line short" />
+                        <div class="ppt-build-card-line" />
+                        <div class="ppt-build-card-line" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </template>
+
+              <template v-else>
+                <div class="pane-section">
+                  <div class="pane-plan-title">{{ displayedArtifact.payload?.title || 'PPT 大纲' }}</div>
+                  <div class="pane-text">共 {{ displayedArtifact.payload?.total || 0 }} 页</div>
+                </div>
+                <div v-if="displayedArtifact.payload?.pages?.length" class="pane-section">
+                  <div class="pane-label">页面结构</div>
+                  <div v-for="(p, i) in displayedArtifact.payload.pages" :key="i" class="pane-page-item">
+                    <span class="pane-page-num">{{ i + 1 }}</span>
+                    <span class="pane-page-layout">{{ pptLayoutLabel(p.layout || p.type) }}</span>
+                    <span class="pane-page-title">{{ pptPageTitleLabel(p, i) }}</span>
+                  </div>
+                </div>
+              </template>
             </template>
 
             <!-- fallback -->
@@ -746,6 +842,7 @@ const conversations = ref([])
 const activeConversationId = ref('')
 const lastBoundConversationId = ref('')
 const quickReplyLabel = ref('你可以直接这样回复')
+const quickReplyQuestion = ref('')
 const quickReplyOptions = ref([])
 const conversationSearch = ref('')
 const conversationSidebarCollapsed = ref(loadConversationSidebarCollapsed())
@@ -756,8 +853,48 @@ function createMessageId(prefix = 'msg') {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`
 }
 
-function setQuickReplies(label = '', options = []) {
+function defaultClarificationOptions(type = 'missing_info') {
+  if (type === 'confirmation') {
+    return [
+      {
+        label: '可以开始生成 PPT',
+        value: '可以开始生成 PPT',
+        description: '按当前确认过的方案继续往下生成汇报稿。'
+      },
+      {
+        label: '继续优化方案',
+        value: '先别生成 PPT，继续优化方案',
+        description: '保留当前方向，但继续调整方案细节。'
+      }
+    ]
+  }
+
+  if (type === 'suggestion' || type === 'ambiguous') {
+    return [
+      {
+        label: '按方向一继续',
+        value: '按方向一继续',
+        description: '沿着第一个方向继续深化。'
+      },
+      {
+        label: '按方向二继续',
+        value: '按方向二继续',
+        description: '沿着第二个方向继续深化。'
+      },
+      {
+        label: '我补充一下要求',
+        value: '我再补充一下要求',
+        description: '先补充限制条件，再决定方向。'
+      }
+    ]
+  }
+
+  return []
+}
+
+function setQuickReplies(label = '', options = [], question = '') {
   quickReplyLabel.value = label || '你可以直接这样回复'
+  quickReplyQuestion.value = question || ''
   quickReplyOptions.value = options
     .filter(item => item && item.label && item.value)
     .map(item => ({
@@ -769,7 +906,36 @@ function setQuickReplies(label = '', options = []) {
 }
 
 function clearQuickReplies() {
+  quickReplyLabel.value = '你可以直接这样回复'
+  quickReplyQuestion.value = ''
   quickReplyOptions.value = []
+}
+
+function maybeSetQuickRepliesFromAiText(text = '') {
+  if (quickReplyOptions.value.length || waitingForClarification.value) return
+
+  const source = String(text || '').trim()
+  if (!source) return
+
+  const normalized = source
+    .replace(/\s+/g, '')
+    .replace(/[“”"'`]/g, '')
+
+  const mentionsTwoDirections = /方向一[\s\S]{0,800}方向二/.test(source)
+  const asksToChooseDirection =
+    /你更想|你更倾向于|你倾向于|更偏向|选哪个|选哪一个|往哪个感觉靠|按哪个方向|混搭也行/.test(source)
+
+  if (mentionsTwoDirections && asksToChooseDirection) {
+    setQuickReplies('选择方向', defaultClarificationOptions('ambiguous'), source)
+    return
+  }
+
+  const asksToStartPpt =
+    /开始生成PPT|生成PPT可以吗|按这个开始生成PPT|是否按这版生成PPT|如果这版.*开始生成PPT/.test(normalized)
+
+  if (asksToStartPpt) {
+    setQuickReplies('下一步', defaultClarificationOptions('confirmation'), source)
+  }
 }
 
 async function sendQuickReply(item) {
@@ -1246,6 +1412,9 @@ const buildTotal    = ref(0)
 // 文档确认状态
 const docContent    = ref('')
 const docTitle      = ref('')
+const docStreamProgress = ref(0)
+const isDocStreaming = ref(false)
+const docStreamPhase = ref('draft')
 // SlideViewer 引用（用于调用 appendSlide）
 const slideViewerRef = ref(null)
 // 编辑器模式
@@ -1381,12 +1550,54 @@ const currentPreviewHint = computed(() => {
     if (wsState.value === 'document' && docContent.value) {
       return '策划文档已经生成。是否进入 PPT 会在对话里确认；如果还想优化方案，也可以直接继续聊。'
     }
+    if (isDocStreaming.value) {
+      return docStreamPhase.value === 'draft'
+        ? `正在搭建策划文档初稿，章节结构已开始出现（${docStreamProgress.value}%）。`
+        : `正在润色策划文档，章节内容会继续被更完整的版本替换（${docStreamProgress.value}%）。`
+    }
     if (isBuilding.value) return '正在把方案转换成 PPT 页面，新的页面会在这里逐张出现。'
     if (brainPlanItems.value.some(item => item.status === 'in_progress')) {
       return '系统正在按计划推进任务，会把任务理解、搜索研究和方案草稿同步展示在这里。'
     }
   }
   return '系统正在准备可预览的中间产出。'
+})
+const pptBuildPayload = computed(() => {
+  if (displayedArtifact.value?.artifactType === 'ppt_outline') return displayedArtifact.value.payload || {}
+  return latestPptOutline.value?.payload || {}
+})
+const pptBuildPageCount = computed(() => {
+  const payload = pptBuildPayload.value || {}
+  return Number(payload.total || buildTotal.value || (Array.isArray(payload.pages) ? payload.pages.length : 0) || resultSlides.value.length || 0)
+})
+const pptBuildProgress = computed(() => {
+  const total = pptBuildPageCount.value
+  if (!total) return 0
+  return Math.max(0, Math.min(100, Math.round((resultSlides.value.length / total) * 100)))
+})
+const pptBuildCards = computed(() => {
+  const payload = pptBuildPayload.value || {}
+  const pages = Array.isArray(payload.pages) ? payload.pages : []
+  const total = pptBuildPageCount.value
+  const cards = []
+  for (let i = 0; i < total; i += 1) {
+    const page = pages[i] || {}
+    const built = i < resultSlides.value.length
+    const active = isBuilding.value && i === resultSlides.value.length && i < total
+    cards.push({
+      index: i,
+      title: pptPageTitleLabel(page, i),
+      layout: pptLayoutLabel(page.layout || page.type),
+      built,
+      active,
+      pending: !built && !active
+    })
+  }
+  return cards
+})
+const currentBuildingCard = computed(() => {
+  if (!pptBuildCards.value.length) return null
+  return pptBuildCards.value.find(card => card.active) || pptBuildCards.value[Math.min(resultSlides.value.length, pptBuildCards.value.length - 1)] || null
 })
 
 function eventTypeLabel(eventType) {
@@ -1405,6 +1616,9 @@ function resetSteps() {
   // 重置流式状态，避免第二次任务时显示上一次残留
   isBuilding.value = false
   buildTotal.value  = 0
+  isDocStreaming.value = false
+  docStreamProgress.value = 0
+  docStreamPhase.value = 'draft'
   resultSlides.value      = []
   resultDownloadUrl.value = ''
   resultData.value        = null
@@ -1432,6 +1646,7 @@ function artifactTypeLabel(type) {
     plan_document: '策划文档',
     review_feedback: '评审意见',
     ppt_outline: 'PPT大纲',
+    ppt_slides: 'PPT成稿',
     ppt_page: 'PPT页面'
   }[type] || '中间产物'
 }
@@ -1444,6 +1659,7 @@ function artifactMsgIcon(type) {
     plan_document: IconEdit,
     review_feedback: IconCheckCircle,
     ppt_outline: IconLayout,
+    ppt_slides: IconFile,
   }[type] || IconEdit
 }
 
@@ -1495,6 +1711,67 @@ function processMessageLabel(message) {
   return message.text || ''
 }
 
+function humanizeActivityText(text) {
+  if (!text) return ''
+  const normalized = String(text).trim()
+  if (!normalized) return ''
+
+  let match = normalized.match(/^第\s*(\d+)\s*轮：制定策划方案/)
+  if (match) return `正在打磨第 ${match[1]} 轮策划方向，收拢核心创意和执行结构`
+
+  match = normalized.match(/^第\s*(\d+)\s*轮：专家评审中/)
+  if (match) return `正在做第 ${match[1]} 轮专家评审，检查亮点、风险和可落地性`
+
+  match = normalized.match(/^第\s*(\d+)\s*轮评审完成，得分\s*([0-9.]+)(.*)$/)
+  if (match) {
+    const suffix = match[3]?.includes('继续优化') ? '，还会继续往上收紧' : '，这一轮已经过线'
+    return `第 ${match[1]} 轮评审完成，当前得分 ${match[2]} 分${suffix}`
+  }
+
+  match = normalized.match(/^正在重新查看\s*(\d+)\s*张图片/)
+  if (match) return `正在重新整理 ${match[1]} 张参考图片，补充更贴近方向的视觉线索`
+
+  match = normalized.match(/^找到\s*(\d+)\s*条结果（(.+?)）/)
+  if (match) return `已补充 ${match[1]} 条参考资料，来源：${match[2]}`
+
+  match = normalized.match(/^已读取文档：(.+)$/)
+  if (match) return `已载入空间文档：${match[1]}`
+
+  match = normalized.match(/^已更新文档：(.+)$/)
+  if (match) return `已同步文档更新：${match[1]}`
+
+  match = normalized.match(/^已保存到工作空间：(.+)$/)
+  if (match) return `已保存到策划空间：${match[1]}`
+
+  if (normalized === '正在整理策划文档...') return '正在把方案整理成可编辑文档'
+  if (normalized === '正在生成 PPT 大纲...') return '正在把方案压缩成 PPT 页面结构'
+  if (normalized === '正在结合策划内容与页面结构匹配背景图...') return '正在给每一页匹配更合适的背景图和视觉氛围'
+  if (normalized === '页面内容已读取') return '参考页面已经读完，正在提炼可用信息'
+
+  if (normalized.startsWith('开始生成 PPT')) return '开始生成 PPT 成稿，页面会逐张出现'
+  if (normalized.startsWith('开始制定策划方案')) return '开始制定策划方案，先收拢方向再写正文'
+
+  return normalized.replace(/\.\.\.$/, '')
+}
+
+function shouldSurfaceProgressMessage(text) {
+  if (!text) return false
+  return [
+    /制定策划方案/,
+    /专家评审中/,
+    /评审完成/,
+    /正在整理策划文档/,
+    /正在生成 PPT 大纲/,
+    /正在结合策划内容与页面结构匹配背景图/,
+    /正在重新查看\s*\d+\s*张图片/,
+    /找到\s*\d+\s*条结果/,
+    /^页面内容已读取$/,
+    /^已读取文档：/,
+    /^已更新文档：/,
+    /^已保存到工作空间：/
+  ].some(pattern => pattern.test(text))
+}
+
 function formatLogTime(ts = Date.now()) {
   const date = new Date(ts)
   return date.toLocaleTimeString('zh-CN', {
@@ -1506,16 +1783,35 @@ function formatLogTime(ts = Date.now()) {
 
 function addExecutionLog(text, ts = Date.now()) {
   if (!text) return
+  const displayText = humanizeActivityText(text)
   const prev = executionLogs.value[0]
-  if (prev?.text === text) return
+  if (prev?.text === displayText) return
   const log = {
     id: `${ts}_${Math.random().toString(16).slice(2, 8)}`,
     time: formatLogTime(ts),
-    text
+    text: displayText
   }
   executionLogs.value.unshift(log)
   executionLogs.value = executionLogs.value.slice(0, 24)
   scheduleConversationPersist()
+}
+
+function pushTaskLog(text, ts = Date.now()) {
+  if (!text) return
+  const displayText = humanizeActivityText(text)
+  const lastMsg = messages.value[messages.value.length - 1]
+  if (lastMsg?.role === 'ai' && lastMsg?.kind === 'task-log' && lastMsg?.text === displayText) return
+  pushAiMessage({
+    kind: 'task-log',
+    text: displayText,
+    time: formatLogTime(ts),
+    timestamp: ts
+  })
+}
+
+function publishActivity(text, ts = Date.now()) {
+  addExecutionLog(text, ts)
+  pushTaskLog(text, ts)
 }
 
 function defaultBrainPlan() {
@@ -1698,6 +1994,9 @@ function serializeState() {
     buildTotal: buildTotal.value,
     docContent: docContent.value,
     docTitle: docTitle.value,
+    isDocStreaming: isDocStreaming.value,
+    docStreamProgress: docStreamProgress.value,
+    docStreamPhase: docStreamPhase.value,
     currentTask: currentTask.value,
     failedReason: failedReason.value,
     failedStage: failedStage.value,
@@ -1811,6 +2110,9 @@ function restoreFromConversation(detail) {
   buildTotal.value = state.buildTotal || 0
   docContent.value = state.docContent || ''
   docTitle.value = state.docTitle || ''
+  isDocStreaming.value = !!state.isDocStreaming
+  docStreamProgress.value = Number(state.docStreamProgress || 0)
+  docStreamPhase.value = state.docStreamPhase || 'draft'
   failedReason.value = state.failedReason || ''
   failedStage.value = state.failedStage || ''
   artifacts.value = Array.isArray(state.artifacts) ? state.artifacts : []
@@ -1826,6 +2128,8 @@ function restoreFromConversation(detail) {
   }
 
   isRunning.value = false
+  waitingForClarification.value = messages.value.some(msg => msg.role === 'ai' && msg.kind === 'clarification' && !msg.answered)
+  syncQuickRepliesFromMessages()
 
   nextTick(() => {
     restoringConversation.value = false
@@ -1852,6 +2156,26 @@ function clearConversationView() {
   nextTick(() => {
     restoringConversation.value = false
   })
+}
+
+function syncQuickRepliesFromMessages() {
+  const pendingClarification = [...messages.value]
+    .reverse()
+    .find(msg => msg.role === 'ai' && msg.kind === 'clarification' && !msg.answered)
+
+  if (!pendingClarification) {
+    clearQuickReplies()
+    return
+  }
+
+  setQuickReplies(
+    pendingClarification.header || '请选择下一步',
+    Array.isArray(pendingClarification.options) && pendingClarification.options.length
+      ? pendingClarification.options
+      : defaultClarificationOptions(pendingClarification.questionType),
+    pendingClarification.question || ''
+  )
+  if (!quickReplyOptions.value.length) clearQuickReplies()
 }
 
 async function loadConversationsForSpace(spaceId) {
@@ -2253,7 +2577,7 @@ async function runBrainTask(text, images = [], docs = [], workspaceRefs = []) {
   progress.value = isContinuing ? Math.max(progress.value, 8) : 8
   progressLabel.value = isContinuing ? '继续推进...' : '正在理解需求...'
   wsState.value = 'execution'
-  addExecutionLog(isContinuing ? `继续任务：${taskSeed.slice(0, 48)}` : `收到新任务：${taskSeed.slice(0, 48)}`)
+  publishActivity(isContinuing ? `继续任务：${taskSeed.slice(0, 48)}` : `收到新任务：${taskSeed.slice(0, 48)}`)
 
   return new Promise(resolve => {
     const timeoutId = setTimeout(() => {
@@ -2325,7 +2649,7 @@ function connectBrainSSE(url, resolve = () => {}) {
       expanded: false
     })
     if (['run_strategy', 'build_ppt'].includes(d.tool)) {
-      addExecutionLog(`开始${d.display || d.tool}`)
+      publishActivity(`开始${d.display || d.tool}`)
     }
   })
 
@@ -2336,13 +2660,19 @@ function connectBrainSSE(url, resolve = () => {}) {
     if (lastToolCall) lastToolCall.progress = d.message
     if (d.message) {
       progressLabel.value = d.message
+      if (shouldSurfaceProgressMessage(d.message)) {
+        publishActivity(d.message, d.timestamp || Date.now())
+      }
     }
   })
 
   sse.addEventListener('text', e => {
     const d = JSON.parse(e.data)
     popThinking()
-    if (d.text) pushMsg('ai', '', d.text, { kind: 'narration' })
+    if (d.text) {
+      pushMsg('ai', '', d.text, { kind: 'narration' })
+      maybeSetQuickRepliesFromAiText(d.text)
+    }
   })
 
   // 流式文字：逐 token 追加到同一条消息
@@ -2384,6 +2714,7 @@ function connectBrainSSE(url, resolve = () => {}) {
       if (msg) {
         msg.html = resolveAiHtml(msg.text)
         Object.assign(msg, buildAiMessageMeta(msg.text, msg.html))
+        maybeSetQuickRepliesFromAiText(msg.text)
       }
       scheduleConversationPersist()
       streamingMsgId = null
@@ -2396,47 +2727,21 @@ function connectBrainSSE(url, resolve = () => {}) {
     popThinking()
     waitingForClarification.value = true
     isRunning.value = false
-    pushAiMessage({ kind: 'clarification', question: d.question, questionType: d.type, answered: false })
-    if (d.type === 'confirmation') {
-      setQuickReplies('请选择下一步', [
-        {
-          label: '可以开始生成 PPT',
-          value: '可以开始生成 PPT',
-          description: '按当前确认过的方案继续往下生成汇报稿。'
-        },
-        {
-          label: '先继续优化方案',
-          value: '先别生成 PPT，继续优化方案',
-          description: '保留当前方向，但继续调整方案细节。'
-        }
-      ])
-    } else if (d.type === 'suggestion' || d.type === 'ambiguous') {
-      setQuickReplies('请选择你要的方向', [
-        {
-          label: '按方向一继续',
-          value: '按方向一继续',
-          description: '沿着第一个方向继续深化。'
-        },
-        {
-          label: '按方向二继续',
-          value: '按方向二继续',
-          description: '沿着第二个方向继续深化。'
-        },
-        {
-          label: '我补充一下要求',
-          value: '我再补充一下要求',
-          description: '先补充限制条件，再决定方向。'
-        }
-      ])
-    } else {
-      setQuickReplies('请补充一个关键信息', [
-        {
-          label: '我补充一下',
-          value: '我补充一下',
-          description: '继续补充当前缺少的信息。'
-        }
-      ])
-    }
+    pushAiMessage({
+      kind: 'clarification',
+      header: d.header || '',
+      question: d.question,
+      questionType: d.type,
+      options: Array.isArray(d.options) ? d.options : [],
+      answered: false
+    })
+    const options = Array.isArray(d.options) && d.options.length ? d.options : defaultClarificationOptions(d.type)
+    setQuickReplies(
+      d.header || (d.type === 'confirmation' ? '下一步' : d.type === 'missing_info' ? '补充信息' : '选择方向'),
+      options,
+      d.question || ''
+    )
+    if (!options.length) clearQuickReplies()
     scheduleConversationPersist()
   })
 
@@ -2446,7 +2751,7 @@ function connectBrainSSE(url, resolve = () => {}) {
     progress.value = Math.max(progress.value, 15)
     progressLabel.value = '正在执行计划'
     if (brainPlanItems.value.length) {
-      addExecutionLog(`计划已更新，当前共 ${brainPlanItems.value.length} 步。`, d.timestamp || Date.now())
+      publishActivity(`计划已更新，当前共 ${brainPlanItems.value.length} 步。`, d.timestamp || Date.now())
     }
   })
 
@@ -2457,7 +2762,7 @@ function connectBrainSSE(url, resolve = () => {}) {
       ...(d.brief || {})
     }
     if (currentTask.value?.topic || currentTask.value?.brand) {
-      addExecutionLog(`已整理任务简报：${currentTask.value.topic || currentTask.value.brand}`, d.timestamp || Date.now())
+      publishActivity(`已整理任务简报：${currentTask.value.topic || currentTask.value.brand}`, d.timestamp || Date.now())
     }
   })
 
@@ -2479,7 +2784,7 @@ function connectBrainSSE(url, resolve = () => {}) {
       })
     }
     if (!matched?.resultSummary || d.ok === false) {
-      addExecutionLog(d.summary || `${d.tool} 已完成`, d.timestamp || Date.now())
+      publishActivity(d.summary || `${d.tool} 已完成`, d.timestamp || Date.now())
     }
     scheduleConversationPersist()
   })
@@ -2489,6 +2794,12 @@ function connectBrainSSE(url, resolve = () => {}) {
     const d = JSON.parse(e.data)
     // 刷新空间文档列表
     loadSpaces()
+    // 通知 WorkspaceView 刷新（BroadcastChannel 跨组件通信）
+    try {
+      const bc = new BroadcastChannel('oc_workspace_updated')
+      bc.postMessage(d)
+      bc.close()
+    } catch {}
     // 标记最近保存/读取的文档
     if (d.docId) {
       recentlySavedDocIds.value = new Set([d.docId, ...recentlySavedDocIds.value])
@@ -2500,6 +2811,7 @@ function connectBrainSSE(url, resolve = () => {}) {
 
   // 复用现有事件处理
   sse.addEventListener('artifact', e => handleArtifact(JSON.parse(e.data)))
+  sse.addEventListener('doc_section_added', e => handleDocSectionAdded(JSON.parse(e.data)))
   sse.addEventListener('doc_ready', e => handleDocReady(JSON.parse(e.data)))
   sse.addEventListener('slide_added', e => handleSlideAdded(JSON.parse(e.data)))
   sse.addEventListener('done', e => {
@@ -2555,8 +2867,16 @@ function handleArtifact(d) {
     // 自动切换右侧面板到最新产出物
     activeArtifact.value = cardMsg
   }
+  if (d.artifactType === 'ppt_outline') {
+    isBuilding.value = true
+    buildTotal.value = Number(d.payload?.total || (Array.isArray(d.payload?.pages) ? d.payload.pages.length : 0) || 0)
+    progressLabel.value = buildTotal.value
+      ? `PPT 结构已确认，开始生成 ${buildTotal.value} 页内容...`
+      : 'PPT 结构已确认，开始生成页面...'
+    if (wsState.value !== 'done') wsState.value = 'execution'
+  }
   if (['plan_draft', 'review_feedback', 'ppt_outline'].includes(d.artifactType)) {
-    addExecutionLog(`${artifactTypeLabel(d.artifactType)}已更新：${artifactTimelineText({ artifactType: d.artifactType, payload: d.payload || {} })}`, d.timestamp || Date.now())
+    publishActivity(`${artifactTypeLabel(d.artifactType)}已更新：${artifactTimelineText({ artifactType: d.artifactType, payload: d.payload || {} })}`, d.timestamp || Date.now())
   }
 
 }
@@ -2568,6 +2888,7 @@ function artifactCardTitle(type, payload) {
   if (type === 'plan_document') return `策划文档：${payload.title || '已生成'}`
   if (type === 'review_feedback') return `评审意见：第 ${payload.round || 1} 轮，评分 ${payload.score || 0}`
   if (type === 'ppt_outline') return `PPT大纲：共 ${payload.total || 0} 页`
+  if (type === 'ppt_slides') return `PPT成稿：共 ${payload.pageCount || 0} 页`
   return artifactTypeLabel(type)
 }
 
@@ -2588,6 +2909,11 @@ function artifactCardSummary(type, payload) {
       .map((page, index) => pptPageTitleLabel(page, index))
       .join(' · ')
   }
+  if (type === 'ppt_slides') {
+    return payload.downloadUrl
+      ? '最终 PPT 已生成，可在右侧预览、翻页并下载。'
+      : '最终 PPT 预览已生成，可在右侧查看完整页面。'
+  }
   return ''
 }
 
@@ -2600,12 +2926,22 @@ function artifactCardChips(type, payload) {
       .slice(0, 3)
       .map(page => pptLayoutLabel(page?.layout || page?.type))
   }
+  if (type === 'ppt_slides') {
+    const chips = []
+    if (payload.pageCount) chips.push(`${payload.pageCount}页`)
+    if (payload.downloadUrl) chips.push('可下载')
+    if (payload.fileName) chips.push(payload.fileName)
+    return chips.slice(0, 3)
+  }
   return []
 }
 
 function handleDocReady(d) {
-  docContent.value = d.docHtml || ''
+  docContent.value = d.docContent || d.docHtml || ''
   docTitle.value = d.title || currentTask.value?.topic || '策划方案'
+  isDocStreaming.value = false
+  docStreamProgress.value = 100
+  docStreamPhase.value = 'final'
   progress.value = Math.max(progress.value, 88)
   progressLabel.value = '策划文档已生成，等待对话确认下一步'
   wsState.value = 'document'
@@ -2633,9 +2969,9 @@ function handleDocReady(d) {
   pushAiMessage(documentCard)
   activeArtifact.value = documentCard
   isRunning.value = false
-  addExecutionLog('策划文档已生成。若还不满意，可继续指出要优化的方向，再决定是否生成 PPT。', d.timestamp || Date.now())
+  publishActivity('策划文档已生成。若还不满意，可继续指出要优化的方向，再决定是否生成 PPT。', d.timestamp || Date.now())
   pushMsg('ai', '', '策划文档我已经整理好了。你先看方案本身是否满意；如果方向对了，直接在对话里回复“可以开始生成 PPT”，我会按这版继续往下做。如果还想调整，也直接告诉我改哪里。')
-  setQuickReplies('请选择下一步', [
+  setQuickReplies('下一步', [
     {
       label: '可以开始生成 PPT',
       value: '可以开始生成 PPT',
@@ -2651,7 +2987,32 @@ function handleDocReady(d) {
       value: '我先补充一些新的要求，再继续往下推',
       description: '先补限制条件或偏好，再决定是否出 PPT。'
     }
-  ])
+  ], '策划文档已经整理好了，这一版你想怎么继续？')
+}
+
+function handleDocSectionAdded(d) {
+  docContent.value = d.docContent || docContent.value
+  docTitle.value = d.title || docTitle.value || currentTask.value?.topic || '策划方案'
+  docStreamProgress.value = Number(d.progress || 0)
+  isDocStreaming.value = docStreamProgress.value < 100
+  docStreamPhase.value = d.provisional ? 'draft' : 'final'
+  progress.value = Math.max(progress.value, 72)
+  progressLabel.value = d.sectionTitle
+    ? `${d.provisional ? '正在起草' : '正在润色'}文档章节：${d.sectionTitle}`
+    : (d.provisional ? '正在搭建策划文档初稿...' : '正在润色策划文档...')
+  wsState.value = 'document'
+  activeArtifact.value = {
+    artifactType: 'plan_document',
+    artifactId: createMessageId('artifact'),
+    title: docTitle.value,
+    payload: {
+      title: docTitle.value,
+      summary: latestPlanDraft.value?.payload?.coreStrategy || ''
+    }
+  }
+  if (d.sectionTitle) {
+    publishActivity(`文档已写入章节：${d.provisional ? '起草' : '润色'} ${d.sectionTitle}`, d.timestamp || Date.now())
+  }
 }
 
 function handleSlideAdded(d) {
@@ -2668,7 +3029,7 @@ function handleSlideAdded(d) {
     ? (total <= 8 || current === 1 || current === total || current % 3 === 0)
     : true
   if (shouldLogPage) {
-    addExecutionLog(
+    publishActivity(
       total > 0
         ? `PPT 已推进到 ${current} / ${total} 页${d.title ? `：${d.title}` : ''}`
         : `已生成第 ${current} 页${d.title ? `：${d.title}` : ''}`,
@@ -2698,7 +3059,29 @@ function handleDone(d) {
   resultDownloadUrl.value  = d.downloadUrl   || ''
   resultData.value         = d
   if (isPptDone) {
-    activeArtifact.value = { artifactType: 'ppt_slides' }
+    const pptCard = {
+      kind: 'artifact-card',
+      artifactType: 'ppt_slides',
+      artifactId: createMessageId('artifact'),
+      title: artifactCardTitle('ppt_slides', {
+        pageCount: d.previewSlides?.length || d.previewData?.pages?.length || 0
+      }),
+      summary: artifactCardSummary('ppt_slides', {
+        downloadUrl: d.downloadUrl || ''
+      }),
+      chips: artifactCardChips('ppt_slides', {
+        pageCount: d.previewSlides?.length || d.previewData?.pages?.length || 0,
+        downloadUrl: d.downloadUrl || '',
+        fileName: d.filename || ''
+      }),
+      payload: {
+        pageCount: d.previewSlides?.length || d.previewData?.pages?.length || 0,
+        downloadUrl: d.downloadUrl || '',
+        fileName: d.filename || ''
+      }
+    }
+    pushAiMessage(pptCard)
+    activeArtifact.value = pptCard
   }
   if (d.brief) {
     currentTask.value = {
@@ -2714,7 +3097,6 @@ function handleDone(d) {
     pushMsg('ai', '', d.hasPlan
       ? '方案方向已经整理完了。是否进入 PPT，我会在对话里和你确认；如果这版还不够满意，也可以继续让我改。'
       : '这一轮信息我已经整理完了，你可以继续补充方向，我再往下推进。')
-    if (!d.hasPlan) clearQuickReplies()
     wsState.value = docContent.value
       ? 'document'
       : (hasStrategyPreview.value ? 'done' : 'welcome')
@@ -2725,7 +3107,7 @@ function handleDone(d) {
     clearQuickReplies()
     wsState.value = 'done'
   }
-  addExecutionLog(
+  publishActivity(
     isBrainOnly
       ? '本轮任务已完成，可继续补充要求、优化方案，确认后再进入 PPT 生成。'
       : (isPptDone ? 'PPT 已生成完成，支持右侧预览和下载。' : '任务已完成，支持预览、编辑和保存。')
@@ -3230,6 +3612,21 @@ onUnmounted(() => {
   font-size: 18px;
   flex-shrink: 0;
   margin-top: 2px;
+}
+
+.clarification-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.clarification-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a8a29e;
 }
 
 .clarification-question {
@@ -4770,6 +5167,20 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
+.quick-reply-question {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #292524;
+}
+
+.quick-reply-helper {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #78716c;
+}
+
 .quick-reply-list {
   display: flex;
   flex-direction: column;
@@ -6300,6 +6711,270 @@ onUnmounted(() => {
 .preview-card {
   height: 92px;
   border-radius: 12px;
+}
+
+.ppt-build-board {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ppt-build-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(var(--arcoblue-6), 0.14), transparent 42%),
+    linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+  border: 1px solid rgba(var(--arcoblue-6), 0.12);
+}
+
+.ppt-build-hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.ppt-build-eyebrow,
+.ppt-build-stage-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--arcoblue-6));
+}
+
+.ppt-build-title {
+  margin-top: 10px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1c1917;
+}
+
+.ppt-build-desc {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #57534e;
+  max-width: 640px;
+}
+
+.ppt-build-metrics {
+  width: 196px;
+  flex-shrink: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.ppt-build-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.ppt-build-metric span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a8a29e;
+}
+
+.ppt-build-metric strong {
+  font-size: 18px;
+  line-height: 1.4;
+  color: #1c1917;
+}
+
+.ppt-build-progress {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #edf1f7;
+}
+
+.ppt-build-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #edf1f7;
+  overflow: hidden;
+}
+
+.ppt-build-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(var(--arcoblue-6)), rgb(var(--arcoblue-4)));
+  transition: width 0.35s ease;
+}
+
+.ppt-build-progress-text {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: #57534e;
+}
+
+.ppt-build-stage {
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #f9fbff 0%, #ffffff 100%);
+  border: 1px solid rgba(var(--arcoblue-6), 0.1);
+}
+
+.ppt-build-stage-title {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1c1917;
+}
+
+.ppt-build-stage-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgb(var(--arcoblue-6));
+  font-weight: 700;
+}
+
+.ppt-build-stage-shell {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(var(--arcoblue-6), 0.08), rgba(var(--arcoblue-3), 0.04)),
+    #fff;
+  border: 1px solid rgba(var(--arcoblue-6), 0.08);
+}
+
+.ppt-build-stage-bar,
+.ppt-build-stage-line,
+.ppt-build-card-line {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eef2ff 0%, #f8fbff 50%, #eef2ff 100%);
+  background-size: 200% 100%;
+  animation: preview-shimmer 1.8s linear infinite;
+}
+
+.ppt-build-stage-bar {
+  width: 32%;
+  height: 10px;
+}
+
+.ppt-build-stage-line {
+  height: 12px;
+  margin-top: 12px;
+}
+
+.ppt-build-stage-line.short,
+.ppt-build-card-line.short {
+  width: 58%;
+}
+
+.ppt-build-stage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ppt-build-stage-grid span {
+  display: block;
+  height: 82px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f5f7fb 0%, #ffffff 100%);
+  border: 1px solid #edf1f7;
+}
+
+.ppt-build-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ppt-build-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #edf1f7;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ppt-build-card.active {
+  border-color: rgba(var(--arcoblue-6), 0.24);
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
+}
+
+.ppt-build-card.built {
+  background: linear-gradient(180deg, #f7fff9 0%, #ffffff 100%);
+  border-color: rgba(var(--green-6), 0.16);
+}
+
+.ppt-build-card.pending {
+  background: linear-gradient(180deg, #fbfcff 0%, #ffffff 100%);
+}
+
+.ppt-build-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ppt-build-card-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f3f5;
+  color: #57534e;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ppt-build-card.active .ppt-build-card-num {
+  background: rgba(var(--arcoblue-6), 0.12);
+  color: rgb(var(--arcoblue-6));
+}
+
+.ppt-build-card.built .ppt-build-card-num {
+  background: rgba(var(--green-6), 0.12);
+  color: rgb(var(--green-6));
+}
+
+.ppt-build-card-status {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a8a29e;
+}
+
+.ppt-build-card-layout {
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(var(--arcoblue-6));
+}
+
+.ppt-build-card-title {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #1c1917;
+  min-height: 40px;
+}
+
+.ppt-build-card-shell {
+  margin-top: 14px;
+}
+
+.ppt-build-card-line {
+  height: 10px;
+  margin-top: 10px;
 }
 
 @keyframes preview-shimmer {

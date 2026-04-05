@@ -44,6 +44,7 @@ function createSession({ apiKeys = {}, spaceId = '', sessionId: providedSessionI
     brief: null,              // 当前会话已确认/推断的任务简报
     planItems: [],            // 当前任务计划
     attachments: [],          // 当前会话累计上传的图片
+    researchStore: [],        // 累积所有 web_search 结果，供 run_strategy 强制引用
     doneEmitted: false,       // 防止重复推送 done
     createdAt: Date.now(),
     updatedAt: Date.now()

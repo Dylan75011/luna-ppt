@@ -222,9 +222,15 @@
 
             <p class="modal-desc">{{ previewItem.desc }}</p>
 
-            <div class="modal-section-title" style="margin-top: 16px; margin-bottom: 12px;">幻灯片预览</div>
+            <div class="modal-section-title" style="margin-top: 16px; margin-bottom: 12px;">
+              幻灯片预览
+              <button class="fullscreen-trigger" @click="openFullscreen(0)">
+                <PhMagnifyingGlassPlus :size="13" weight="bold" />
+                全屏预览
+              </button>
+            </div>
             <div class="modal-slides-preview">
-              <div class="modal-slide-preview-card">
+              <div class="modal-slide-preview-card" @click="openFullscreen(0)">
                 <div class="msp-slide msp-slide--cover" :style="{ background: previewItem.coverBg }">
                   <div class="msp-cover-content">
                     <div class="msp-cover-brand" :style="{ color: previewItem.titleColor + '80' }">品牌名称</div>
@@ -232,10 +238,11 @@
                     <div class="msp-cover-divider" :style="{ background: previewItem.titleColor + '40' }" />
                     <div class="msp-cover-info" :style="{ color: previewItem.titleColor + '70' }">2026 · 城市</div>
                   </div>
+                  <div class="msp-hover-overlay"><PhMagnifyingGlassPlus :size="20" weight="bold" /></div>
                 </div>
                 <div class="msp-label">封面页</div>
               </div>
-              <div class="modal-slide-preview-card">
+              <div class="modal-slide-preview-card" @click="openFullscreen(1)">
                 <div class="msp-slide msp-slide--content" :style="{ background: previewItem.contentBg }">
                   <div class="msp-content-header" :style="{ background: previewItem.primary }">
                     <div class="msp-content-header-title" :style="{ color: '#fff' }">活动背景</div>
@@ -254,7 +261,7 @@
                 </div>
                 <div class="msp-label">内容页</div>
               </div>
-              <div class="modal-slide-preview-card">
+              <div class="modal-slide-preview-card" @click="openFullscreen(2)">
                 <div class="msp-slide msp-slide--content" :style="{ background: previewItem.contentBg }">
                   <div class="msp-content-header" :style="{ background: previewItem.primary }">
                     <div class="msp-content-header-title" :style="{ color: '#fff' }">目标受众</div>
@@ -267,10 +274,11 @@
                       </div>
                     </div>
                   </div>
+                  <div class="msp-hover-overlay"><PhMagnifyingGlassPlus :size="20" weight="bold" /></div>
                 </div>
                 <div class="msp-label">内容页</div>
               </div>
-              <div class="modal-slide-preview-card">
+              <div class="modal-slide-preview-card" @click="openFullscreen(4)">
                 <div class="msp-slide msp-slide--end" :style="{ background: previewItem.endBg }">
                   <div class="msp-end-content">
                     <div class="msp-end-circle" :style="{ borderColor: previewItem.titleColor + '30' }">
@@ -280,6 +288,7 @@
                     <div class="msp-end-sub" :style="{ color: previewItem.titleColor + '60' }">THANK YOU</div>
                     <div class="msp-end-contact" :style="{ color: previewItem.titleColor + '40' }">contact@brand.com</div>
                   </div>
+                  <div class="msp-hover-overlay"><PhMagnifyingGlassPlus :size="20" weight="bold" /></div>
                 </div>
                 <div class="msp-label">结尾页</div>
               </div>
@@ -315,6 +324,79 @@
         <PhCheckCircle :size="15" weight="fill" />{{ toastText }}
       </div>
     </transition>
+
+    <!-- Fullscreen PPT Preview -->
+    <transition name="fade">
+      <div v-if="fullscreenVisible" class="fullscreen-overlay" @click.self="closeFullscreen" @keydown.esc="closeFullscreen" @keydown.left="prevSlide" @keydown.right="nextSlide" tabindex="0">
+        <div class="fullscreen-header">
+          <div class="fullscreen-title">{{ previewItem?.name }}</div>
+          <div class="fullscreen-counter">{{ fullscreenIndex + 1 }} / {{ fullscreenSlides.length }}</div>
+          <button class="fullscreen-close" @click="closeFullscreen"><PhX :size="20" weight="bold" /></button>
+        </div>
+        <div class="fullscreen-slides">
+          <button class="fullscreen-nav fullscreen-nav--prev" @click="prevSlide"><PhCaretLeft :size="32" weight="bold" /></button>
+          <div class="fullscreen-slide-wrap">
+            <transition name="slide-fade" mode="out-in">
+              <div v-if="fullscreenSlides[fullscreenIndex]" :key="fullscreenIndex" class="fullscreen-slide" :style="{ background: fullscreenSlides[fullscreenIndex].bg }">
+                <template v-if="fullscreenSlides[fullscreenIndex].type === 'cover'">
+                  <div class="fs-cover">
+                    <div class="fs-cover-brand" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor + '80' }">品牌名称 BRAND</div>
+                    <div class="fs-cover-title" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor }">{{ fullscreenSlides[fullscreenIndex].subtitle }}</div>
+                    <div class="fs-cover-divider" :style="{ background: fullscreenSlides[fullscreenIndex].titleColor + '50' }" />
+                    <div class="fs-cover-info" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor + '70' }">{{ fullscreenSlides[fullscreenIndex].info }}</div>
+                  </div>
+                </template>
+                <template v-else-if="fullscreenSlides[fullscreenIndex].type === 'toc'">
+                  <div class="fs-toc">
+                    <div class="fs-toc-header" :style="{ background: fullscreenSlides[fullscreenIndex].primary }">
+                      <div class="fs-toc-label" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor + '80' }">目录 CONTENTS</div>
+                      <div class="fs-toc-title" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor }">策划大纲</div>
+                    </div>
+                    <div class="fs-toc-items">
+                      <div v-for="(item, i) in fullscreenSlides[fullscreenIndex].items" :key="item" class="fs-toc-item" :style="{ borderColor: fullscreenSlides[fullscreenIndex].primary + '20' }">
+                        <span class="fs-toc-num" :style="{ color: fullscreenSlides[fullscreenIndex].primary }">0{{ i + 1 }}</span>
+                        <span class="fs-toc-text" :style="{ color: fullscreenSlides[fullscreenIndex].primary }">{{ item }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="fullscreenSlides[fullscreenIndex].type === 'content'">
+                  <div class="fs-content">
+                    <div class="fs-content-header" :style="{ background: fullscreenSlides[fullscreenIndex].primary }">
+                      <div class="fs-content-label" :style="{ color: '#ffffff80' }">CONTENTS</div>
+                      <div class="fs-content-title">{{ fullscreenSlides[fullscreenIndex].title }}</div>
+                    </div>
+                    <div class="fs-content-body">
+                      <div class="fs-content-subtitle" :style="{ color: fullscreenSlides[fullscreenIndex].primary }">{{ fullscreenSlides[fullscreenIndex].subtitle }}</div>
+                      <div class="fs-content-points">
+                        <div v-for="point in fullscreenSlides[fullscreenIndex].points" :key="point" class="fs-point">
+                          <div class="fs-point-dot" :style="{ background: fullscreenSlides[fullscreenIndex].primary }" />
+                          <div class="fs-point-text">{{ point }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="fullscreenSlides[fullscreenIndex].type === 'end'">
+                  <div class="fs-end">
+                    <div class="fs-end-circle" :style="{ borderColor: fullscreenSlides[fullscreenIndex].titleColor + '30' }">
+                      <div class="fs-end-dot" :style="{ background: fullscreenSlides[fullscreenIndex].titleColor }" />
+                    </div>
+                    <div class="fs-end-title" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor }">{{ fullscreenSlides[fullscreenIndex].title }}</div>
+                    <div class="fs-end-sub" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor + '60' }">{{ fullscreenSlides[fullscreenIndex].sub }}</div>
+                    <div class="fs-end-contact" :style="{ color: fullscreenSlides[fullscreenIndex].titleColor + '40' }">{{ fullscreenSlides[fullscreenIndex].contact }}</div>
+                  </div>
+                </template>
+              </div>
+            </transition>
+          </div>
+          <button class="fullscreen-nav fullscreen-nav--next" @click="nextSlide"><PhCaretRight :size="32" weight="bold" /></button>
+        </div>
+        <div class="fullscreen-dots">
+          <button v-for="(_, i) in fullscreenSlides" :key="i" class="fullscreen-dot" :class="{ active: i === fullscreenIndex }" @click="fullscreenIndex = i" />
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -324,7 +406,7 @@ import { useRouter } from 'vue-router'
 import {
   PhCalendar, PhLayout, PhArrowRight, PhCheckCircle,
   PhRocket, PhCar, PhMicrophone, PhStar, PhUsers, PhChartBar,
-  PhEye, PhX,
+  PhEye, PhX, PhMagnifyingGlassPlus, PhCaretLeft, PhCaretRight,
 } from '@phosphor-icons/vue'
 
 const router = useRouter()
@@ -339,6 +421,28 @@ const previewItem = shallowRef(null)
 const previewVisible = ref(false)
 function openPreview(tpl)  { previewItem.value = tpl; previewVisible.value = true }
 function closePreview()    { previewVisible.value = false }
+
+const fullscreenVisible = ref(false)
+const fullscreenIndex = ref(0)
+const fullscreenSlides = ref([])
+function openFullscreen(idx) {
+  fullscreenSlides.value = getLayoutSlides(previewItem.value)
+  fullscreenIndex.value = idx
+  fullscreenVisible.value = true
+}
+function closeFullscreen() { fullscreenVisible.value = false }
+function nextSlide() { fullscreenIndex.value = (fullscreenIndex.value + 1) % fullscreenSlides.value.length }
+function prevSlide() { fullscreenIndex.value = (fullscreenIndex.value - 1 + fullscreenSlides.value.length) % fullscreenSlides.value.length }
+
+function getLayoutSlides(tpl) {
+  return [
+    { type: 'cover', bg: tpl.coverBg, titleColor: tpl.titleColor, subtitle: '2026年度新品发布会', info: '科技改变世界 · 北京国际会议中心' },
+    { type: 'toc', bg: tpl.contentBg, primary: tpl.primary, titleColor: tpl.titleColor, items: ['活动背景与目标', '产品核心亮点', '市场定位分析', '目标受众洞察', '传播策略规划'] },
+    { type: 'content', bg: tpl.contentBg, primary: tpl.primary, titleColor: tpl.titleColor, title: '活动背景', subtitle: '市场趋势与品牌机遇', points: ['全球科技产业持续高速增长，创新产品迭代加速', '消费者对智能化产品的需求爆发，AIoT成为新风口', '品牌需要一场重量级发布会抢占用户心智'] },
+    { type: 'content', bg: tpl.contentBg, primary: tpl.primary, titleColor: tpl.titleColor, title: '核心亮点', subtitle: '三大技术创新引领行业', points: ['自研芯片性能提升300%，重新定义行业标准', '全场景AI助手，实现真正的人机协同', '生态互联互通，打造智慧生活新体验'] },
+    { type: 'end', bg: tpl.endBg, titleColor: tpl.titleColor, title: '感谢观看', sub: 'THANK YOU', contact: 'www.brand.com' }
+  ]
+}
 
 const SLIDE_TYPE_LABELS = {
   cover:      '封面',
@@ -1331,16 +1435,25 @@ function clearSpotlight(e) {
   font-weight: 500;
 }
 .doc-points {
-  margin: 2px 0 0 28px;
+  margin: 3px 0 0 28px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  list-style: none;
 }
 .doc-points li {
   font-size: 11px;
   color: #57534e;
-  line-height: 1.4;
+  line-height: 1.5;
+  padding-left: 10px;
+  position: relative;
+}
+.doc-points li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: #d4d0cb;
 }
 
 /* Modal footer */
@@ -1470,6 +1583,148 @@ function clearSpotlight(e) {
 .toast-slide-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
 .toast-slide-enter-from   { opacity: 0; transform: translateX(-50%) translateY(10px); }
 .toast-slide-leave-to     { opacity: 0; transform: translateX(-50%) translateY(6px); }
+
+/* Fullscreen trigger */
+.fullscreen-trigger {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600;
+  background: rgba(0,0,0,0.06); color: #57534e;
+  border: none; border-radius: 6px; cursor: pointer; margin-left: 10px;
+  transition: background 0.15s;
+}
+.fullscreen-trigger:hover { background: rgba(0,0,0,0.1); }
+
+/* Slide hover overlay */
+.msp-hover-overlay {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.15s;
+  border-radius: 6px;
+}
+.modal-slide-preview-card:hover .msp-hover-overlay { opacity: 1; }
+.modal-slide-preview-card { cursor: pointer; }
+
+/* Fullscreen PPT Preview */
+.fullscreen-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  outline: none;
+}
+.fullscreen-header {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+}
+.fullscreen-title { font-size: 15px; font-weight: 700; color: #fff; }
+.fullscreen-counter { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
+.fullscreen-close {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.1); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.fullscreen-close:hover { background: rgba(255,255,255,0.2); }
+
+.fullscreen-slides {
+  display: flex; align-items: center; gap: 20px; width: 100%;
+  max-width: 1100px; padding: 0 20px;
+}
+.fullscreen-slide-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+}
+.fullscreen-slide {
+  width: 100%; aspect-ratio: 16/9; border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); overflow: hidden;
+  position: relative;
+}
+.fullscreen-nav {
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.1); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.fullscreen-nav:hover { background: rgba(255,255,255,0.2); }
+.fullscreen-nav--prev { }
+.fullscreen-nav--next { }
+
+.fullscreen-dots {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px;
+}
+.fullscreen-dot {
+  width: 8px; height: 8px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.15s; padding: 0;
+}
+.fullscreen-dot.active { background: #fff; transform: scale(1.2); }
+
+/* Fullscreen slide layouts */
+.fs-cover {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  padding: 40px;
+}
+.fs-cover-brand { font-size: 14px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
+.fs-cover-title { font-size: 42px; font-weight: 800; letter-spacing: -1px; text-align: center; line-height: 1.1; }
+.fs-cover-divider { width: 60px; height: 3px; border-radius: 2px; }
+.fs-cover-info { font-size: 14px; letter-spacing: 1px; }
+
+.fs-toc {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+}
+.fs-toc-header {
+  padding: 30px 40px; display: flex; flex-direction: column; gap: 6px;
+}
+.fs-toc-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+.fs-toc-title { font-size: 28px; font-weight: 700; }
+.fs-toc-items {
+  flex: 1; display: flex; flex-direction: column; gap: 0; padding: 20px 40px;
+}
+.fs-toc-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid;
+}
+.fs-toc-item:last-child { border-bottom: none; }
+.fs-toc-num { font-size: 13px; font-weight: 700; opacity: 0.6; width: 24px; }
+.fs-toc-text { font-size: 16px; font-weight: 600; }
+
+.fs-content {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+}
+.fs-content-header {
+  padding: 24px 36px; display: flex; flex-direction: column; gap: 4px;
+}
+.fs-content-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.fs-content-title { font-size: 22px; font-weight: 700; color: #fff; }
+.fs-content-body {
+  flex: 1; padding: 24px 36px; display: flex; flex-direction: column; gap: 16px;
+}
+.fs-content-subtitle { font-size: 16px; font-weight: 700; }
+.fs-content-points { display: flex; flex-direction: column; gap: 12px; }
+.fs-point { display: flex; align-items: flex-start; gap: 12px; }
+.fs-point-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.fs-point-text { font-size: 14px; line-height: 1.6; opacity: 0.85; }
+
+.fs-end {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+}
+.fs-end-circle {
+  width: 60px; height: 60px; border-radius: 50%; border: 2px solid;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+}
+.fs-end-dot { width: 16px; height: 16px; border-radius: 50%; }
+.fs-end-title { font-size: 36px; font-weight: 800; }
+.fs-end-sub { font-size: 14px; letter-spacing: 4px; font-weight: 600; }
+.fs-end-contact { font-size: 13px; margin-top: 8px; }
+
+/* Fullscreen transitions */
+.fade-enter-active { transition: opacity 0.2s ease; }
+.fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.slide-fade-enter-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.slide-fade-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
+.slide-fade-enter-from { opacity: 0; transform: scale(0.98); }
+.slide-fade-leave-to { opacity: 0; transform: scale(1.02); }
 </style>
 
 <style>

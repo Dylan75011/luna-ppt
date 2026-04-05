@@ -5,8 +5,11 @@
         <div class="doc-title-row">
           <span class="doc-badge">策划文档</span>
           <span class="doc-title">{{ title }}</span>
+          <span v-if="loading" class="doc-status">整理中</span>
         </div>
-        <div class="doc-subtitle">先在对话里确认这版方案是否满意，右侧只用来查看和核对内容。</div>
+        <div class="doc-subtitle">
+          {{ loading ? '文档内容正在按章节逐步整理，右侧会持续更新。' : '先在对话里确认这版方案是否满意，右侧只用来查看和核对内容。' }}
+        </div>
       </div>
     </div>
 
@@ -21,7 +24,7 @@ import { ref, watch } from 'vue'
 import NotionEditor from './NotionEditor.vue'
 
 const props = defineProps({
-  content:  { type: String,  default: '' },
+  content:  { type: [String, Object],  default: '' },
   title:    { type: String,  default: '策划方案' },
   spaces:   { type: Array,   default: () => [] },
   loading:  { type: Boolean, default: false }
@@ -79,6 +82,15 @@ watch(() => props.content, v => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 320px;
+}
+
+.doc-status {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(var(--orange-6));
+  background: rgba(var(--orange-6), 0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 
 .doc-subtitle {

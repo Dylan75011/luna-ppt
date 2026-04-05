@@ -1,0 +1,1719 @@
+{
+  "id": "doc_5a6f9d2ffa6f",
+  "docType": "document",
+  "name": "策划方案",
+  "contentFormat": "tiptap-json",
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "岚图汽车132站车展全链路体验营销方案"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "一、方案核心定位"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "以「五感体验」为锚点，将岚图「中式优雅+高端科技」的差异化基因注入132站车展全链路——通过分级配置模型和标准化SOP体系，在有限预算内实现B级标杆出圈、C级深度渗透、DE级广泛覆盖的三层穿透。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "二、市场背景与品牌挑战"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "岚图作为"
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "央国企高端新能源第一品牌"
+          },
+          {
+            "type": "text",
+            "text": "，面临的核心命题是：如何在新能源赛道白热化竞争中，建立「可信赖的高端」认知？"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "当前车展场景有三个明显痛点："
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "1. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "同质化严重"
+          },
+          {
+            "type": "text",
+            "text": "——大多数品牌展台走马观花，参观者缺乏深度体验动机"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "2. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "传播碎片化"
+          },
+          {
+            "type": "text",
+            "text": "——132站执行品质参差不齐，素材难以复用，品牌资产沉淀困难"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "3. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "服务难标准化"
+          },
+          {
+            "type": "text",
+            "text": "——展会高峰期人员流动性大，服务品质难以保障"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "我们的答案是：不追求每一站都是A级旗舰，而是通过"
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "分级配置+标准化SOP"
+          },
+          {
+            "type": "text",
+            "text": "的精准投放策略，让B级站做足差异化、C级站做深体验感、DE级站做透品牌认知，在132站的广度覆盖中实现品牌资产的系统性积累。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "三、策略框架：五感体验系统"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "五感体验不是营销噱头，而是将品牌调性转化为可感知体验的"
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "系统方法论"
+          },
+          {
+            "type": "text",
+            "text": "："
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "体验维度品牌支撑点展台实现手段安全感产品力核心技术展示 + 试乘体验舒适感空间设计四区递进动线 + 材质过渡尊重感服务细节薪酬现结机制 + 高端茶歇愉悦感互动参与四大创新装置品位感视觉调性VI系统统一 + 中式美学"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "核心逻辑"
+          },
+          {
+            "type": "text",
+            "text": "：参观者从入口到转化区，完成「吸引→认知→情感→信任」的完整旅程，每一区对应一个体验目标，最终形成对岚图「中式优雅+高端科技」的品牌共识。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "四、展台空间规划：四区递进动线设计"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "动线设计原则"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "传统展台「一览无余」，参观者平均停留时间不足3分钟。我们的策略是制造"
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "探索感"
+          },
+          {
+            "type": "text",
+            "text": "——用光影变化和地面材质过渡划分空间，让动线有呼吸感，节奏层层递进。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "功能分区"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "区域核心功能体验目标关键设计**吸引区**入口展示视觉冲击，停留即转化全息投影新车亮相+品牌符号强化**体验区**核心展位认知建立，解决「这是什么车」新车亮相+技术讲解+产品力展示**沉浸区**互动装置情感连接，解决「为什么选岚图」非遗工坊+AI智驾画卷+充能挑战赛+香氛定制**转化区**洽谈空间信任建立，解决「现在下单」私密高端洽谈区+中式茶歇"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "分级适配"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "B级站（800㎡）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：完整四区呈现，可加入媒体日发布会"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "C级站（400㎡）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：三区融合（体验+沉浸合并），保留核心转化功能"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "DE级站（200㎡）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：聚焦吸引区+体验区，确保品牌认知触达"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "五、创新互动活动设计"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "互动装置的核心目的是让参观者"
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "停留更久+记忆更深+自发传播"
+          },
+          {
+            "type": "text",
+            "text": "。传统扫码送礼已无法激发参与欲，我们需要的是「参与感」——让每个人成为品牌故事的共创者。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "四大创新装置"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "互动名称感官对应核心机制品牌关联**非遗工坊**触觉漆扇/茶艺/苏绣DIY，定制岚图专属元素「中式优雅」文化认同**AI智驾画卷**视觉AI生成技术将驾驶愿景转化为艺术作品「高端科技」创新感知**充能挑战赛**听觉互动游戏模拟岚图超充技术产品功能认知门槛降低**香氛定制**嗅觉车内同款香氛体验「看不见的质感」记忆锚点"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "配置策略"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "B级站"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：四个互动全配置，定制化元素更多"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "C级站"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：选配2个核心互动（推荐非遗工坊+AI智驾画卷）"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "DE级站"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：标准化展示为主，互动装置简化或取消"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "六、132站分级配置与标准化SOP体系"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "分级配置模型"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "级别站数面积展台配置互动配置茶歇服务传播标准**B级**8800㎡顶配展台+媒体发布区全互动+定制化高端中式茶歇PRPhoto完整素材**C级**44400㎡标配展台核心互动×2基础茶歇标准化传播**DE级**80200㎡紧凑模块化展台标准化展示无茶歇简版传播"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "配置逻辑"
+          },
+          {
+            "type": "text",
+            "text": "：B级站做标杆出圈，辐射一线城市高净值人群；C级站做渗透转化，覆盖区域重点城市；DE级站做认知覆盖，最大化三四线城市品牌触达。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "「1+3+N」标准化SOP体系"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "1套总纲手册"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：品牌调性规范、VI执行标准、传播素材模板"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "3级执行标准"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：B/C/DE级各自的操作手册和检查清单"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "N站适应性调整"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：允许根据当地文化和展馆条件进行微调，但核心规范100%统一"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "形同神似"
+          },
+          {
+            "type": "text",
+            "text": "——视觉识别、服务话术、传播素材标准100%统一，空间尺寸和互动配置按级别适配。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "激励机制：薪酬现结"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "传统月结模式在展会高峰期人员流失率高达30%以上，我们的对策是："
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "日结服务费"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：展会期间每日结算，快速调动执行力"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "满意度奖金池"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：客户评分直接关联个人收入，激发服务主动性"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "到岗率保障"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：提前2个月储备人员，现结机制确保高峰期到岗率"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "七、整合传播策略：三阶段内容规划"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "车展传播是「展前造势→展中引爆→展后沉淀」的系统工程，每一站的素材都是下一站的弹药。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展前阶段（展前2周）"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "悬念海报"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：制造信息不对称，「岚图展台有什么不一样」"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "媒体邀约"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：核心媒体提前探馆承诺"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "本地KOL种草"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：区域达人预热，制造「岚图来了」的期待感"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展中阶段（3-5天/站）"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "实时短视频"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：展台亮点实时分发，降低传播门槛"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "PRPhoto标准化"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：光照、色温、构图、机位、人物站位统一规范，确保90%以上站点产出可混剪素材"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "媒体直播"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：无法到场的人也能感受展台热度"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展后阶段（展后1周）"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "车主证言"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：真实用户体验传播"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "活动精剪"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：每站3分钟精华视频沉淀"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "数据复盘"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：为下一站提供优化依据"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "八、预算分配与投资回报逻辑"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "预算总览（132站总预算按比例分配）"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "成本项金额（万元）占比说明**展台搭建与硬装**544045%品牌形象物理载体，B/C级是重点**互动装置开发**2005%四大装置一次性开发，132站复用**互动装置运输与搭建**39610%每站3万元，按站计费**人员成本**80020%含日结薪酬+奖金池激励**传播素材与PRPhoto**2005%标准化素材体系，本地化支持**高端茶歇（B级站）**641.6%B级站专属，强化尊重感体验**备用金**2005%应对延期、天气、成本波动**合计**7300100%—"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展台搭建细分"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "级别站数单站预算（万元）小计（万元）B级81501200C级44602640DE级80201600"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "投资回报逻辑"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "B级站（8站）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：预算占比约30%，覆盖一线城市高净值人群，做标杆出圈，媒体曝光贡献大"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "C级站（44站）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：预算占比约45%，覆盖区域重点城市，做深度渗透转化，留资主战场"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "DE级站（80站）"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：预算占比约25%，用模块化降低单站成本，实现最大范围品牌认知覆盖"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "80%的预算投向B+C级站，确保核心市场的深度渗透；DE级站用模块化策略实现广覆盖。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "九、执行节奏与KPI体系"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "执行节奏"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "阶段时间周期核心任务**Phase 1：筹备期**展前3个月132站档期确认、展台设计定稿、供应商招标、人员培训SOP发布、传播素材初版制作**Phase 2：执行期**展中3-5天/站每站搭建完成、互动装置调试、人员到位、素材按标准产出、PRPhoto实时更新**Phase 3：复盘期**展后1周/站单站数据复盘、传播效果分析、用户反馈整理、经验沉淀输入SOP迭代**Phase 4：迭代期**年度年度数据汇总、下一年度预算申报、SOP体系升级、互动装置迭代"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 3
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "核心KPI"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "指标目标值说明**媒体曝光量**年度累计≥5亿次132站合计，衡量品牌声量**展台留资量**B级≥2000组/站，C级≥800组/站，DE级≥200组/站销售线索收集效率**互动参与率**进店客户≥60%活动吸引力检验**客户满意度（NPS）**≥70分五感体验终极检验**PRPhoto出片率**≥90%站点符合标准素材一致性保障**人员流失率（展会期）**≤5%薪酬现结机制效果检验"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "十、风险应对与保障机制"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "风险应对策略**执行品质不一致**建立「神秘访客」暗访机制，每站随机抽查评分纳入供应商考核；SOP每年迭代一次，将优秀站点经验固化为标准**人员招募困难**提前2个月启动人员储备；薪酬现结+满意度奖金池，提高到岗率和积极性**互动装置审美疲劳**年度迭代1-2个互动装置；B级站引入定制化互动**预算超支或成本波动**预留5%不可预见费；模块化搭建降低定制成本；年度框架协议锁定核心供应商价格**品牌调性传达偏差**VI系统100%统一执行；每站搭建前品牌审核；展后素材品牌方确认后再发布"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "---"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "总结：我们为什么值得做"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "1. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "差异化定位"
+          },
+          {
+            "type": "text",
+            "text": "：五感体验策略将岚图「央国企高端新能源第一品牌」的抽象定位转化为可感知的具体体验，解决「品牌认知模糊」的核心痛点"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "2. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "高效资源配置"
+          },
+          {
+            "type": "text",
+            "text": "：分级配置模型确保132站不是「撒胡椒面」，而是B级做标杆、C级做渗透、DE级做覆盖的精准投放，预算效率最大化"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "3. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "可积累的品牌资产"
+          },
+          {
+            "type": "text",
+            "text": "：标准化SOP+PRPhoto体系让132站的投入产生长尾价值，每一站的素材都是下一站的弹药"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "4. "
+          },
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "执行落地保障"
+          },
+          {
+            "type": "text",
+            "text": "：薪酬现结机制解决展会高峰期人员稳定性难题，「神秘访客」机制确保132站品质一致性"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "132站不是终点，而是岚图品牌从「知名」走向「公认高端」的必经之路。"
+          }
+        ]
+      }
+    ]
+  },
+  "createdAt": "2026-04-05T14:43:14.248Z",
+  "updatedAt": "2026-04-05T14:54:14.546Z"
+}

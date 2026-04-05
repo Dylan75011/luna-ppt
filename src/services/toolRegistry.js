@@ -4,11 +4,122 @@ const { fetchPage } = require('./webFetch');
 const { analyzeAgentImages } = require('./visionMcp');
 const PptBuilderAgent = require('../agents/pptBuilderAgent');
 const ImageAgent = require('../agents/imageAgent');
+const EventVisualDesignerAgent = require('../agents/eventVisualDesignerAgent');
 const { strategize, critique, writeDoc } = require('../skills');
 const { generatePPT } = require('./pptGenerator');
 const { renderToHtml } = require('./previewRenderer');
 const config = require('../config');
 const wm = require('./workspaceManager');
+const { htmlToTiptap, markdownToTiptap } = require('./richText');
+const { toOutputUrl } = require('./outputPaths');
+
+function createEmptyTiptapDoc() {
+  return { type: 'doc', content: [{ type: 'paragraph' }] };
+}
+
+function cloneDocNode(node) {
+  return JSON.parse(JSON.stringify(node));
+}
+
+function buildDocStreamSnapshots(tiptapDoc, fallbackTitle = '策划方案') {
+  const blocks = Array.isArray(tiptapDoc?.content) ? tiptapDoc.content : [];
+  if (!blocks.length) {
+    return [{ title: fallbackTitle, content: createEmptyTiptapDoc(), progress: 100 }];
+  }
+
+  const titleBlock = blocks.find(block => block?.type === 'heading' && Number(block?.attrs?.level) === 1);
+  const extractText = (node) => {
+    if (!node) return '';
+    if (typeof node.text === 'string') return node.text;
+    if (Array.isArray(node.content)) return node.content.map(extractText).join('');
+    return '';
+  };
+  const resolvedTitle = extractText(titleBlock) || fallbackTitle;
+  const snapshots = [];
+  const progressiveBlocks = [];
+  const totalBlocks = blocks.length;
+
+  for (let i = 0; i < totalBlocks; i += 1) {
+    progressiveBlocks.push(cloneDocNode(blocks[i]));
+    const block = blocks[i];
+    const isSectionBoundary = i === totalBlocks - 1
+      || (block?.type === 'heading' && Number(block?.attrs?.level) === 2)
+      || ((blocks[i + 1]?.type === 'heading') && Number(blocks[i + 1]?.attrs?.level) === 2);
+    if (!isSectionBoundary) continue;
+    snapshots.push({
+      title: resolvedTitle,
+      sectionTitle: block?.type === 'heading' ? extractText(block) : '',
+      progress: Math.round(((i + 1) / totalBlocks) * 100),
+      content: {
+        type: 'doc',
+        content: progressiveBlocks.map(cloneDocNode)
+      }
+    });
+  }
+
+  if (!snapshots.length) {
+    snapshots.push({
+      title: resolvedTitle,
+      progress: 100,
+      content: { type: 'doc', content: blocks.map(cloneDocNode) }
+    });
+  }
+
+  return snapshots;
+}
+
+function buildPlanDraftMarkdown(plan = {}, userInput = {}) {
+  const title = plan.planTitle || userInput.topic || `${userInput.brand || ''}策划方案`;
+  const lines = [`# ${title}`];
+
+  if (plan.coreStrategy) {
+    lines.push('', '## 核心判断', '', plan.coreStrategy);
+  }
+
+  if (Array.isArray(plan.highlights) && plan.highlights.length) {
+    lines.push('', '## 方案亮点', '', ...plan.highlights.map(item => `- ${item}`));
+  }
+
+  if (Array.isArray(plan.sections) && plan.sections.length) {
+    plan.sections.forEach((section) => {
+      lines.push('', `## ${section.title || '方案章节'}`);
+      if (section.narrative) lines.push('', section.narrative);
+      if (Array.isArray(section.keyPoints) && section.keyPoints.length) {
+        lines.push('', ...section.keyPoints.map(item => `- ${item}`));
+      }
+    });
+  }
+
+  if (Array.isArray(plan.timeline?.phases) && plan.timeline.phases.length) {
+    lines.push('', '## 执行节奏', '', ...plan.timeline.phases.map(phase => `- ${phase.phase || '阶段'}：${phase.milestone || phase.duration || ''}`));
+  }
+
+  if (Array.isArray(plan.kpis) && plan.kpis.length) {
+    lines.push('', '## KPI 目标', '', ...plan.kpis.map(item => `- ${item.metric || '指标'}：${item.target || ''}`));
+  }
+
+  if (plan?.visualExecutionHints?.sceneTone) {
+    lines.push('', '## 现场效果设计建议', '', `整体现场气质：${plan.visualExecutionHints.sceneTone}`);
+  }
+
+  if (Array.isArray(plan?.visualExecutionHints?.mustRenderScenes) && plan.visualExecutionHints.mustRenderScenes.length) {
+    lines.push('', '### 建议提前出效果图的重点场景', '', ...plan.visualExecutionHints.mustRenderScenes.map(item => `- ${item}`));
+  }
+
+  if (Array.isArray(plan?.visualExecutionHints?.onsiteDesignSuggestions) && plan.visualExecutionHints.onsiteDesignSuggestions.length) {
+    lines.push('', '### 分场景设计建议');
+    plan.visualExecutionHints.onsiteDesignSuggestions.forEach((item) => {
+      lines.push('', `#### ${item.scene || '重点场景'}`);
+      if (item.goal) lines.push('', `目标：${item.goal}`);
+      if (item.designSuggestion) lines.push('', item.designSuggestion);
+      if (Array.isArray(item.visualFocus) && item.visualFocus.length) {
+        lines.push('', ...item.visualFocus.map(point => `- ${point}`));
+      }
+    });
+  }
+
+  return lines.join('\n').trim();
+}
 
 // ── OpenAI function calling 工具定义 ────────────────────────────
 
@@ -131,9 +242,9 @@ const TOOL_DEFINITIONS = [
           budget: { type: 'string', description: '预算（如"500万"）' },
           tone: { type: 'string', description: '风格调性（如"科技感、高端、年轻"）' },
           requirements: { type: 'string', description: '特殊要求或限制条件' },
-          research_context: { type: 'string', description: '本次已搜索到的所有行业信息、竞品案例和创意参考的摘要' }
+          research_context: { type: 'string', description: '对本次搜索内容的补充摘要（可选）。系统会自动整合所有 web_search 的原始结果，无需重复罗列，只需写搜索中未体现的额外判断或背景即可' }
         },
-        required: ['brand', 'event_description', 'goal', 'research_context']
+        required: ['brand', 'event_description', 'goal']
       }
     }
   },
@@ -205,6 +316,10 @@ const TOOL_DEFINITIONS = [
       parameters: {
         type: 'object',
         properties: {
+          header: {
+            type: 'string',
+            description: '可选。给这次提问一个很短的标题，适合显示在输入框上方的选择面板里，例如“确认品牌”“选择方向”“下一步”。'
+          },
           question: {
             type: 'string',
             description: '要问的问题，用自然对话语气。如果你有合理猜测，可先说出猜测再让用户确认，比"直接提问"更自然。'
@@ -213,6 +328,19 @@ const TOOL_DEFINITIONS = [
             type: 'string',
             enum: ['missing_info', 'ambiguous', 'confirmation', 'suggestion'],
             description: 'missing_info=缺少无法假设的核心信息；ambiguous=两个方向都合理，需用户选择；confirmation=需要用户明确同意才能执行高代价操作；suggestion=提供选项让用户选择偏好'
+          },
+          options: {
+            type: 'array',
+            description: '可选。给用户提供 2-4 个可直接选择的回复项。不要包含“其他”，用户始终可以直接输入自己的话。',
+            items: {
+              type: 'object',
+              properties: {
+                label: { type: 'string', description: '用户看到的选项标题，1-12 个字为宜' },
+                value: { type: 'string', description: '用户点击后实际回传给模型的回复文本' },
+                description: { type: 'string', description: '可选。用于解释这个选项意味着什么或会如何继续。' }
+              },
+              required: ['label', 'value']
+            }
           }
         },
         required: ['question', 'type']
@@ -384,6 +512,15 @@ async function execWebSearch(args, session, onEvent) {
     `[${i + 1}] ${r.title}\n${r.snippet}`
   ).join('\n\n');
 
+  // 累积到 researchStore，供 run_strategy 强制引用，不依赖 Brain 的记忆
+  if (!Array.isArray(session.researchStore)) session.researchStore = [];
+  session.researchStore.push({
+    query: args.query,
+    timestamp: Date.now(),
+    results: results.map(r => ({ title: r.title, url: r.url, snippet: r.snippet })),
+    source: searchResult.source
+  });
+
   onEvent('tool_progress', { message: `找到 ${results.length} 条结果（${searchResult.source}）` });
   onEvent('artifact', {
     artifactType: 'research_result',
@@ -439,11 +576,35 @@ async function execRunStrategy(args, session, onEvent) {
     pptStructureHint: ''
   };
 
-  // 构建 researchResults（把 research_context 包装成标准格式）
+  // 从 researchStore 重建完整搜索记录（保证所有搜索都被纳入，不依赖 Brain 的记忆）
+  const RESEARCH_CONTEXT_MAX_CHARS = 8000;
+  const store = Array.isArray(session.researchStore) ? session.researchStore : [];
+  let storedContext = '';
+  if (store.length > 0) {
+    // 从最新的搜索往前累积，超出上限时截止（保留最近的搜索）
+    const parts = [];
+    let totalChars = 0;
+    for (let i = store.length - 1; i >= 0; i--) {
+      const entry = store[i];
+      const block = `【搜索${i + 1}】${entry.query}\n` +
+        entry.results.map((r, j) => `  [${j + 1}] ${r.title}\n  ${r.snippet}`).join('\n');
+      if (totalChars + block.length > RESEARCH_CONTEXT_MAX_CHARS) break;
+      parts.unshift(block);
+      totalChars += block.length;
+    }
+    storedContext = parts.join('\n\n');
+  }
+
+  // Brain 传来的 research_context 作为补充摘要，与 storedContext 合并
+  const finalResearchContext = [storedContext, args.research_context]
+    .filter(s => s && s.trim() && s.trim() !== '（暂无搜索数据）')
+    .join('\n\n---\n\n') || '（暂无搜索数据）';
+
+  // 构建 researchResults（把完整 context 包装成标准格式）
   const researchResults = [{
     taskId: 'brain-research',
     focus: '综合研究',
-    summary: args.research_context || '（暂无搜索数据）',
+    summary: finalResearchContext,
     keyFindings: [],
     inspirations: []
   }];
@@ -505,6 +666,7 @@ async function execRunStrategy(args, session, onEvent) {
       planTitle: bestPlan?.planTitle || '',
       coreStrategy: bestPlan?.coreStrategy || '',
       highlights: bestPlan?.highlights || [],
+      visualExecutionHints: bestPlan?.visualExecutionHints || {},
       sections: (bestPlan?.sections || []).map(s => ({
         title: s.title,
         keyPoints: s.keyPoints || []
@@ -512,24 +674,63 @@ async function execRunStrategy(args, session, onEvent) {
     }
   });
 
+  const provisionalDoc = markdownToTiptap(buildPlanDraftMarkdown(bestPlan, userInput));
+  const provisionalSnapshots = buildDocStreamSnapshots(
+    provisionalDoc,
+    bestPlan?.planTitle || userInput.topic || `${userInput.brand} 策划方案`
+  );
+  provisionalSnapshots.forEach((snapshot, index) => {
+    onEvent('doc_section_added', {
+      title: snapshot.title,
+      sectionTitle: snapshot.sectionTitle || '',
+      progress: Math.max(8, Math.round(snapshot.progress * 0.55)),
+      index,
+      total: provisionalSnapshots.length,
+      docContent: snapshot.content,
+      provisional: true
+    });
+  });
+
   const { markdown, html } = await writeDoc({ plan: bestPlan, userInput, reviewFeedback: previousFeedback }, session.apiKeys);
+  const tiptapDoc = htmlToTiptap(html);
   session.docMarkdown = markdown;
   session.docHtml = html;
+  session.docJson = tiptapDoc;
+  const docSnapshots = buildDocStreamSnapshots(
+    tiptapDoc,
+    bestPlan?.planTitle || userInput.topic || `${userInput.brand} 策划方案`
+  );
+  docSnapshots.forEach((snapshot, index) => {
+    onEvent('doc_section_added', {
+      title: snapshot.title,
+      sectionTitle: snapshot.sectionTitle || '',
+      progress: Math.min(98, 55 + Math.round(snapshot.progress * 0.43)),
+      index,
+      total: docSnapshots.length,
+      docContent: snapshot.content,
+      provisional: false
+    });
+  });
   onEvent('doc_ready', {
     docHtml: html,
+    docContent: tiptapDoc,
     title: bestPlan?.planTitle || userInput.topic || `${userInput.brand} 策划方案`,
     score: bestScore
   });
 
-  // 自动保存策划文档到工作空间
+  // 自动保存策划文档到工作空间（放在任务文件夹中）
   if (session.spaceId && html) {
     try {
-      const docTitle = bestPlan?.planTitle || `${userInput.brand || ''}策划方案`;
-      const node = wm.createNode({ parentId: session.spaceId, name: docTitle, type: 'document', docType: 'document' });
-      wm.saveContent(node.id, html, 'legacy-html');
-      // 刷新空间上下文，让后续工具调用能看到新文档
+      const planTitle = bestPlan?.planTitle || `${userInput.brand || ''}策划方案`;
+      // 生成任务文件夹名：取活动标题前20字符，去掉特殊符号
+      const rawFolderName = (bestPlan?.planTitle || userInput.topic || userInput.brand || '策划任务')
+        .replace(/[\/\\:*?"<>|]/g, '').slice(0, 20).trim();
+      const folder = wm.ensureTaskFolder(session.spaceId, rawFolderName);
+      session.taskFolderId = folder.id;   // 供 build_ppt 复用
+      const node = wm.createNode({ parentId: folder.id, name: '策划方案', type: 'document', docType: 'document' });
+      wm.saveContent(node.id, tiptapDoc, 'tiptap-json');
       try { session.spaceContext = wm.getSpaceContext(session.spaceId); } catch {}
-      onEvent('workspace_updated', { spaceId: session.spaceId, docId: node.id, docName: docTitle, docType: 'document' });
+      onEvent('workspace_updated', { spaceId: session.spaceId, folderId: folder.id, folderName: rawFolderName, docId: node.id, docName: '策划方案', docType: 'document' });
     } catch (e) {
       console.warn('[run_strategy] 自动保存策划文档失败:', e.message);
     }
@@ -557,8 +758,10 @@ async function execBuildPpt(args, session, onEvent) {
 
   const pptBuilderAgent = new PptBuilderAgent(apiKeys);
   const imageAgent      = new ImageAgent(apiKeys);
+  const visualDesignerAgent = new EventVisualDesignerAgent(apiKeys);
 
   const imageMap = {};
+  let imageCandidates = {};
 
   try {
     onEvent('tool_progress', { message: '正在生成 PPT 大纲...' });
@@ -569,8 +772,26 @@ async function execBuildPpt(args, session, onEvent) {
       docContent: args.note || session.docHtml || '',
       imageMap,
       onOutlineReady: async (outline, total) => {
+        onEvent('tool_progress', { message: '正在根据方案设计活动现场效果图建议...' });
+        const visualPlan = await visualDesignerAgent.run({
+          plan: bestPlan,
+          pptOutline: outline,
+          userInput,
+          attachments: Array.isArray(session?.attachments) ? session.attachments : []
+        }).catch(err => {
+          console.warn('[build_ppt] 活动图设计失败:', err.message);
+          return null;
+        });
+
+        if (visualPlan?.pages?.length) {
+          outline.pages = (outline.pages || []).map((page, index) => ({
+            ...page,
+            visualAssetPlan: visualPlan.pages.find(item => item.pageIndex === index) || page.visualAssetPlan || null
+          }));
+        }
+
         onEvent('tool_progress', { message: '正在结合策划内容与页面结构匹配背景图...' });
-        const imageCandidates = await imageAgent.run({ plan: bestPlan, userInput, pptOutline: outline })
+        imageCandidates = await imageAgent.run({ plan: bestPlan, userInput, pptOutline: outline, visualPlan })
           .catch(err => {
             console.warn('[build_ppt] 配图搜索失败:', err.message);
             return {};
@@ -602,21 +823,58 @@ async function execBuildPpt(args, session, onEvent) {
     const downloadUrl = result.path;
     const previewSlides = renderToHtml(pptData);
 
-    // 自动保存 PPT 到工作空间
+    // 自动保存 PPT 到工作空间（优先放在与策划方案相同的任务文件夹）
     if (session.spaceId) {
       try {
         const brand = session.brief?.brand || session.userInput?.brand || 'PPT';
-        const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace('/', '-');
-        const pptName = `${brand}_${dateStr}.pptx`;
+        const pptName = `${brand} PPT.pptx`;
+        const targetParent = session.taskFolderId || session.spaceId;
         const savedNode = wm.savePptToSpace({
           spaceId: session.spaceId,
+          parentId: targetParent,
           name: pptName,
           pptData,
           downloadUrl,
           previewSlides
         });
+
+        const seenImagePaths = new Set();
+        const candidateImages = [
+          ...(Array.isArray(imageCandidates?.pages) ? imageCandidates.pages : []),
+          ...(['cover', 'content', 'end']
+            .flatMap((category) => Array.isArray(imageCandidates?.[category]) ? imageCandidates[category].slice(0, 1) : []))
+        ];
+
+        candidateImages.forEach((item, index) => {
+          const localPath = String(item?.localPath || '').trim();
+          if (!localPath || seenImagePaths.has(localPath)) return;
+          seenImagePaths.add(localPath);
+          const pageNo = Number.isInteger(item?.pageIndex) ? item.pageIndex + 1 : null;
+          const baseLabel = item?.pageTitle || item?.role || item?.originQuery || `配图 ${index + 1}`;
+          const imageName = pageNo
+            ? `${brand} 配图 ${String(pageNo).padStart(2, '0')}.jpg`
+            : `${brand} ${String(baseLabel).slice(0, 24) || `配图 ${index + 1}`}.jpg`;
+          wm.saveAssetToSpace({
+            spaceId: session.spaceId,
+            parentId: targetParent,
+            name: imageName,
+            docType: 'image',
+            filePath: localPath,
+            previewUrl: toOutputUrl(localPath),
+            meta: {
+              sourcePageTitle: item?.pageTitle || '',
+              role: item?.role || '',
+              caption: item?.originQuery || item?.query || '',
+              pageIndex: Number.isInteger(item?.pageIndex) ? item.pageIndex : null,
+              sceneType: item?.sceneType || '',
+              assetType: item?.assetType || '',
+              insertMode: item?.insertMode || ''
+            }
+          });
+        });
+
         try { session.spaceContext = wm.getSpaceContext(session.spaceId); } catch {}
-        onEvent('workspace_updated', { spaceId: session.spaceId, docId: savedNode.id, docName: pptName, docType: 'ppt' });
+        onEvent('workspace_updated', { spaceId: session.spaceId, folderId: session.taskFolderId || null, docId: savedNode.id, docName: pptName, docType: 'ppt' });
       } catch (e) {
         console.warn('[build_ppt] 自动保存 PPT 失败:', e.message);
       }
@@ -686,7 +944,7 @@ async function execUpdateWorkspaceDoc(args, session, onEvent) {
   try {
     // 检查文档存在且属于当前空间
     const data = wm.getContent(docId);
-    wm.saveContent(docId, content, 'legacy-html');
+    wm.saveContent(docId, markdownToTiptap(content), 'tiptap-json');
 
     // 如果需要重命名
     if (args.title && String(args.title).trim() && String(args.title).trim() !== data.name) {
@@ -715,7 +973,7 @@ async function execSaveToWorkspace(args, session, onEvent) {
 
   try {
     const node = wm.createNode({ parentId: session.spaceId, name: title, type: 'document', docType: 'document' });
-    wm.saveContent(node.id, content, 'legacy-html');
+    wm.saveContent(node.id, markdownToTiptap(content), 'tiptap-json');
     // 刷新空间上下文
     try { session.spaceContext = wm.getSpaceContext(session.spaceId); } catch {}
     onEvent('tool_progress', { message: `已保存到工作空间：${title}` });

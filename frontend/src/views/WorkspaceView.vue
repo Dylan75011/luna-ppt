@@ -76,9 +76,10 @@
               </div>
             </template>
             <template #icon="node">
-              <PhStack       v-if="node.nType === 'space'"    :size="14" weight="duotone" />
+              <PhStack       v-if="node.nType === 'space'"      :size="14" weight="duotone" />
               <PhFolder      v-else-if="node.nType === 'folder'" :size="14" weight="duotone" />
               <PhFilePdf     v-else-if="node.docType === 'ppt'"  :size="14" weight="duotone" />
+              <PhImageSquare v-else-if="node.docType === 'image'" :size="14" weight="duotone" />
               <PhFileText    v-else                              :size="14" weight="duotone" />
             </template>
           </a-tree>
@@ -112,7 +113,27 @@
               {{ selectedNode.title }}
             </span>
           </div>
-          <div class="ws-empty" style="flex:1">
+          <div v-if="selectedChildren.length" class="folder-overview">
+            <div
+              v-for="item in selectedChildren"
+              :key="item.key"
+              class="folder-overview-card"
+              @click="selectNodeFromOverview(item)"
+            >
+              <div class="folder-overview-icon">
+                <PhStack v-if="item.nType === 'space'" :size="18" weight="duotone" />
+                <PhFolder v-else-if="item.nType === 'folder'" :size="18" weight="duotone" />
+                <PhFilePdf v-else-if="item.docType === 'ppt'" :size="18" weight="duotone" />
+                <PhImageSquare v-else-if="item.docType === 'image'" :size="18" weight="duotone" />
+                <PhFileText v-else :size="18" weight="duotone" />
+              </div>
+              <div class="folder-overview-main">
+                <div class="folder-overview-title">{{ item.title }}</div>
+                <div class="folder-overview-meta">{{ overviewTypeLabel(item) }}</div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="ws-empty" style="flex:1">
             <div class="ws-empty-art"><PhFolder :size="40" weight="thin" /></div>
             <div class="ws-empty-title">{{ selectedNode.title }}</div>
             <div class="ws-empty-desc">点击节点右侧的 ··· 可新建子文件夹或文档</div>
@@ -164,6 +185,27 @@
             <div class="ws-empty-desc">该 PPT 文档没有可用的幻灯片数据</div>
           </div>
         </template>
+
+        <!-- 图片 -->
+        <template v-else-if="selectedNode.docType === 'image'">
+          <div v-if="imagePreviewUrl" class="asset-preview-shell">
+            <div class="asset-preview-meta">
+              <div>
+                <div class="asset-preview-kicker">图片产出物</div>
+                <div class="asset-preview-title">{{ docTitle || selectedNode.title }}</div>
+              </div>
+              <a :href="imageDownloadUrl || imagePreviewUrl" target="_blank" rel="noopener" class="asset-download-link">查看原图</a>
+            </div>
+            <div class="asset-preview-stage">
+              <img :src="imagePreviewUrl" :alt="docTitle || selectedNode.title" class="asset-preview-image" />
+            </div>
+          </div>
+          <div v-else class="ws-empty">
+            <div class="ws-empty-art"><PhImageSquare :size="40" weight="thin" /></div>
+            <div class="ws-empty-title">暂无图片预览</div>
+            <div class="ws-empty-desc">该图片产出物没有可用的预览地址</div>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -186,7 +228,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import { workspaceApi } from '../api/workspace'
 import SlideViewer from '../components/SlideViewer.vue'
@@ -197,6 +239,7 @@ import {
 import {
   PhPlus, PhDotsThree,
   PhStack, PhFolder, PhFilePdf, PhFileText,
+  PhImageSquare,
   PhFolderSimpleDashed, PhPresentationChart,
   PhNotePencil,
 } from '@phosphor-icons/vue'
@@ -208,26 +251,7 @@ const selectedKeys = ref([])
 const selectedNode = ref(null)
 
 function buildArcoTree(spaces) {
-  function buildNode(n) {
-    const node = {
-      key:      n.id,
-      title:    n.name,
-      nType:    n.type,
-      docType:  n.docType,
-      raw: n,
-      selectable: true,
-      draggable: false
-    }
-    if (n.children && n.children.length) {
-      node.children = n.children.map(buildNode)
-    } else if (n.type === 'space' || n.type === 'folder') {
-      node.children = []
-    } else {
-      node.isLeaf = true
-    }
-    return node
-  }
-  return spaces.map(buildNode)
+  return spaces.map(buildArcoNode)
 }
 
 async function loadTree() {
@@ -242,6 +266,8 @@ loadTree()
 // ── 节点选中 ────────────────────────────────────────────────────
 const pptSlides      = ref([])
 const pptDownloadUrl = ref('')
+const imagePreviewUrl = ref('')
+const imageDownloadUrl = ref('')
 const saveStatus     = ref('')
 const docContent     = ref({})
 const docTitle       = ref('')
@@ -249,6 +275,38 @@ let   currentNodeId  = null
 let   saveTimer      = null
 let   renameTimer    = null
 const contentPanelRef = ref(null)
+
+const selectedChildren = computed(() => {
+  const children = selectedNode.value?.raw?.children
+  return Array.isArray(children) ? children.map(buildArcoNode) : []
+})
+
+function buildArcoNode(n) {
+  const node = {
+    key:      n.id,
+    title:    n.name,
+    nType:    n.type,
+    docType:  n.docType,
+    raw: n,
+    selectable: true,
+    draggable: false
+  }
+  if (n.children && n.children.length) {
+    node.children = n.children.map(buildArcoNode)
+  } else if (n.type === 'space' || n.type === 'folder') {
+    node.children = []
+  } else {
+    node.isLeaf = true
+  }
+  return node
+}
+
+function overviewTypeLabel(node) {
+  if (node.nType === 'folder') return `${(node.raw?.children || []).length} 项内容`
+  if (node.docType === 'ppt') return 'PPT 预览文件'
+  if (node.docType === 'image') return '图片产出物'
+  return '可编辑文档'
+}
 
 function createEmptyDoc() {
   return { type: 'doc', content: [{ type: 'paragraph' }] }
@@ -279,6 +337,9 @@ async function onTreeSelect(keys, { node }) {
   selectedKeys.value = keys
   selectedNode.value = node
   pptSlides.value    = []
+  pptDownloadUrl.value = ''
+  imagePreviewUrl.value = ''
+  imageDownloadUrl.value = ''
   saveStatus.value   = ''
   docContent.value   = createEmptyDoc()
   docTitle.value     = ''
@@ -292,6 +353,10 @@ async function onTreeSelect(keys, { node }) {
     if (node.docType === 'ppt') {
       pptSlides.value      = doc.previewSlides || []
       pptDownloadUrl.value = doc.downloadUrl   || ''
+    } else if (node.docType === 'image') {
+      docTitle.value = node.title || doc.name || ''
+      imagePreviewUrl.value = doc.previewUrl || doc.downloadUrl || ''
+      imageDownloadUrl.value = doc.downloadUrl || doc.previewUrl || ''
     } else {
       currentNodeId    = node.key
       docTitle.value   = node.title || doc.name || ''
@@ -314,7 +379,7 @@ function onDocChange(content) {
 }
 
 function onDocTitleInput() {
-  if (!selectedNode.value?.key || !docTitle.value.trim()) return
+  if (!selectedNode.value?.key || !docTitle.value.trim() || selectedNode.value?.docType !== 'document') return
   saveStatus.value = '标题更新中...'
   clearTimeout(renameTimer)
   renameTimer = setTimeout(async () => {
@@ -375,9 +440,13 @@ async function onNodeAction(action, node) {
     const url = workspaceApi.exportWordUrl(node.key)
     window.open(url, '_blank')
   } else if (action === 'delete') {
+    const isSpace = node.nType === 'space'
+    const content = isSpace
+      ? `确定删除「${node.title}」？空间内的文档、图片、PPT 和关联对话都会一起删除，且不可恢复。`
+      : `确定删除「${node.title}」？此操作不可撤销。`
     Modal.warning({
       title: '确认删除',
-      content: `确定删除「${node.title}」？此操作不可撤销。`,
+      content,
       okButtonProps: { status: 'danger' },
       onOk: async () => {
         await workspaceApi.remove(node.key)
@@ -402,19 +471,17 @@ async function onWordFileSelected(e) {
       const created = await workspaceApi.createDocument(node.key, docName, 'document')
       const nodeId  = created.node?.id || created.id
       const result  = await workspaceApi.importWord(nodeId, file)
-      await workspaceApi.saveContent(nodeId, result.html, 'legacy-html')
       Message.remove('word-import')
       Message.success({ content: `已导入到「${docName}」`, id: 'word-import' })
       await loadTree()
       selectedKeys.value  = [nodeId]
       currentNodeId       = nodeId
       docTitle.value      = docName
-      docContent.value    = result.html
+      docContent.value    = result.content || createEmptyDoc()
       selectedNode.value  = { key: nodeId, title: docName, nType: 'document', docType: 'document' }
     } else {
       const result = await workspaceApi.importWord(node.key, file)
-      await workspaceApi.saveContent(node.key, result.html, 'legacy-html')
-      if (currentNodeId === node.key) docContent.value = result.html
+      if (currentNodeId === node.key) docContent.value = result.content || createEmptyDoc()
       Message.remove('word-import')
       Message.success({ content: '已导入 Word 内容', id: 'word-import' })
     }
@@ -432,9 +499,24 @@ async function doRename() {
   await loadTree()
 }
 
+function selectNodeFromOverview(node) {
+  selectedKeys.value = [node.key]
+  onTreeSelect([node.key], { node })
+}
+
+let _wsBroadcast = null
+
+onMounted(() => {
+  try {
+    _wsBroadcast = new BroadcastChannel('oc_workspace_updated')
+    _wsBroadcast.onmessage = () => loadTree()
+  } catch {}
+})
+
 onUnmounted(() => {
   clearTimeout(saveTimer)
   clearTimeout(renameTimer)
+  _wsBroadcast?.close()
 })
 </script>
 
@@ -719,6 +801,61 @@ onUnmounted(() => {
   align-items: center;
 }
 
+.folder-overview {
+  padding: 20px 24px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  overflow: auto;
+}
+
+.folder-overview-card {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.folder-overview-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(68, 64, 60, 0.16);
+  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.06);
+}
+
+.folder-overview-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f5f5f4;
+  color: #57534e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.folder-overview-main {
+  min-width: 0;
+}
+
+.folder-overview-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1c1917;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.folder-overview-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #a8a29e;
+}
+
 /* ── Document page ── */
 .doc-page-shell {
   flex: 1;
@@ -750,6 +887,70 @@ onUnmounted(() => {
   color: #a8a29e;
   opacity: 0;
   transition: opacity 0.2s ease;
+}
+
+.asset-preview-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 18px;
+  overflow: auto;
+}
+
+.asset-preview-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.asset-preview-kicker {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #a8a29e;
+}
+
+.asset-preview-title {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.asset-download-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #1c1917;
+  color: #fff;
+  text-decoration: none;
+}
+
+.asset-preview-stage {
+  flex: 1;
+  min-height: 320px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top, rgba(120, 113, 108, 0.08), transparent 42%),
+    linear-gradient(180deg, #f8f7f5 0%, #f3f1ee 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+}
+
+.asset-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 16px;
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(28, 25, 23, 0.14);
 }
 
 .save-status.visible { opacity: 1; }
