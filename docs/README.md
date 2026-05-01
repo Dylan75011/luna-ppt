@@ -6,7 +6,7 @@ Luna 是一个基于大模型的智能活动策划平台，通过自然语言对
 
 - **自然语言交互**：通过对话理解需求，无需填写复杂表单
 - **自动素材搜集**：搜索行业趋势、竞品案例、创意参考（搜索降级：MiniMax → Tavily → DuckDuckGo）
-- **多轮方案优化**：DeepSeek-R1 评审 + MiniMax 迭代，评分 ≥ 7.0 通过
+- **多轮方案优化**：DeepSeek V4-Pro 评审 + MiniMax 迭代，评分 ≥ 7.0 通过
 - **PPT 生成**：Pexels 配图 + MiniMax AI 封面图，实时预览，一键下载
 - **文档空间管理**：多项目隔离，策划经验自动沉淀到 Platform Memory
 
@@ -40,7 +40,7 @@ Luna 是一个基于大模型的智能活动策划平台，通过自然语言对
 意图判断 → 搜索素材 → 生成方案 → 评审优化 → 生成 PPT
 ```
 
-- **MiniMax**（主力）+ **DeepSeek-R1**（评审）
+- **MiniMax**（主力）+ **DeepSeek V4-Pro**（评审）
 - 搜索降级：MiniMax → Tavily → DuckDuckGo
 - 前端：Vue 3 + Vite，后端：Express
 - 会话：SSE 实时推送 + SQLite 持久化

@@ -1,6 +1,10 @@
 // 设计系统常量：字体、CSS、Design Tokens
 
-const FONTS = "'Geist', 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif";
+const { FONT_STACK } = require('./fonts');
+
+// 优先使用内嵌的 Inter + Noto Sans SC（见 fonts.js），避免容器/Linux 缺字体回退漂移。
+// PingFang SC / system-ui 仅作为内嵌字体加载失败时的最后兜底。
+const FONTS = FONT_STACK;
 
 const SLIDE_CSS = `
 *,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}

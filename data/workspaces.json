@@ -1,208 +1,25 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-25T16:01:57.682Z",
+  "updatedAt": "2026-05-01T16:21:52.711Z",
   "spaces": [
     {
-      "id": "space_c3b5dce94dbb",
+      "id": "space_ff551e947841",
       "type": "space",
-      "name": "华为",
-      "createdAt": "2026-03-28T14:46:14.273Z",
+      "name": "小米",
+      "createdAt": "2026-05-01T16:21:52.711Z",
       "children": [
         {
-          "id": "doc_e25fc617fdbe",
+          "id": "doc_90d470e684f4",
           "type": "document",
           "name": "README",
-          "createdAt": "2026-03-29T11:42:43.724Z",
-          "updatedAt": "2026-03-30T15:30:46.654Z",
+          "createdAt": "2026-05-01T16:21:52.711Z",
+          "updatedAt": "2026-05-01T16:21:52.711Z",
           "docType": "document",
           "system": true,
           "systemType": "space_index"
-        },
-        {
-          "id": "folder_e40f5048c483",
-          "type": "folder",
-          "name": "全新旗舰车型发布会，对标BBA，定价45",
-          "children": [
-            {
-              "id": "doc_94649b88d008",
-              "type": "document",
-              "name": "策划方案",
-              "createdAt": "2026-04-21T15:52:04.693Z",
-              "updatedAt": "2026-04-24T17:46:24.993Z",
-              "docType": "document"
-            }
-          ],
-          "createdAt": "2026-04-21T15:52:04.693Z",
-          "updatedAt": "2026-04-21T15:52:04.693Z"
-        },
-        {
-          "id": "folder_7d7e6b554e2f",
-          "type": "folder",
-          "name": "华为智界新车发布会，500-800人规模",
-          "children": [
-            {
-              "id": "doc_c501aa8062de",
-              "type": "document",
-              "name": "策划方案",
-              "createdAt": "2026-04-22T16:24:31.797Z",
-              "updatedAt": "2026-04-22T17:26:13.445Z",
-              "docType": "document"
-            }
-          ],
-          "createdAt": "2026-04-22T16:24:31.795Z",
-          "updatedAt": "2026-04-22T16:24:31.795Z"
-        },
-        {
-          "id": "doc_ed27d27201e3",
-          "type": "document",
-          "name": "小红书\"老黄牛\"笔记研究摘要",
-          "createdAt": "2026-04-23T17:01:08.301Z",
-          "updatedAt": "2026-04-24T17:45:08.511Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_d7a184964aeb",
-          "type": "document",
-          "name": "小红书\"老黄牛\"笔记研究摘要",
-          "createdAt": "2026-04-24T17:23:18.822Z",
-          "updatedAt": "2026-04-24T17:36:18.143Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_df3a9c1b7270",
-          "type": "document",
-          "name": "小红书\"老黄牛\"笔记研究摘要",
-          "createdAt": "2026-04-24T17:41:08.077Z",
-          "updatedAt": "2026-04-24T17:51:34.764Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_c2a6f5f92f11",
-          "type": "document",
-          "name": "华为/鸿蒙智行车展活动主题研究报告",
-          "createdAt": "2026-04-24T17:56:21.516Z",
-          "updatedAt": "2026-04-25T07:54:12.850Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_a5624690ac5e",
-          "type": "document",
-          "name": "问界/鸿蒙智行车展活动研究报告",
-          "createdAt": "2026-04-25T09:09:13.224Z",
-          "updatedAt": "2026-04-25T09:31:04.026Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_3d618d3d4ee9",
-          "type": "document",
-          "name": "华为问界 2026北京车展活动研究摘要",
-          "createdAt": "2026-04-25T09:56:26.699Z",
-          "updatedAt": "2026-04-25T09:56:26.863Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_ba26bdad2130",
-          "type": "document",
-          "name": "小红书问界北京车展活动研究摘要",
-          "createdAt": "2026-04-25T10:17:12.238Z",
-          "updatedAt": "2026-04-25T10:17:12.420Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_772711e466c9",
-          "type": "document",
-          "name": "问界/鸿蒙智行车展活动研究报告",
-          "createdAt": "2026-04-25T11:56:20.188Z",
-          "updatedAt": "2026-04-25T11:56:20.301Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_2ad8fb559648",
-          "type": "document",
-          "name": "问界/鸿蒙智行车展活动研究报告",
-          "createdAt": "2026-04-25T15:55:33.882Z",
-          "updatedAt": "2026-04-25T15:55:34.004Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_4b2c70ad62a5",
-          "type": "document",
-          "name": "问界/鸿蒙智行车展活动研究报告",
-          "createdAt": "2026-04-25T16:01:57.646Z",
-          "updatedAt": "2026-04-25T16:01:57.681Z",
-          "docType": "document"
         }
       ],
-      "indexDocId": "doc_e25fc617fdbe"
-    },
-    {
-      "id": "space_8b44e7372180",
-      "type": "space",
-      "name": "岚图",
-      "createdAt": "2026-03-29T14:23:04.026Z",
-      "children": [
-        {
-          "id": "doc_d626d1bcbf5a",
-          "type": "document",
-          "name": "README",
-          "createdAt": "2026-03-29T14:23:04.027Z",
-          "updatedAt": "2026-03-29T14:23:04.027Z",
-          "docType": "document",
-          "system": true,
-          "systemType": "space_index"
-        },
-        {
-          "id": "doc_f6a2a2d3892b",
-          "type": "document",
-          "name": "岚图汽车区域车展运营项目方案_v2",
-          "createdAt": "2026-04-05T07:44:25.918Z",
-          "updatedAt": "2026-04-15T16:19:41.345Z",
-          "docType": "document"
-        },
-        {
-          "id": "doc_6d27cdde908a",
-          "type": "document",
-          "name": "岚图汽车区域车展运营项目方案_v2",
-          "createdAt": "2026-04-06T15:53:53.964Z",
-          "updatedAt": "2026-04-06T15:53:53.965Z",
-          "docType": "document"
-        },
-        {
-          "id": "folder_3521bc2b88a5",
-          "type": "folder",
-          "name": "登峰时刻  岚图珠峰上市盛典",
-          "children": [
-            {
-              "id": "doc_d70886069135",
-              "type": "document",
-              "name": "策划方案",
-              "createdAt": "2026-04-18T16:22:12.023Z",
-              "updatedAt": "2026-04-18T16:22:12.024Z",
-              "docType": "document"
-            }
-          ],
-          "createdAt": "2026-04-18T16:22:12.019Z",
-          "updatedAt": "2026-04-18T16:22:12.019Z"
-        },
-        {
-          "id": "folder_0b19f1ee4c8c",
-          "type": "folder",
-          "name": "岚图泰山X8庭院级大五座SUV新品城市级",
-          "children": [
-            {
-              "id": "doc_f8fc0670d07d",
-              "type": "document",
-              "name": "策划方案",
-              "createdAt": "2026-04-21T15:26:53.187Z",
-              "updatedAt": "2026-04-22T17:25:34.301Z",
-              "docType": "document"
-            }
-          ],
-          "createdAt": "2026-04-21T15:26:53.185Z",
-          "updatedAt": "2026-04-21T15:26:53.185Z"
-        }
-      ],
-      "indexDocId": "doc_d626d1bcbf5a"
+      "indexDocId": "doc_90d470e684f4"
     }
   ]
 }

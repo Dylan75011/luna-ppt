@@ -1,5 +1,6 @@
 // Challenge Brief 工具：在 web_search / propose_concept 之前，主动扫 brief 找红旗
 const { challengeBrief } = require('../../skills');
+const { makeSkillStatusBridge } = require('./skillStatusBridge');
 
 const RESEARCH_CONTEXT_MAX_CHARS = 4000;
 
@@ -50,7 +51,8 @@ async function execChallengeBrief(args = {}, session, onEvent) {
     result = await challengeBrief({
       userInput,
       existingAssumptions,
-      researchContext
+      researchContext,
+      onStatus: makeSkillStatusBridge(onEvent, { skillLabel: '审视 brief' })
     }, session.apiKeys);
   } catch (err) {
     console.warn('[challenge_brief] 失败:', err.message);

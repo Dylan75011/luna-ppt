@@ -10,12 +10,20 @@ module.exports = {
   // MiniMax（订阅制，主力）
   minimaxApiKey: process.env.MINIMAX_API_KEY || '',
   minimaxBaseUrl: process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/v1',
-  minimaxModel: process.env.MINIMAX_MODEL || 'MiniMax-M2.5',
+  minimaxModel: process.env.MINIMAX_MODEL || 'MiniMax-M2.7-highspeed',
 
-  // DeepSeek（按量，仅 Critic Agent）
+  // DeepSeek V4（按量，Critic Agent + 跨厂商兜底）
+  // 旧 alias deepseek-chat / deepseek-reasoner 在 2026-07-24 停服，需迁移到 v4-pro / v4-flash。
+  // thinking/non-thinking 模式由 llmClients.js 在请求里显式传 thinking 参数切换，不靠 model id。
   deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
   deepseekBaseUrl: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-  deepseekReasonerModel: process.env.DEEPSEEK_REASONER_MODEL || 'deepseek-reasoner',
+  // Critic Agent：旗舰 1.6T，跑 thinking 模式
+  deepseekReasonerModel: process.env.DEEPSEEK_REASONER_MODEL || 'deepseek-v4-pro',
+  // brainAgent 跨厂商兜底：284B 快速版，跑 non-thinking 模式
+  deepseekChatModel: process.env.DEEPSEEK_CHAT_MODEL || 'deepseek-v4-flash',
+
+  // 兜底开关：默认启用（有 deepseek key 就用），设 'off' 强制走原有的 minimax 软失败
+  fallbackProvider: process.env.LUNA_FALLBACK_PROVIDER || 'auto',
 
   // 评审配置
   criticPassScore: parseFloat(process.env.CRITIC_PASS_SCORE || '7.0'),

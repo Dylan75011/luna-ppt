@@ -4,16 +4,18 @@ import { ref, computed } from 'vue'
 const STORAGE_KEY = 'oc_api_keys'
 
 const DEFAULTS = {
-  minimaxModel:    'MiniMax-M2.5',
+  minimaxModel:    'MiniMax-M2.7-highspeed',
   criticPassScore: 7.0,
   criticMaxRounds: 3
 }
+
+const ALLOWED_MINIMAX_MODELS = new Set(['MiniMax-M2.7-highspeed'])
 
 function sanitizeSettings(raw = {}) {
   return {
     minimaxApiKey:  raw.minimaxApiKey  || '',
     deepseekApiKey: raw.deepseekApiKey || '',
-    minimaxModel:   raw.minimaxModel   || DEFAULTS.minimaxModel,
+    minimaxModel:   ALLOWED_MINIMAX_MODELS.has(raw.minimaxModel) ? raw.minimaxModel : DEFAULTS.minimaxModel,
     tavilyApiKey:   raw.tavilyApiKey   || '',
     serpApiKey:     raw.serpApiKey     || '',
     bingApiKey:     raw.bingApiKey     || '',
@@ -42,7 +44,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   const hasMinimaxKey  = computed(() => !!data.value.minimaxApiKey)
   const hasDeepseekKey = computed(() => !!data.value.deepseekApiKey)
-  const minimaxModel   = computed(() => data.value.minimaxModel   || 'MiniMax-M2.5')
+  const minimaxModel   = computed(() => data.value.minimaxModel   || DEFAULTS.minimaxModel)
   const criticPassScore = computed(() => data.value.criticPassScore ?? 7.0)
   const criticMaxRounds = computed(() => data.value.criticMaxRounds ?? 3)
 
@@ -50,7 +52,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const apiKeys = computed(() => ({
     minimaxApiKey:  data.value.minimaxApiKey  || '',
     deepseekApiKey: data.value.deepseekApiKey || '',
-    minimaxModel:   data.value.minimaxModel   || 'MiniMax-M2.5',
+    minimaxModel:   data.value.minimaxModel   || DEFAULTS.minimaxModel,
     tavilyApiKey:   data.value.tavilyApiKey   || '',
     serpApiKey:     data.value.serpApiKey     || '',
     bingApiKey:     data.value.bingApiKey     || '',

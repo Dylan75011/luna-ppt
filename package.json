@@ -8,7 +8,9 @@
     "dev:api": "node src/server.js",
     "dev:ui": "vite",
     "build": "vite build",
-    "test": "node tests/ppt.test.js"
+    "test": "node tests/ppt.test.js",
+    "test:visual": "node tests/visual-regression/run.js",
+    "test:visual:update": "node tests/visual-regression/run.js --update"
   },
   "keywords": [
     "ppt",
@@ -20,6 +22,8 @@
   "license": "MIT",
   "dependencies": {
     "@arco-design/web-vue": "^2.57.0",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/noto-sans-sc": "^5.2.9",
     "@phosphor-icons/vue": "^2.2.1",
     "@tiptap/extension-code-block-lowlight": "^3.21.0",
     "@tiptap/extension-color": "^3.21.0",

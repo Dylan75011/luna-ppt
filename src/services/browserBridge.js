@@ -24,7 +24,8 @@ const HELLO_TIMEOUT_MS = 5_000;
 // 通过 LUNA_BRIDGE_ALLOWLIST 覆盖；Extension 侧 host_permissions 是硬限制，这里是服务端兜底
 const DEFAULT_ALLOWLIST = [
   'xiaohongshu.com',
-  'xhscdn.com'
+  'xhscdn.com',
+  'bing.com'
 ];
 
 let wss = null;
@@ -187,6 +188,16 @@ function start({ port = DEFAULT_PORT, allowlist: customAllowlist } = {}) {
     }
     res.writeHead(404); res.end();
   });
+
+  server.on('error', (err) => {
+    console.warn(`[browserBridge] 监听失败: ${err.message}`);
+    rejectAllPending(`browser bridge listen failed: ${err.message}`);
+    if (wss) {
+      try { wss.close(); } catch {}
+      wss = null;
+    }
+  });
+
   server.listen(port, '127.0.0.1');
 
   wss = new WebSocketServer({ server });

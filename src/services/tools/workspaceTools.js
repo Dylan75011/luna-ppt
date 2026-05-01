@@ -7,26 +7,27 @@ const AFFIRMATIVE_PATTERNS = [
   /确认删除|同意删除|可以删除|就删|删了吧/
 ];
 
-// 当工具就地覆盖了当前右侧预览的策划文档时，把完整快照推回前端，
-// 避免工作区已是最新、预览区仍停在 run_strategy 流式过程中某个不完整片段。
-function syncPreviewIfCurrentDoc(session, onEvent, docId, tiptapDoc, title) {
+// 任何"写型"工具（update / patch / find_replace / append）结束后无条件调用：
+// 把完整 tiptap doc 推回前端预览面板，并把 session 的"当前文档"指针切到这份。
+//
+// 用 doc_preview_updated 这个**无副作用**事件——区别于 doc_ready / doc_section_added
+// （那俩是 run_strategy 流式生成专用，handleDocReady 会 pushAiMessage、handleDocSectionAdded
+// 会改 progressLabel）。如果 agent 在长对话里反复改文档，复用 doc_ready 会让前端不断
+// 推"方案已整理到右侧"的重复 AI 消息。
+//
+// 同时把 session.lastSavedDocId 切到当前 docId——brain prompt 用这个字段提示"最新文档"，
+// 用户改 doc_B 之后下一轮再说"再加一节"，brain 应该指向 doc_B 而不是更早的 doc_A。
+function pushDocPreview(session, onEvent, docId, tiptapDoc, title) {
   if (!docId || !tiptapDoc || typeof tiptapDoc !== 'object') return;
-  if (session.lastSavedDocId !== docId) return;
   const displayTitle = title || session.lastSavedDocName || '策划方案';
-  onEvent('doc_section_added', {
+  onEvent('doc_preview_updated', {
+    docId,
     title: displayTitle,
-    sectionTitle: '',
-    progress: 100,
-    docContent: tiptapDoc,
-    provisional: false
+    docContent: tiptapDoc
   });
-  onEvent('doc_ready', {
-    docHtml: '',
-    docContent: tiptapDoc,
-    title: displayTitle
-  });
-  session.docJson = tiptapDoc;
+  session.lastSavedDocId = docId;
   session.lastSavedDocName = displayTitle;
+  session.docJson = tiptapDoc;
 }
 
 const DELETE_APPROVAL_TTL_MS = 5 * 60 * 1000;
@@ -270,7 +271,7 @@ async function execPatchWorkspaceDocSection(args, session, onEvent) {
       docType: 'document',
       action: `patch_${mode}`
     });
-    syncPreviewIfCurrentDoc(session, onEvent, docId, patchedDoc, displayName);
+    pushDocPreview(session, onEvent, docId, patchedDoc, displayName);
 
     return {
       success: true,
@@ -284,6 +285,130 @@ async function execPatchWorkspaceDocSection(args, session, onEvent) {
     };
   } catch (e) {
     return { success: false, error: `局部编辑失败：${e.message}` };
+  }
+}
+
+// 在 tiptap blocks 范围内，对 text 节点的 text 字段做字符串替换
+// 注意：跨 text 节点（如被 mark 切开的连续文本）不会匹配，属于已知约束
+function replaceTextInBlocks(blocks, find, replace, { caseSensitive = true, maxReplacements = 50 } = {}) {
+  if (!Array.isArray(blocks) || !find) return { count: 0, samples: [] };
+  const escaped = find.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const re = new RegExp(escaped, caseSensitive ? 'g' : 'gi');
+  let count = 0;
+  const samples = [];
+
+  const traverse = (node) => {
+    if (!node || count >= maxReplacements) return;
+    if (node.type === 'text' && typeof node.text === 'string' && node.text) {
+      const original = node.text;
+      let localHits = 0;
+      const replaced = original.replace(re, (match) => {
+        if (count >= maxReplacements) return match;
+        count += 1;
+        localHits += 1;
+        return replace;
+      });
+      if (replaced !== original) {
+        node.text = replaced;
+        if (samples.length < 5) {
+          const trimmed = replaced.length > 100 ? replaced.slice(0, 100) + '…' : replaced;
+          samples.push({ before: original.length > 100 ? original.slice(0, 100) + '…' : original, after: trimmed, hits: localHits });
+        }
+      }
+    }
+    if (Array.isArray(node?.content)) {
+      for (const child of node.content) {
+        if (count >= maxReplacements) break;
+        traverse(child);
+      }
+    }
+  };
+
+  for (const block of blocks) {
+    if (count >= maxReplacements) break;
+    traverse(block);
+  }
+  return { count, samples };
+}
+
+async function execFindReplaceInDoc(args, session, onEvent) {
+  const docId = String(args.doc_id || '').trim();
+  const find = typeof args.find === 'string' ? args.find : '';
+  const replace = typeof args.replace === 'string' ? args.replace : '';
+  const scopeHeading = typeof args.scope_heading === 'string' ? args.scope_heading.trim() : '';
+  const caseSensitive = args.case_sensitive !== false; // 默认大小写敏感
+  const maxReplacements = Math.max(1, Math.min(200, Number(args.max_replacements) || 50));
+
+  if (!docId) return { success: false, error: '请指定 doc_id' };
+  if (!find) return { success: false, error: 'find 为空，必须指定要查找的字符串' };
+  if (find === replace) return { success: false, error: 'find 与 replace 完全相同，无需替换' };
+
+  try {
+    const data = wm.getContent(docId);
+    if ((data.docType || 'document') !== 'document') {
+      return { success: false, error: `该文档类型为 ${data.docType}，不支持 find/replace` };
+    }
+    const tiptapDoc = (data.content && typeof data.content === 'object')
+      ? JSON.parse(JSON.stringify(data.content))
+      : { type: 'doc', content: [] };
+    const blocks = Array.isArray(tiptapDoc.content) ? tiptapDoc.content : [];
+
+    let targetBlocks = blocks;
+    let scopeInfo = null;
+    if (scopeHeading) {
+      const located = findSection(tiptapDoc, scopeHeading, args.heading_level ? Number(args.heading_level) : null);
+      if (located.error) {
+        return {
+          success: false,
+          error: located.error,
+          available_headings: located.availableHeadings,
+          ambiguous_matches: located.matches
+        };
+      }
+      targetBlocks = blocks.slice(located.start, located.end);
+      scopeInfo = { heading: `${'#'.repeat(located.heading.level)} ${located.heading.text}`, start: located.start, end: located.end };
+    }
+
+    const { count, samples } = replaceTextInBlocks(targetBlocks, find, replace, { caseSensitive, maxReplacements });
+
+    if (count === 0) {
+      return {
+        success: false,
+        error: `未在${scopeHeading ? `章节"${scopeHeading}"内` : '文档中'}找到 "${find}"。可能原因：(1) 大小写或全半角不一致——试试 case_sensitive=false；(2) 该文本被加粗/高亮等格式拆分到不同 text 节点导致跨节点不匹配——这种情况改用 patch_workspace_doc_section；(3) 文档里确实没有这个词。`,
+        replaced_count: 0
+      };
+    }
+
+    wm.saveContent(docId, tiptapDoc, 'tiptap-json');
+    try { session.spaceContext = wm.getSpaceContext(session.spaceId); } catch {}
+
+    const displayName = data.name || docId;
+    const truncated = count >= maxReplacements;
+    onEvent('tool_progress', {
+      message: `已替换 ${count} 处 "${find}" → "${replace}"${scopeHeading ? `（限定章节"${scopeHeading}"）` : ''}${truncated ? '（已达上限）' : ''}`
+    });
+    onEvent('workspace_updated', {
+      spaceId: session.spaceId,
+      docId,
+      docName: displayName,
+      docType: 'document',
+      action: 'find_replace'
+    });
+    pushDocPreview(session, onEvent, docId, tiptapDoc, displayName);
+
+    return {
+      success: true,
+      doc_id: docId,
+      name: displayName,
+      find,
+      replace,
+      replaced_count: count,
+      truncated,
+      scope: scopeInfo,
+      samples
+    };
+  } catch (e) {
+    return { success: false, error: `查找替换失败：${e.message}` };
   }
 }
 
@@ -312,7 +437,7 @@ async function execUpdateWorkspaceDoc(args, session, onEvent) {
     const displayName = args.title || data.name || docId;
     onEvent('tool_progress', { message: `已更新文档：${displayName}` });
     onEvent('workspace_updated', { spaceId: session.spaceId, docId, docName: displayName, docType: 'document', action: 'update' });
-    syncPreviewIfCurrentDoc(session, onEvent, docId, tiptapDoc, displayName);
+    pushDocPreview(session, onEvent, docId, tiptapDoc, displayName);
 
     return { success: true, doc_id: docId, name: displayName };
   } catch (e) {
@@ -334,10 +459,12 @@ async function execSaveToWorkspace(args, session, onEvent) {
 
   try {
     const node = wm.createNode({ parentId: session.spaceId, name: title, type: 'document', docType: 'document' });
-    wm.saveContent(node.id, markdownToTiptap(content), 'tiptap-json');
+    const tiptapDoc = markdownToTiptap(content);
+    wm.saveContent(node.id, tiptapDoc, 'tiptap-json');
     try { session.spaceContext = wm.getSpaceContext(session.spaceId); } catch {}
     onEvent('tool_progress', { message: `已保存到工作空间：${title}` });
     onEvent('workspace_updated', { spaceId: session.spaceId, docId: node.id, docName: title, docType: 'document' });
+    pushDocPreview(session, onEvent, node.id, tiptapDoc, title);
 
     return { success: true, doc_id: node.id, name: title };
   } catch (e) {
@@ -369,7 +496,7 @@ async function execAppendWorkspaceDoc(args, session, onEvent) {
 
     onEvent('tool_progress', { message: `已追加到文档：${data.name || docId}` });
     onEvent('workspace_updated', { spaceId: session.spaceId, docId, docName: data.name || docId, docType: 'document', action: 'append' });
-    syncPreviewIfCurrentDoc(session, onEvent, docId, mergedDoc, data.name || docId);
+    pushDocPreview(session, onEvent, docId, mergedDoc, data.name || docId);
 
     return { success: true, doc_id: docId, name: data.name || docId, appended_blocks: appendedBlocks.length };
   } catch (e) {
@@ -588,6 +715,7 @@ module.exports = {
   execReadWorkspaceDoc,
   execUpdateWorkspaceDoc,
   execPatchWorkspaceDocSection,
+  execFindReplaceInDoc,
   execSaveToWorkspace,
   execAppendWorkspaceDoc,
   execListWorkspaceDocs,

@@ -3,6 +3,7 @@ const router  = express.Router();
 const multer  = require('multer');
 const wm      = require('../services/workspaceManager');
 const conversationStore = require('../services/conversationStore');
+const { cleanupConversationTmp } = require('../services/outputRetention');
 // lazy require: docx-preview is browser-only, only load when actually needed
 let _docxToTiptapJson = null;
 function getDocxConverter() {
@@ -99,10 +100,18 @@ router.post('/conversations/:id/messages', (req, res) => {
   }
 });
 
-// 删除会话
+// 删除会话：SQL 行 + 磁盘临时区一起清。先删 DB 再删盘 —— 即使盘清理失败，
+// 用户视图层（依赖 conversations 表）已经看不到这条会话；磁盘上的临时区
+// 目录最坏情况下会留作孤儿，由 retention 兜底（或下一次手工清理）。
 router.delete('/conversations/:id', (req, res) => {
   try {
-    conversationStore.deleteConversation(req.params.id);
+    const conversationId = req.params.id;
+    conversationStore.deleteConversation(conversationId);
+    try {
+      cleanupConversationTmp(conversationId);
+    } catch (cleanupErr) {
+      console.warn('[workspace] cleanupConversationTmp 失败:', conversationId, cleanupErr.message);
+    }
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
@@ -161,7 +170,14 @@ router.delete('/:id', (req, res) => {
   try {
     const deletedIds = wm.deleteNode(req.params.id);
     if (String(req.params.id).startsWith('space_')) {
-      conversationStore.deleteWorkspaceConversations(req.params.id);
+      // 删 space 会 cascade 掉它名下所有 conversation；磁盘上每条 conv 的临时区也得清，
+      // 否则删 workspace 之后会留一堆 output/conversations/<convId>/ 孤儿。
+      const purgedConvIds = conversationStore.deleteWorkspaceConversations(req.params.id) || [];
+      purgedConvIds.forEach((cid) => {
+        try { cleanupConversationTmp(cid); } catch (err) {
+          console.warn('[workspace] cleanupConversationTmp 失败:', cid, err.message);
+        }
+      });
     }
     res.json({ success: true, deletedIds });
   } catch (e) {

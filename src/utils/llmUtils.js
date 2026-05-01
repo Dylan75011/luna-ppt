@@ -8,6 +8,19 @@ const RETRY_LIMIT = 2;
 const RETRY_DELAY_MS = 2000;
 const DEBUG_DIR = path.resolve(process.cwd(), 'data/llm-debug');
 
+// 流式调用的超时兜底——以前的 streaming 分支没有任何超时，
+// 一旦上游（如 MiniMax）挂死，整条 skill 链路（propose_concept / run_strategy 等）
+// 会永久挂起，brainAgent 的 race 切了控制权但底层永不返回，结果是 background_done 永不触发。
+const STREAM_IDLE_MS = 30_000;     // 30s 无 chunk → 视为卡死并 abort
+const STREAM_TOTAL_MS = 120_000;   // 120s 总时长上限（连接 + 流式累计）
+// 心跳间隔：每 N 秒触发一次 onStatus({ status: 'streaming_heartbeat', ... })，
+// 让上层 tool 转成 tool_progress 推回 brainAgent，刷新 idle watchdog。
+// 2s：之前是 8s，导致 propose_concept / run_strategy 流式期间用户看到的进度
+// 间隔 8s 一次，体感像卡死。前端节流可在客户端做。
+const STREAM_HEARTBEAT_MS = 2_000;
+// 阻塞调用的等待心跳间隔（更短一点，因为阻塞调用没有 chunk，只能用墙钟节奏推）
+const BLOCKING_WAIT_HEARTBEAT_MS = 5_000;
+
 class LLMTimeoutError extends Error {
   constructor(message) {
     super(message);
@@ -117,11 +130,33 @@ function writeDebugSnapshot(name, payload) {
 }
 
 /**
+ * 剥离推理模型可能泄漏的 <think> 标签
+ * 覆盖三种形态：
+ *   1) <think>X</think>正文           → 保留正文
+ *   2) X</think>正文（开始 tag 缺失） → 流式截断常见，丢弃 </think> 之前
+ *   3) <think>X（结束 tag 缺失）      → 截断/未完成，从 <think> 处直接截掉
+ */
+function stripThinkTags(text) {
+  if (!text) return '';
+  let s = String(text);
+  s = s.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  const closeIdx = s.search(/<\/think>/i);
+  if (closeIdx >= 0) {
+    s = s.slice(closeIdx).replace(/<\/think>/i, '');
+  }
+  const openIdx = s.search(/<think>/i);
+  if (openIdx >= 0) {
+    s = s.slice(0, openIdx);
+  }
+  return s.trim();
+}
+
+/**
  * 从文本中提取 JSON
  * 兼容：<think>...</think> 推理标签、markdown 代码块、裸 JSON
  */
 function extractJson(text) {
-  const cleaned = String(text || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  const cleaned = stripThinkTags(text);
   const candidates = [
     cleaned,
     stripCodeFences(cleaned),
@@ -142,6 +177,22 @@ function extractJson(text) {
   throw lastError || new Error('无法解析 JSON');
 }
 
+/**
+ * 判断模型输出是否"全是 think 没有 JSON"——典型症状是输出主体是 <think>...</think>
+ * 块，思考被 maxTokens 截断后根本没机会产出 JSON。检测到这种 case 应该走更激进的重试
+ * 路径（加 anti-think 提醒，必要时上调 maxTokens）而不是平庸地走 repair。
+ */
+function isThinkOnlyOutput(text) {
+  if (!text) return false;
+  const raw = String(text || '').trim();
+  if (!raw) return false;
+  // 含 <think> 标签，且剥掉 think 后基本没剩内容（也可能因为思考爆了 token 没闭合）
+  if (!/<think>/i.test(raw)) return false;
+  const stripped = stripThinkTags(raw);
+  // 剥完后剩不到 20 字符 / 没有任何 { 或 [ → 视为没产出 JSON
+  return stripped.length < 20 || !/[{\[]/.test(stripped);
+}
+
 function validateStructuredResult(result, validate) {
   if (!validate) return result;
   return validate(result);
@@ -154,36 +205,95 @@ function validateStructuredResult(result, validate) {
  * 适合 maxTokens 较大（>3000）的场景，彻底规避整体超时问题。
  */
 async function callLLM(messages, options = {}) {
-  const { model = 'minimax', runtimeKey, minimaxModel, name = 'llm', timeoutMs, streaming, ...rest } = options;
+  const { model = 'minimax', runtimeKey, minimaxModel, name = 'llm', timeoutMs, streaming, onStatus, ...rest } = options;
 
-  // ── 流式累积模式（MiniMax 长文本，不需要整体超时）────────────────────────────
+  // ── 流式累积模式（MiniMax 长文本）─────────────────────────────────────
+  // 加 idle (30s) + total (120s) 两层超时——之前没有超时，一旦 MiniMax 挂死整条 skill 链
+  // 永久挂起，brainAgent 的 race 已经切了控制权但底层永不返回，导致 background_done
+  // 永不触发、用户体感"卡住"。超时后抛错让 callLLMJson 走它已有的 fallback 分支。
+  //
+  // 同时每 8s 通过 onStatus 推 streaming_heartbeat —— 让上层（tool / brainAgent）
+  // 即使 LLM 在长段落里没产出 onSection 触发条件，也能感知"还活着"
   if (streaming && model === 'minimax') {
     let lastError;
-    for (let attempt = 0; attempt <= RETRY_LIMIT; attempt++) {
+    const streamRetryLimit = Number.isFinite(rest.streamRetryLimit)
+      ? Math.max(0, Math.floor(rest.streamRetryLimit))
+      : RETRY_LIMIT;
+    const streamIdleMs = Number.isFinite(rest.streamIdleMs) && rest.streamIdleMs > 0
+      ? rest.streamIdleMs
+      : STREAM_IDLE_MS;
+    const streamTotalMs = Number.isFinite(rest.streamTotalMs) && rest.streamTotalMs > 0
+      ? rest.streamTotalMs
+      : STREAM_TOTAL_MS;
+    for (let attempt = 0; attempt <= streamRetryLimit; attempt++) {
+      const ac = new AbortController();
+      const startedAt = Date.now();
+      let lastChunkAt = Date.now();
+      let lastHeartbeatAt = Date.now();
+      let abortReason = null;
+      const watchdog = setInterval(() => {
+        if (ac.signal.aborted) return;
+        if (Date.now() - startedAt > streamTotalMs) {
+          abortReason = 'total_timeout';
+          ac.abort('total_timeout');
+        } else if (Date.now() - lastChunkAt > streamIdleMs) {
+          abortReason = 'idle_timeout';
+          ac.abort('idle_timeout');
+        }
+      }, 1000);
+      if (typeof watchdog.unref === 'function') watchdog.unref();
+
       try {
         let accumulated = '';
         await callMinimaxStreamText(
           messages,
-          { runtimeKey, minimaxModel, maxTokens: rest.maxTokens, temperature: rest.temperature, extra: rest.extra },
-          (chunk) => { accumulated += chunk; }
+          { runtimeKey, minimaxModel, maxTokens: rest.maxTokens, temperature: rest.temperature, extra: rest.extra, signal: ac.signal },
+          (chunk) => {
+            lastChunkAt = Date.now();
+            accumulated += chunk;
+            // 8s 节流的心跳：让上层 tool 把它转成 tool_progress，刷新 brainAgent idle watchdog
+            // text 字段额外带出当前累计原文，给上层做 partial JSON 解析（流式预览用）；
+            // name 字段透传调用方传入的 name，让上层能按阶段（如 planSkeleton/planSection_2）分流进度文案；
+            // 旧消费者仍可只看 chars，向后兼容。
+            if (typeof onStatus === 'function' && Date.now() - lastHeartbeatAt >= STREAM_HEARTBEAT_MS) {
+              lastHeartbeatAt = Date.now();
+              try { onStatus({ status: 'streaming_heartbeat', name, chars: accumulated.length, text: accumulated, attempt: attempt + 1, source: 'callLLM' }); } catch {}
+            }
+          }
         );
         return accumulated;
       } catch (err) {
-        lastError = err;
-        if (attempt < RETRY_LIMIT) {
-          console.warn(`[${name}] 流式调用失败 (${attempt + 1}/${RETRY_LIMIT})，${RETRY_DELAY_MS}ms 后重试:`, err.message);
+        // 区分自我触发的超时 abort 和上游真错误
+        if (abortReason || ac.signal.aborted) {
+          const detail = abortReason || 'aborted';
+          lastError = new LLMTimeoutError(`[${name}] 流式调用 ${detail}（idle ${streamIdleMs}ms / total ${streamTotalMs}ms）`);
+        } else {
+          lastError = err;
+        }
+        if (attempt < streamRetryLimit) {
+          console.warn(`[${name}] 流式调用失败 (${attempt + 1}/${streamRetryLimit})，${RETRY_DELAY_MS}ms 后重试:`, lastError.message);
           await sleep(RETRY_DELAY_MS);
         }
+      } finally {
+        clearInterval(watchdog);
       }
     }
-    throw new Error(`[${name}] LLM 流式调用失败（已重试 ${RETRY_LIMIT} 次）: ${lastError.message}`);
+    throw new Error(`[${name}] LLM 流式调用失败（已重试 ${streamRetryLimit} 次）: ${lastError.message}`);
   }
 
   // ── 阻塞式调用（小输出 / DeepSeek）──────────────────────────────────────────
+  // 阻塞调用没有 chunk 反馈，开个墙钟心跳：每 5s 推一次 status='blocking_wait_heartbeat'
+  // 给上层 tool，让它转成 tool_progress 刷新 brainAgent idle watchdog。
   let lastError;
   for (let attempt = 0; attempt <= RETRY_LIMIT; attempt++) {
     const controller = timeoutMs > 0 ? new AbortController() : null;
     const signal = controller?.signal;
+    const blockingHeartbeat = typeof onStatus === 'function'
+      ? setInterval(() => {
+          try { onStatus({ status: 'blocking_wait_heartbeat', attempt: attempt + 1, source: 'callLLM' }); } catch {}
+        }, BLOCKING_WAIT_HEARTBEAT_MS)
+      : null;
+    if (blockingHeartbeat && typeof blockingHeartbeat.unref === 'function') blockingHeartbeat.unref();
     try {
       if (model === 'deepseek-reasoner') {
         return await withTimeout(
@@ -206,6 +316,8 @@ async function callLLM(messages, options = {}) {
         console.warn(`[${name}] 调用失败 (${attempt + 1}/${RETRY_LIMIT})，${RETRY_DELAY_MS}ms 后重试:`, err.message);
         await sleep(RETRY_DELAY_MS);
       }
+    } finally {
+      if (blockingHeartbeat) clearInterval(blockingHeartbeat);
     }
   }
   throw new Error(`[${name}] LLM 调用失败（已重试 ${RETRY_LIMIT} 次）: ${lastError.message}`);
@@ -219,10 +331,17 @@ async function repairJsonOutput(rawText, options = {}) {
     temperature = 0,
     maxTokens = 4096,
     timeoutMs,
+    repairTimeoutMs,
     extra,
     name = 'llm',
     repairHint = ''
   } = options;
+  // repair 经常需要重新生成完整大 JSON（如 conceptProposal 4000 token），
+  // 不能用调用方的 timeoutMs（往往 20s）。允许 caller 用 repairTimeoutMs 显式覆盖；
+  // 否则按 max(timeoutMs * 3, 60s) 自动放大。
+  const effectiveTimeoutMs = Number.isFinite(repairTimeoutMs) && repairTimeoutMs > 0
+    ? repairTimeoutMs
+    : Math.max((timeoutMs || 0) * 3, 60_000);
 
   const repairMessages = [
     {
@@ -244,7 +363,7 @@ async function repairJsonOutput(rawText, options = {}) {
     minimaxModel,
     temperature,
     maxTokens: Math.min(maxTokens, 4096),
-    timeoutMs,
+    timeoutMs: effectiveTimeoutMs,
     extra: mergeExtraOptions(extra, { response_format: { type: 'json_object' } }),
     name: `${name}:repair`
   });
@@ -264,18 +383,24 @@ async function callLLMJson(messages, options = {}) {
     debugLabel = name,
     onStatus,
     fallback,
+    retryLimit = RETRY_LIMIT,
     ...rest
   } = options;
   let msgs = messages;
   let lastError;
   let lastRawText = '';
 
-  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt++) {
+  const jsonRetryLimit = Number.isFinite(retryLimit)
+    ? Math.max(0, Math.floor(retryLimit))
+    : RETRY_LIMIT;
+
+  for (let attempt = 0; attempt <= jsonRetryLimit; attempt++) {
     try {
       notifyStatus(onStatus, 'requesting', { attempt: attempt + 1 });
       const text = await callLLM(msgs, {
         name,
         ...rest,
+        onStatus,  // 把 caller 的 onStatus 透传到 callLLM，使 streaming_heartbeat 能冒泡上来
         extra: mergeExtraOptions(rest.extra, { response_format: { type: 'json_object' } })
       });
       lastRawText = String(text || '');
@@ -310,22 +435,26 @@ async function callLLMJson(messages, options = {}) {
         }
       }
 
-      if (attempt < RETRY_LIMIT) {
-        console.warn(`[${name}] JSON 解析失败 (${attempt + 1}/${RETRY_LIMIT})，重新请求:`, summarizeError(lastError));
+      if (attempt < jsonRetryLimit) {
+        const isThinkOnly = isThinkOnlyOutput(lastRawText);
+        console.warn(`[${name}] JSON 解析失败 (${attempt + 1}/${jsonRetryLimit})，重新请求:`, summarizeError(lastError), isThinkOnly ? '【think 块占满 maxTokens，未输出 JSON】' : '');
         notifyStatus(onStatus, 'retrying', {
           attempt: attempt + 2,
           previousAttempt: attempt + 1,
-          error: summarizeError(lastError)
+          error: summarizeError(lastError),
+          thinkOnly: isThinkOnly
         });
+        // think-only：模型把 token 全用在 <think> 块上没产出 JSON。下一轮必须显式禁止
+        // 思考链路，否则重试会同样失败。普通解析失败给原来的简短提示就够。
+        const retryNudge = isThinkOnly
+          ? '上次输出 token 全部用在 <think> 思考过程里，最终没产出 JSON。**这一次完全不要使用 <think>、<thought> 标签，也不要写任何思考过程或铺垫**——直接产出最终的合法 JSON 对象，token 全部留给 JSON 字段。' +
+            (repairHint ? `\n结构要求：${repairHint}` : '')
+          : '上次输出无法通过结构化校验。请重新输出，并且只返回合法 JSON，不要包含任何额外文字或代码块。' +
+            `\n问题摘要：${summarizeError(lastError)}` +
+            (repairHint ? `\n结构要求：${repairHint}` : '');
         msgs = [
           ...msgs,
-          {
-            role: 'user',
-            content:
-              '上次输出无法通过结构化校验。请重新输出，并且只返回合法 JSON，不要包含任何额外文字或代码块。' +
-              `\n问题摘要：${summarizeError(lastError)}` +
-              (repairHint ? `\n结构要求：${repairHint}` : '')
-          }
+          { role: 'user', content: retryNudge }
         ];
         lastRawText = '';
       }
@@ -345,7 +474,7 @@ async function callLLMJson(messages, options = {}) {
     rawText: lastRawText,
     repairHint
   });
-  throw new Error(`[${name}] JSON 解析失败（已重试 ${RETRY_LIMIT} 次）: ${summarizeError(lastError)}`);
+  throw new Error(`[${name}] JSON 解析失败（已重试 ${jsonRetryLimit} 次）: ${summarizeError(lastError)}`);
 }
 
-module.exports = { callLLM, callLLMJson, extractJson, LLMTimeoutError };
+module.exports = { callLLM, callLLMJson, extractJson, stripThinkTags, LLMTimeoutError };

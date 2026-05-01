@@ -94,7 +94,7 @@ docs/                   # 设计文档
 
 - **后端**：Node.js + Express
 - **PPT 生成**：PptxGenJS
-- **AI 模型**：MiniMax 订阅（主力）、DeepSeek-R1 按量（评审专用）
+- **AI 模型**：MiniMax 订阅（主力）、DeepSeek V4-Pro 按量（评审专用）
 - **前端**：原生 HTML/CSS/JavaScript
 
 ## 设计文档

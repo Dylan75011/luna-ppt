@@ -66,7 +66,9 @@ async function callMinimax(messages, options = {}) {
 }
 
 /**
- * 调用 DeepSeek-R1（仅 Critic Agent，按量付费）
+ * 调用 DeepSeek 推理模型（仅 Critic Agent，按量付费）
+ * V4 起 thinking 模式由参数显式开启，否则即使用 v4-pro 也只跑 non-thinking。
+ * thinking 模式会忽略 temperature，但保留参数以兼容老 reasoner alias。
  * @param {string[]} messages
  * @param {object}  options  - { temperature, maxTokens, extra, runtimeKey }
  */
@@ -77,6 +79,7 @@ async function callDeepseekReasoner(messages, options = {}) {
     messages,
     temperature: options.temperature ?? 0.6,
     max_tokens: options.maxTokens ?? 8192,
+    thinking: { type: 'enabled' },
     ...(options.extra || {})
   }, { signal: options.signal });
   return response.choices[0].message.content;
@@ -132,7 +135,11 @@ async function callMinimaxWithToolsStream(messages, tools, options = {}, onChunk
   for await (const chunk of stream) {
     if (options.signal?.aborted) break;
     const choice = chunk.choices[0];
-    if (!choice) continue;
+    if (!choice) {
+      // 空 chunk（保活/分片间隔）也算 heartbeat，让外层 watchdog 知道连接还活
+      onChunk({ type: 'heartbeat' });
+      continue;
+    }
     if (choice.finish_reason) finishReason = choice.finish_reason;
 
     const delta = choice.delta;
@@ -141,6 +148,14 @@ async function callMinimaxWithToolsStream(messages, tools, options = {}, onChunk
     if (delta?.content) {
       fullContent += delta.content;
       onChunk({ type: 'text_delta', delta: delta.content });
+    } else if (delta?.tool_calls) {
+      // 工具调用 delta 也要触发 onChunk —— 否则 brainAgent 的 idle watchdog
+      // 在模型只生成 tool_call 时永远更新不到 lastChunkAt，可能误触发 abort；
+      // 反过来，模型若卡在 tool_call 慢吐 delta，watchdog 也能感知"还在动"
+      onChunk({ type: 'tool_call_delta' });
+    } else {
+      // delta 完全为空（仅 finish_reason 等）
+      onChunk({ type: 'heartbeat' });
     }
 
     // 工具调用：按 index 累积（流式下分片到达）
@@ -198,4 +213,44 @@ async function callMinimaxStreamText(messages, options = {}, onChunk = () => {})
   return fullContent;
 }
 
-module.exports = { callMinimax, callDeepseekReasoner, callMinimaxWithTools, callMinimaxWithToolsStream, callMinimaxStreamText };
+/**
+ * deepseek-chat 流式文本输出，无 tool calling。
+ * 用于 brainAgent L2 软失败兜底——独立 provider 独立故障模式，
+ * 当 minimax 网络/服务不稳时给用户一段交代。
+ *
+ * @param {Array}    messages
+ * @param {object}   options  - { runtimeKey, deepseekChatModel, temperature, maxTokens, signal }
+ * @param {Function} onChunk  - (delta: string) => void
+ */
+async function callDeepseekChatText(messages, options = {}, onChunk = () => {}) {
+  const client = createDeepseekClient(options.runtimeKey);
+  const model = options.deepseekChatModel || config.deepseekChatModel;
+  const requestOpts = options.signal ? { signal: options.signal } : undefined;
+  const stream = await client.chat.completions.create({
+    model,
+    messages,
+    stream: true,
+    temperature: options.temperature ?? 0.5,
+    max_tokens: options.maxTokens ?? 1500,
+    thinking: { type: 'disabled' }
+  }, requestOpts);
+  let fullContent = '';
+  for await (const chunk of stream) {
+    if (options.signal?.aborted) break;
+    const delta = chunk.choices[0]?.delta?.content || '';
+    if (delta) {
+      fullContent += delta;
+      onChunk(delta);
+    }
+  }
+  return fullContent;
+}
+
+module.exports = {
+  callMinimax,
+  callDeepseekReasoner,
+  callMinimaxWithTools,
+  callMinimaxWithToolsStream,
+  callMinimaxStreamText,
+  callDeepseekChatText
+};

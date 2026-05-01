@@ -1,5 +1,0 @@
-{
-  "error": "[critique] LLM 调用失败（已重试 2 次）: [critique] 请求超时（>35000ms）",
-  "rawText": "",
-  "repairHint": "必须返回对象，包含 score(number)、strengths(string[])、weaknesses(string[])、specificFeedback(string)。"
-}

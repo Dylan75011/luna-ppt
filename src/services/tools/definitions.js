@@ -125,7 +125,7 @@ const TOOL_DEFINITIONS = [
     type: 'function',
     function: {
       name: 'web_search',
-      description: '搜索网页，获取行业动态、竞品案例、创意形式、市场数据等信息',
+      description: '搜索网页，获取行业动态、竞品案例、创意形式、市场数据等信息。**通用网页搜索的唯一入口**——内部已自动级联：优先走本地 Chrome 扩展的 Bing 登录态搜索（结果干净、无 quota），扩展不可用时自动 fallback 到 Tavily/MiniMax 多源 + DuckDuckGo 兜底。你不需要判断走哪条路。返回 source 字段标明实际来源（browser:bing / minimax+tavily / ddg）。',
       parameters: {
         type: 'object',
         properties: {
@@ -154,7 +154,7 @@ const TOOL_DEFINITIONS = [
     type: 'function',
     function: {
       name: 'browser_search',
-      description: '通过本地 Chrome 扩展，以用户登录态在小红书等平台内搜索笔记列表（只含标题/作者/点赞数/封面，5-10 秒出结果）。**推荐工作流**：先用这个看 10 条标题+作者，自行判断哪几条质量高/角度对路，然后用 browser_read_notes 批量抓这几条的正文；不要默认抓全部正文。也可通过 fetch_body_top_n 让本工具顺带把前 N 条正文一并抓回来（每条约多 3-4 秒），但通常不如先看标题再挑有针对性。使用前提：用户已在 Chrome 里加载 Luna 扩展并登录对应平台。结果累积到 researchStore。',
+      description: '**仅用于站内平台搜索**（目前只支持小红书 xiaohongshu）。通用网页搜索请用 web_search（已自动走扩展 Bing）。本工具以用户登录态在小红书内搜笔记列表（标题/作者/点赞数/封面，5-10 秒出结果）。**推荐工作流**：先用这个看 10 条标题+作者，自行判断哪几条质量高/角度对路，然后用 browser_read_notes 批量抓这几条的正文；不要默认抓全部正文。也可通过 fetch_body_top_n 让本工具顺带把前 N 条正文一并抓回来（每条约多 3-4 秒），但通常不如先看标题再挑有针对性。使用前提：用户已在 Chrome 里加载 Luna 扩展并登录对应平台。结果累积到 researchStore。',
       parameters: {
         type: 'object',
         properties: {
@@ -233,7 +233,7 @@ const TOOL_DEFINITIONS = [
     type: 'function',
     function: {
       name: 'browser_read_page',
-      description: '通过本地 Chrome 扩展，以用户登录态读取指定 URL 的完整可见文本（走真实渲染路径，绕过一部分反爬和登录门槛）。适合 browser_search 之后对 Top 结果取全文。',
+      description: '通过本地 Chrome 扩展，以用户登录态读取指定 URL 的完整可见文本（走真实渲染路径，绕过一部分反爬和登录门槛）。适合 web_search 之后对 Top 结果取全文。返回值带 meta.lowSignal/loginWall/charCount——看到 lowSignal:true 说明这条页面要么登录墙、要么正文过短，**直接换下一条结果不要硬塞 context**。',
       parameters: {
         type: 'object',
         properties: {
@@ -399,6 +399,26 @@ const TOOL_DEFINITIONS = [
           content: { type: 'string', description: '新的 Markdown 片段。replace 模式下如果不以 heading 开头，会自动保留原标题。delete 模式可省略。' }
         },
         required: ['doc_id', 'heading', 'mode']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'find_replace_in_doc',
+      description: '对已有文档做"全文/章节内字符串替换"。✅最佳场景：用户说"把『五大实验室』全部改成『六大实验室』""把预算 500 万改成 800 万""把日期改为 5 月 20 日"——这种"单点替换、不重写章节"的需求。比 patch_workspace_doc_section 更省 token、不丢格式（保留加粗/高亮/列表结构）。⚠️局限：(1) 跨格式拆分的文本不会匹配——如果"五大实验室"中"五大"被加粗、"实验室"没加粗，会被拆成两个 text 节点导致匹配失败，这种情况降级用 patch_workspace_doc_section。(2) 不支持正则。(3) 只改纯文本字面量，不影响图片/代码块结构。返回 replaced_count 表示实际替换了几处，0 处时会提示原因。',
+      parameters: {
+        type: 'object',
+        properties: {
+          doc_id: { type: 'string', description: '要编辑的文档 ID' },
+          find: { type: 'string', description: '要查找的字符串（精确匹配，不是正则）。例："五大实验室"、"500万"、"4 月 20 日"' },
+          replace: { type: 'string', description: '要替换成的字符串。可以为空（""），等同于"删除这个词"。' },
+          scope_heading: { type: 'string', description: '可选：限定只在某个章节内替换。不传则全文替换。例：传"预算"只在"## 预算"那节里替换，避免误改其它地方的"500万"' },
+          heading_level: { type: 'number', description: '可选：scope_heading 标题层级 (1-6)，多个同名标题时消歧' },
+          case_sensitive: { type: 'boolean', description: '可选：是否区分大小写。默认 true。中文场景一般保持默认；英文/缩写不确定大小写时设为 false。' },
+          max_replacements: { type: 'number', description: '可选：最多替换次数上限，默认 50，上限 200。用于安全兜底，防止误把高频词全替换。如果用户明确说"全部"，可以设大一点。' }
+        },
+        required: ['doc_id', 'find', 'replace']
       }
     }
   },

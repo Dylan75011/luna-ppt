@@ -8,6 +8,9 @@ const IMAGE_DOWNLOAD_TIMEOUT_MS = 8_000;
 const VLM_REQUEST_TIMEOUT_MS = 15_000;
 // analyzeAgentImages 单图整体兜底（含下载+VLM），并发模式下用来防止某张图拖慢全局
 const PER_IMAGE_BUDGET_MS = 25_000;
+// 并发上限：纯 Promise.all 在用户上传 5 张图时会同时打 5 个 VLM 请求，
+// 可能撞 MiniMax rate limit。3 个一批是平衡点（吞吐 vs 限速风险）。
+const VLM_CONCURRENCY = 3;
 
 function getMinimaxApiHost() {
   return String(config.minimaxBaseUrl || 'https://api.minimaxi.com/v1').replace(/\/v1\/?$/, '');
@@ -94,8 +97,8 @@ async function analyzeAgentImages(attachments = [], options = {}) {
   ].join('\n');
 
   // 并发分析：原本 for-of 串行下 5 张图 ≈ 5×VLM 延迟。
-  // 单图整体 race PER_IMAGE_BUDGET_MS 兜底，慢的那张不会拖死全局。
-  const results = await Promise.all(attachments.map(async (attachment) => {
+  // 现在分批并发，每批 VLM_CONCURRENCY 张（避免撞 MiniMax 限速），单图整体 race 25s 兜底。
+  const analyzeOne = async (attachment) => {
     try {
       const analysis = await withTimeout(
         understandImage(prompt, attachment.localPath || attachment.url, {
@@ -109,7 +112,14 @@ async function analyzeAgentImages(attachments = [], options = {}) {
     } catch (error) {
       return { ...attachment, analysis: '', error: error.message };
     }
-  }));
+  };
+
+  const results = [];
+  for (let i = 0; i < attachments.length; i += VLM_CONCURRENCY) {
+    const batch = attachments.slice(i, i + VLM_CONCURRENCY);
+    const batchResults = await Promise.all(batch.map(analyzeOne));
+    results.push(...batchResults);
+  }
   return results;
 }
 

@@ -69,8 +69,23 @@ function pruneAgentUploads(options = {}) {
   return pruneDirectory(dir, { keep, maxAgeMs, onlyType: 'file' });
 }
 
+// 删除一条会话的整个临时区目录（output/conversations/<conversationId>/）。
+// 已经 promote 到 workspace 的资产物理上已经搬到 output/promoted/<docId>/，
+// 不在这个目录里，所以 rm -rf 安全；调用方在 DELETE /conversations/:id 时触发。
+function cleanupConversationTmp(conversationId) {
+  if (!conversationId) return false;
+  const safe = String(conversationId).replace(/[^\w.-]/g, '');
+  if (!safe) return false;
+  const dir = path.join(getOutputRoot(), 'conversations', safe);
+  if (!fs.existsSync(dir)) return false;
+  const ok = safeRm(dir);
+  if (ok) console.log('[outputRetention] cleanupConversationTmp:', dir);
+  return ok;
+}
+
 module.exports = {
   pruneRuns,
   pruneAgentUploads,
   pruneDirectory,
+  cleanupConversationTmp,
 };

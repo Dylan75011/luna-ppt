@@ -25,9 +25,11 @@
           <a-tree
             :data="treeData"
             :selected-keys="selectedKeys"
+            :expanded-keys="expandedKeys"
             :default-expand-all="false"
             block-node
             @select="onTreeSelect"
+            @expand="onTreeExpand"
           >
             <template #title="node">
               <div class="tree-node-row">
@@ -130,7 +132,7 @@
               class="folder-overview-card"
               @click="selectNodeFromOverview(item)"
             >
-              <div class="folder-overview-icon">
+              <div class="folder-overview-icon" :class="overviewIconTone(item)">
                 <PhStack v-if="item.nType === 'space'" :size="18" weight="duotone" />
                 <PhFolder v-else-if="item.nType === 'folder'" :size="18" weight="duotone" />
                 <PhFilePdf v-else-if="item.docType === 'ppt'" :size="18" weight="duotone" />
@@ -262,10 +264,32 @@ const selectedNode = ref(null)
 const layoutRef = ref(null)
 const isTreeResizing = ref(false)
 const TREE_PANEL_WIDTH_KEY = 'oc_workspace_tree_width'
+const TREE_EXPANDED_KEYS_KEY = 'oc_workspace_tree_expanded'
 const TREE_PANEL_MIN_WIDTH = 200
 const TREE_PANEL_DEFAULT_WIDTH = 280
 const TREE_PANEL_MAX_GAP = 360
 const treePanelWidth = ref(TREE_PANEL_DEFAULT_WIDTH)
+const expandedKeys = ref(loadExpandedKeys())
+
+function loadExpandedKeys() {
+  try {
+    const raw = localStorage.getItem(TREE_EXPANDED_KEYS_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return [] }
+}
+
+function persistExpandedKeys(keys) {
+  try {
+    localStorage.setItem(TREE_EXPANDED_KEYS_KEY, JSON.stringify(keys))
+  } catch {}
+}
+
+function onTreeExpand(keys) {
+  expandedKeys.value = keys
+  persistExpandedKeys(keys)
+}
 
 function buildArcoTree(spaces) {
   return spaces.map(buildArcoNode)
@@ -359,6 +383,15 @@ function overviewTypeLabel(node) {
   if (node.docType === 'ppt') return 'PPT 预览文件'
   if (node.docType === 'image') return '图片产出物'
   return '可编辑文档'
+}
+
+// 类型语义色（贴合暖色调的克制方案）
+function overviewIconTone(node) {
+  if (node.nType === 'space')   return 'tone--amber'
+  if (node.nType === 'folder')  return 'tone--sand'
+  if (node.docType === 'ppt')   return 'tone--rose'
+  if (node.docType === 'image') return 'tone--sage'
+  return 'tone--ink'
 }
 
 function createEmptyDoc() {
@@ -674,22 +707,25 @@ onUnmounted(() => {
 }
 
 .tree-add-btn {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: transparent;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   color: #a8a29e;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
 }
 
 .tree-add-btn:hover {
   background: rgba(68, 64, 60, 0.08);
   color: #44403c;
+}
+.tree-add-btn:active {
+  transform: scale(0.92);
 }
 
 /* ── Tree scroll ── */
@@ -791,20 +827,30 @@ onUnmounted(() => {
 .tree-empty-text { font-size: 13px; color: #a8a29e; margin: 0; }
 
 .tree-empty-btn {
-  padding: 5px 14px;
-  border: 1px solid rgba(68, 64, 60, 0.2);
-  background: transparent;
-  border-radius: 6px;
+  padding: 7px 16px;
+  border: 1px solid rgba(68, 64, 60, 0.18);
+  background: #fff;
+  border-radius: 8px;
   font-family: inherit;
   font-size: 12.5px;
+  font-weight: 500;
   color: #57534e;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
+  transition: background 0.22s ease, border-color 0.22s ease,
+              box-shadow 0.22s ease,
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tree-empty-btn:hover {
-  background: rgba(68, 64, 60, 0.06);
-  border-color: rgba(68, 64, 60, 0.35);
+  background: #faf9f7;
+  border-color: rgba(68, 64, 60, 0.32);
+  box-shadow: 0 4px 10px rgba(28, 25, 23, 0.06);
+  transform: translateY(-1px);
+}
+.tree-empty-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 }
 
 :deep(.danger-option) { color: rgb(var(--red-6)) !important; }
@@ -855,15 +901,21 @@ onUnmounted(() => {
 }
 
 .ws-empty-art {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: #f5f5f4;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 60%),
+    linear-gradient(180deg, #faf9f7 0%, #ede9e2 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(28, 25, 23, 0.04),
+    0 12px 28px rgba(28, 25, 23, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c4c0bb;
-  margin-bottom: 4px;
+  color: #b6ada1;
+  margin-bottom: 6px;
 }
 
 .ws-empty-title {
@@ -906,32 +958,68 @@ onUnmounted(() => {
 }
 
 .folder-overview-card {
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(28, 25, 23, 0.07);
   border-radius: 14px;
   padding: 14px;
+  background: #fff;
   display: flex;
   gap: 12px;
   align-items: flex-start;
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.03);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease,
+              box-shadow 0.28s ease,
+              background-color 0.28s ease;
 }
 
 .folder-overview-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(68, 64, 60, 0.16);
-  box-shadow: 0 14px 30px rgba(28, 25, 23, 0.06);
+  transform: translateY(-2px);
+  border-color: rgba(28, 25, 23, 0.14);
+  background: #fefefd;
+  box-shadow: 0 2px 4px rgba(28, 25, 23, 0.04),
+              0 18px 36px rgba(28, 25, 23, 0.07);
+}
+
+.folder-overview-card:hover .folder-overview-icon {
+  transform: scale(1.04);
 }
 
 .folder-overview-icon {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
-  background: #f5f5f4;
+  background: linear-gradient(180deg, #fafaf9 0%, #efece8 100%);
   color: #57534e;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.28s ease, color 0.28s ease;
+}
+
+/* 类型语义色（克制，贴合暖色调） */
+.folder-overview-icon.tone--amber {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.10) 100%);
+  color: #b45309;
+}
+.folder-overview-icon.tone--sand {
+  background: linear-gradient(180deg, rgba(180, 158, 122, 0.18) 0%, rgba(146, 124, 88, 0.12) 100%);
+  color: #78624a;
+}
+.folder-overview-icon.tone--rose {
+  background: linear-gradient(180deg, rgba(244, 63, 94, 0.13) 0%, rgba(225, 29, 72, 0.08) 100%);
+  color: #be123c;
+}
+.folder-overview-icon.tone--sage {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.15) 0%, rgba(22, 163, 74, 0.10) 100%);
+  color: #15803d;
+}
+.folder-overview-icon.tone--ink {
+  background: linear-gradient(180deg, #f5f4f1 0%, #ebe8e2 100%);
+  color: #44403c;
 }
 
 .folder-overview-main {
@@ -975,7 +1063,12 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  color: #a8a29e;
+  font-weight: 500;
+  color: #78624a;
+  padding: 4px 10px;
+  background: linear-gradient(180deg, rgba(180, 158, 122, 0.16) 0%, rgba(146, 124, 88, 0.12) 100%);
+  border-radius: 999px;
+  letter-spacing: 0.02em;
 }
 
 .save-status {
@@ -1021,11 +1114,27 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px;
   border-radius: 999px;
   background: #1c1917;
   color: #fff;
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
+  box-shadow: 0 2px 6px rgba(28, 25, 23, 0.18);
+  transition: background 0.22s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
+}
+
+.asset-download-link:hover {
+  background: #0c0a09;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(28, 25, 23, 0.22);
+}
+
+.asset-download-link:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.18);
 }
 
 .asset-preview-stage {
@@ -1062,14 +1171,15 @@ onUnmounted(() => {
 }
 
 .doc-page-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: #f5f5f4;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.10) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #78716c;
+  color: #b45309;
   flex-shrink: 0;
   margin-top: 4px;
 }
@@ -1129,5 +1239,279 @@ onUnmounted(() => {
   .tree-resizer {
     display: none;
   }
+}
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES                     ║
+   ╚════════════════════════════════════════════╝ */
+
+.page-layout { background: var(--bg-stage); color: var(--ink); }
+
+/* Header */
+.page-header {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+}
+.page-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: -0.015em;
+}
+.page-subtitle {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+/* Tree panel */
+.ws-tree-panel {
+  background: var(--bg-stage-2);
+  border-right: 1px solid var(--line);
+}
+.tree-toolbar {
+  border-bottom: 1px solid var(--line);
+}
+.tree-panel-title {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+}
+.tree-add-btn {
+  color: var(--mute);
+  background: transparent;
+}
+.tree-add-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--ink);
+}
+
+/* Tree nodes */
+.tree-node-row {
+  color: var(--ink-2);
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.tree-node-row:hover {
+  background: var(--bg-card-hover);
+  color: var(--ink);
+}
+.tree-node-row.active {
+  background: var(--bg-card-hover);
+  color: var(--ink-strong);
+}
+.tree-node-label { color: inherit; }
+.tree-node-more { color: var(--mute); }
+.tree-node-more:hover { color: var(--ink); background: var(--bg-card-hover); }
+
+/* Tree empty state */
+.tree-empty { color: var(--mute); }
+.tree-empty-icon { color: var(--ink-3); opacity: 0.4; }
+.tree-empty-text {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.tree-empty-btn {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.tree-empty-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--ink-3);
+}
+
+/* Tree resizer */
+.tree-resizer { background: transparent; }
+.tree-resizer:hover .tree-resizer-line,
+.tree-resizer.active .tree-resizer-line { background: var(--ink-strong); }
+.tree-resizer-line { background: var(--line); }
+
+/* Content panel */
+.ws-content-panel { background: var(--bg-stage); color: var(--ink); }
+
+/* 文件夹概览页头（content-header）：去掉白底 band，融进暗场 */
+.content-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--line) !important;
+  padding: 0 28px !important;
+  height: 56px !important;
+}
+.content-title {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 18px !important;
+  letter-spacing: -0.015em;
+  gap: 10px;
+}
+.content-title svg { color: var(--ink-3); }
+
+/* folder-overview 容器自身不要 frame */
+.folder-overview {
+  background: transparent !important;
+  border: none !important;
+  padding: 24px 28px 32px !important;
+}
+
+/* Empty state */
+.ws-empty { background: var(--bg-stage); color: var(--ink-2); }
+.ws-empty-art { color: var(--ink-3); opacity: 0.5; }
+.ws-empty-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-size: 22px;
+}
+.ws-empty-desc {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+}
+
+/* Folder overview cards */
+.folder-overview { background: var(--bg-stage); }
+.folder-overview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.folder-overview-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+.folder-overview-icon { color: var(--ink-3); }
+.folder-overview-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.folder-overview-meta {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+/* Doc page (single document view) */
+.doc-page-shell { background: var(--bg-stage); color: var(--ink); }
+/* 去掉 header band 的 bg 框，融进暗场 */
+.doc-page-header {
+  background: transparent !important;
+  border-bottom: none !important;
+}
+.doc-page-icon { color: var(--ink-3); }
+.doc-page-breadcrumb {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.doc-page-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.doc-page-meta {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.doc-editor-area { background: var(--bg-stage); color: var(--ink); }
+
+/* Asset preview */
+.asset-preview-shell { background: var(--bg-stage); }
+.asset-preview-stage {
+  background: var(--bg-stage-2);
+  border: 1px solid var(--line);
+}
+.asset-preview-image { background: var(--bg-stage-2); border: 1px solid var(--line); }
+.asset-preview-kicker {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.asset-preview-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.asset-preview-meta {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.asset-download-link {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ink);
+  text-decoration: none;
+}
+.asset-download-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Save status */
+.save-status {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.save-status.success { color: var(--accent-ink); }
+.save-status.error   { color: var(--danger); }
+.save-status.loading { color: var(--ink-3); }
+
+/* Tone helpers */
+.tone--ink   { color: var(--ink); }
+.tone--sage  { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+.tone--sand  { color: var(--warn); background: var(--warn-soft); border-color: rgba(214,201,155,0.2); }
+.tone--rose  { color: var(--danger); background: var(--danger-soft); border-color: rgba(214,168,155,0.2); }
+.tone--amber { color: var(--warn); background: var(--warn-soft); border-color: rgba(214,201,155,0.2); }
+
+/* Headers in this view */
+.page-layout h1, .page-layout h2, .page-layout h3 { color: var(--ink-strong); }
+
+/* Content panel header */
+.content-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+/* Arco tree selected */
+:deep(.arco-tree-node-selected .arco-tree-node-title-text),
+:deep(.arco-tree-node-selected) .tree-node-label {
+  color: var(--ink-strong) !important;
+}
+:deep(.arco-tree-node-selected .arco-tree-node) {
+  background: var(--bg-card-hover) !important;
 }
 </style>

@@ -2,9 +2,15 @@ const BaseAgent = require('./baseAgent');
 const { buildResearchPrompt } = require('../prompts/research');
 const { search } = require('../services/webSearch');
 const { fetchPages } = require('../services/webFetch');
+const { withTimeout } = require('../utils/abortx');
 
 // 并发抓取 Top N 页面全文
 const FETCH_TOP_N = 3;
+// fetchPages 整体兜底：单 URL 已有 10s 超时，但并发整体若全部慢仍会拖累。
+// 超过这个时间就放弃抓取页面，靠搜索摘要继续。
+const FETCH_PAGES_BUDGET_MS = 18_000;
+// search 整体兜底
+const SEARCH_BUDGET_MS = 15_000;
 
 class ResearchAgent extends BaseAgent {
   constructor(agentId, apiKeys = {}) {
@@ -24,7 +30,11 @@ class ResearchAgent extends BaseAgent {
     // ── 第一步：搜索，获取结果列表 ──────────────────────────────────────
     let searchOutcome = { results: [], source: null, warning: null };
     try {
-      searchOutcome = await search(task.keywords.join(' '), searchOptions);
+      searchOutcome = await withTimeout(
+        search(task.keywords.join(' '), searchOptions),
+        SEARCH_BUDGET_MS,
+        `search(${task.focus})`
+      );
     } catch (err) {
       console.warn(`[${this.name}] 搜索异常: ${err.message}`);
     }
@@ -35,11 +45,15 @@ class ResearchAgent extends BaseAgent {
     if (searchResults.length > 0) {
       const topUrls = searchResults.slice(0, FETCH_TOP_N).map(r => r.url).filter(Boolean);
       try {
-        fetchedPages = await fetchPages(topUrls, {
-          jinaApiKey: this.apiKeys.jinaApiKey,
-          timeoutMs: 10000,
-          maxLength: 2500
-        });
+        fetchedPages = await withTimeout(
+          fetchPages(topUrls, {
+            jinaApiKey: this.apiKeys.jinaApiKey,
+            timeoutMs: 10000,
+            maxLength: 2500
+          }),
+          FETCH_PAGES_BUDGET_MS,
+          `fetchPages(${topUrls.length})`
+        );
         console.log(`[${this.name}] 抓取页面 ${fetchedPages.length}/${topUrls.length} 成功`);
       } catch (err) {
         console.warn(`[${this.name}] 页面抓取异常: ${err.message}`);

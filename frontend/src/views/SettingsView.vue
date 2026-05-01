@@ -34,10 +34,7 @@
             </a-form-item>
             <a-form-item label="模型版本">
               <a-select v-model="form.minimaxModel">
-                <a-option value="MiniMax-M2.5">MiniMax-M2.5（Token Plan 推荐）</a-option>
-                <a-option value="MiniMax-M2.5-highspeed">MiniMax-M2.5-highspeed（更快）</a-option>
-                <a-option value="MiniMax-M2.7">MiniMax-M2.7（最新旗舰）</a-option>
-                <a-option value="MiniMax-M2.7-highspeed">MiniMax-M2.7-highspeed</a-option>
+                <a-option value="MiniMax-M2.7-highspeed">MiniMax-M2.7-highspeed（最新旗舰 · 高速版）</a-option>
               </a-select>
               <template #extra>Token Plan（sk-cp- 开头）订阅后可免费大量调用</template>
             </a-form-item>
@@ -47,7 +44,7 @@
         <!-- DeepSeek -->
         <div class="settings-section">
           <div class="section-header">
-            <span class="section-title">DeepSeek-R1</span>
+            <span class="section-title">DeepSeek V4-Pro</span>
             <span class="section-badge">评审专用 · 按量付费</span>
           </div>
           <div class="section-fields">
@@ -155,7 +152,7 @@ const saving = ref(false)
 
 const form = reactive({
   minimaxApiKey:   store.data.minimaxApiKey   || '',
-  minimaxModel:    store.data.minimaxModel    || 'MiniMax-M2.5',
+  minimaxModel:    store.data.minimaxModel    || 'MiniMax-M2.7-highspeed',
   deepseekApiKey:  store.data.deepseekApiKey  || '',
   serpApiKey:      store.data.serpApiKey      || '',
   bingApiKey:      store.data.bingApiKey      || '',
@@ -349,4 +346,123 @@ async function handleSave() {
 }
 
 .settings-link:hover { color: #44403c; }
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES                     ║
+   ╚════════════════════════════════════════════╝ */
+
+.page-layout { background: var(--bg-stage); color: var(--ink); }
+
+.page-header {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+}
+.page-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: -0.015em;
+}
+.page-subtitle {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.save-btn {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 6px 16px;
+  height: 32px;
+}
+.save-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--ink-3);
+}
+.save-btn[disabled],
+.save-btn:disabled { opacity: 0.4; }
+
+.settings-body { background: var(--bg-stage); }
+.settings-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+
+.settings-section {
+  background: var(--bg-card);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.settings-section:first-of-type { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.settings-section:last-of-type { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+
+.section-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.section-badge {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Arco form overrides — 暗场 */
+:deep(.arco-form-item-label) {
+  color: var(--ink-2) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+:deep(.arco-form-item-message) {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+:deep(.arco-input-wrapper),
+:deep(.arco-select-view),
+:deep(.arco-input-number) {
+  background: var(--bg-input) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+:deep(.arco-input-wrapper input),
+:deep(.arco-input-number input),
+:deep(.arco-select-view-input) {
+  color: var(--ink) !important;
+  background: transparent !important;
+}
+:deep(.arco-input-wrapper input::placeholder) {
+  color: var(--mute) !important;
+}
+:deep(.arco-input-wrapper:hover),
+:deep(.arco-select-view:hover),
+:deep(.arco-input-number:hover) {
+  border-color: var(--ink-3) !important;
+}
+:deep(.arco-input-wrapper.arco-input-focus),
+:deep(.arco-select-view-focus),
+:deep(.arco-input-number-focus) {
+  background: var(--bg-input-focus) !important;
+  border-color: var(--accent-line) !important;
+  box-shadow: 0 0 0 2px var(--accent-soft) !important;
+}
+
+.settings-link {
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.settings-link:hover { color: var(--accent); }
 </style>

@@ -234,4 +234,58 @@ onUnmounted(() => {
   border-radius: 3px;
   font-size: 12px;
 }
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES                     ║
+   ║  注：iframe 内的 PPT 内容保留原色，不动      ║
+   ║       只改 luna 自己的 chrome / placeholder  ║
+   ╚════════════════════════════════════════════╝ */
+
+.ppt-editor-overlay { background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); }
+.ppt-editor-shell {
+  background: var(--bg-stage);
+  border: 1px solid var(--line);
+  box-shadow: 0 32px 80px -16px rgba(0,0,0,0.7);
+}
+.ppt-editor-header {
+  background: var(--bg-stage-2);
+  border-bottom: 1px solid var(--line);
+}
+.ppt-editor-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  font-size: 16px;
+}
+
+.ppt-editor-placeholder { background: var(--bg-stage); }
+.placeholder-icon { color: var(--ink-3); opacity: 0.5; }
+.placeholder-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.placeholder-desc { color: var(--ink-2); }
+.placeholder-code {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  border-radius: var(--radius-sm);
+}
+.placeholder-steps {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius);
+}
+.placeholder-steps code {
+  background: var(--bg-stage-2);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
 </style>

@@ -72,6 +72,24 @@ const wrapperScenarios = [
     expect: { type: 'strategy', label: '方案策划', needsClarification: false }
   },
   {
+    id: 'short-followup-question-stays-chat',
+    text: '你咋知道的',
+    options: {
+      session: { taskIntent: { type: 'strategy', label: '方案策划' } },
+      intentClassifier: mock({ type: 'strategy', confidence: 0.9, reason: '不应调用', needsClarification: false })
+    },
+    expect: { type: 'chat', label: '普通对话', needsClarification: false }
+  },
+  {
+    id: 'question-mark-stays-chat',
+    text: '?',
+    options: {
+      session: { taskIntent: { type: 'strategy', label: '方案策划' } },
+      intentClassifier: mock({ type: 'strategy', confidence: 0.9, reason: '不应调用', needsClarification: false })
+    },
+    expect: { type: 'chat', label: '普通对话', needsClarification: false }
+  },
+  {
     id: 'low-confidence-becomes-clarify',
     text: '帮我搞一下这个',
     options: {

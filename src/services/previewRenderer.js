@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const { renderAllSlides: designerRender, SLIDE_CSS: designerCSS } = require('./slideDesigner');
+const { FONT_FACE_CSS } = require('./slideDesigner/fonts');
 const path = require('path');
 const { toOutputUrl } = require('./outputPaths');
 
@@ -377,7 +378,8 @@ function wrapForScreenshot(htmlFragment, bgImagePath = null) {
     );
   }
   return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
-<style>body{margin:0;overflow:hidden;background:#fff;width:960px;height:540px}${SLIDE_CSS}${designerCSS || ''}</style>
+<style>${FONT_FACE_CSS}
+body{margin:0;overflow:hidden;background:#fff;width:960px;height:540px;font-family:"Inter","Noto Sans SC","PingFang SC",system-ui,sans-serif}${SLIDE_CSS}${designerCSS || ''}</style>
 </head><body>${html}</body></html>`;
 }
 

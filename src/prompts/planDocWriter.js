@@ -1,60 +1,23 @@
-// 合并 prompt：一次性产出策划文档 markdown + 结构化 plan JSON
-// 输出顺序：markdown 先（用户实时看到），<plan_json>...</plan_json> 在文档末尾
+// 策划方案"分阶段生成"prompt 集
+//
+// 三阶段架构：
+//   1) buildSkeletonPrompt  → 骨架（标题/核心策略/亮点/章节列表/章节要点）
+//   2) buildSectionPrompt   → 单章节展开（narrative + 执行细节 + 物料）
+//   3) buildDetailsPrompt   → 详情（预算/节奏/KPI/风险/视觉）
+//
+// 加上配套的轻量级"单段美化"prompt（buildPolishSectionPrompt），用于后台
+// pipeline 在每段写完后并行润色。
+//
+// 这套 prompt 替代了原来"一次性产出整篇 markdown + plan_json"的单调用模式。
+// 每段输出严格用 JSON（无 markdown），最终 markdown 由后端模板拼接。
 
-function buildPlanDocPrompt(input) {
-  const { orchestratorOutput = {}, researchResults = [], userInput = {}, approvedConcept = null } = input;
+function buildBriefBlock(userInput = {}, orchestratorOutput = {}) {
   const {
     brand = '', description = '', goal = '', audience = '', tone = '',
     budget = '', requirements = '', topic = ''
   } = userInput;
 
-  const researchSummary = (Array.isArray(researchResults) ? researchResults : [])
-    .map(r => `【${r.taskId || r.focus || '研究'}】${r.focus || ''}\n${r.summary || ''}`)
-    .join('\n\n') || '（暂无补充研究）';
-
-  const approvedConceptSection = approvedConcept ? `
-
-## 已与客户确认的活动主体思路（必须沿用）
-
-以下创意骨架已在上一步经客户明确确认，**完整方案必须沿用这个方向**，不要自行替换主题或创意方向。你可以在细节、执行、章节结构上深化扩展，但不得：
-- 替换活动主题名称（当前为：${approvedConcept.themeName || '待定'}）
-- 更换核心创意切入点
-- 丢弃已确认的亮点方向（可以深化但不能省略）
-
-### 主题
-${approvedConcept.themeName || '（待定）'}
-
-### 核心创意
-${approvedConcept.coreIdea || ''}
-
-### 已确认的亮点方向（必须在方案中体现）
-${(approvedConcept.creativeAngles || []).map((a, i) => `${i + 1}. ${a}`).join('\n') || '（无）'}
-
-### 整体调性
-${approvedConcept.toneAndStyle || ''}
-
-### 方向选择理由（供你理解上下文）
-${approvedConcept.rationale || ''}
-` : '';
-
-  const systemPrompt = `你是顶级活动策划专家。你要一次性产出两样东西：
-1）用户立刻能读的完整 Markdown 策划文档（第一部分，先写）
-2）给系统用的结构化 JSON（第二部分，用 <plan_json>...</plan_json> 包住，必须放在文档最后）
-
-写作风格（针对 Markdown 部分）：
-- 第一人称视角（「我们建议」「我们判断」），不要「本方案」样的官样文体
-- 每章先抛判断/结论，再展开；数字与案例要具体
-- 标题层级：# 方案标题，## 章节，### 子点；重要数据加粗，用 - 列表或表格
-- 直接开始写，不要前言、不要说明、不要 <think> 推理
-
-硬性格式约束：
-- Markdown 开头就是 \`# 方案标题\`，不要有任何空行或说明文字
-- JSON 严格放在 <plan_json> 和 </plan_json> 之间，标签前后各空一行
-- JSON 必须合法，不要带 markdown 代码块围栏`;
-
-  const userPrompt = `请为下面这个活动一次性产出策划文档和结构化 JSON。
-
-## 活动基本信息
+  return `## 活动基本信息
 品牌/客户：${brand || '（未指定）'}
 活动/项目：${topic || description || '（未指定）'}
 核心目标：${goal || orchestratorOutput.parsedGoal || '（未明确）'}
@@ -62,59 +25,238 @@ ${approvedConcept.rationale || ''}
 风格调性：${tone || '（未明确）'}
 预算量级：${budget || '（未明确）'}
 补充要求：${requirements || '无'}
-关键主题：${(orchestratorOutput.keyThemes || []).join('、') || '无'}
-
-## 研究素材
-${researchSummary}
-${approvedConceptSection}
----
-
-## 第一部分：完整 Markdown 策划文档
-
-直接以 \`# 方案标题\` 开始。方案必须覆盖：核心策略、方案亮点、章节设计（3-5 章）、预算框架、执行节奏、核心 KPI、风险应对、现场效果建议。标题层级与结构你根据活动特点自主设计。
-
-## 第二部分：结构化 JSON
-
-文档写完后，**另起一行输出 <plan_json>**，然后输出以下结构的合法 JSON，最后以 </plan_json> 结束：
-
-<plan_json>
-{
-  "planTitle": "方案标题（与 Markdown 的 # 标题一致）",
-  "coreStrategy": "核心命题 1-2 句",
-  "highlights": ["亮点1", "亮点2", "亮点3"],
-  "sections": [
-    { "title": "章节标题", "keyPoints": ["要点1","要点2"], "narrative": "200字以内核心内容" }
-  ],
-  "budget": {
-    "total": "${budget || '待定'}",
-    "breakdown": [{ "item": "预算项", "amount": "金额", "percentage": "占比", "rationale": "分配理由" }]
-  },
-  "timeline": {
-    "eventDate": "活动日期（如已知）",
-    "phases": [{ "phase": "阶段名", "duration": "时长", "milestone": "产出" }]
-  },
-  "kpis": [{ "metric": "指标名", "target": "目标值", "rationale": "设定理由" }],
-  "riskMitigation": ["风险+应对1", "风险+应对2"],
-  "visualTheme": {
-    "style": "整体视觉风格定位（1-2句）",
-    "colorMood": "色彩基调",
-    "imageKeywords": ["英文关键词1","英文关键词2","英文关键词3"]
-  },
-  "visualExecutionHints": {
-    "sceneTone": "现场气质一句话",
-    "mustRenderScenes": ["场景1","场景2","场景3"],
-    "spatialKeywords": ["英文关键词1","英文关键词2"],
-    "avoidElements": ["应避免元素1"],
-    "onsiteDesignSuggestions": [
-      { "scene": "主舞台/签到区等", "goal": "承担任务", "designSuggestion": "具体设计建议", "visualFocus": ["要素1","要素2"] }
-    ]
-  }
+关键主题：${(orchestratorOutput.keyThemes || []).join('、') || '无'}`;
 }
-</plan_json>
 
-要求：JSON 的 planTitle、sections[].title 应与 Markdown 里的标题文字保持一致。sections 数组至少 3 项，与 Markdown 里 ## 标题对应。`;
+function buildResearchBlock(researchResults = []) {
+  const summary = (Array.isArray(researchResults) ? researchResults : [])
+    .map(r => `【${r.taskId || r.focus || '研究'}】${r.focus || ''}\n${r.summary || ''}`)
+    .join('\n\n');
+  return `## 研究素材\n${summary || '（暂无补充研究）'}`;
+}
+
+function buildApprovedConceptBlock(approvedConcept) {
+  if (!approvedConcept) return '';
+  return `
+## 已确认的活动主体思路（必须沿用）
+
+主题：${approvedConcept.themeName || '（待定）'}
+核心创意：${approvedConcept.coreIdea || ''}
+亮点方向：
+${(approvedConcept.creativeAngles || []).map((a, i) => `${i + 1}. ${a}`).join('\n') || '（无）'}
+整体调性：${approvedConcept.toneAndStyle || ''}
+
+要求：方案必须沿用此方向，不得替换主题/核心创意。可在执行细节、章节结构上深化。`;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 阶段 1：骨架
+// ─────────────────────────────────────────────────────────────────────
+function buildSkeletonPrompt(input) {
+  const { orchestratorOutput = {}, researchResults = [], userInput = {}, approvedConcept = null } = input;
+
+  const systemPrompt = `你是顶级活动策划专家。这是「分阶段生成」的第 1 阶段：先出方案骨架。
+
+你的任务：基于活动信息和已确认创意，产出一份**结构化骨架 JSON**。骨架决定整份方案的章节走向，但不写章节正文——正文会在下一阶段逐章展开。
+
+硬性要求：
+- 直接输出 JSON，不要前言、说明、markdown 代码块围栏、<think> 推理
+- 整体输出**不超过 1500 字**
+- sections 必须 3-5 章（视活动复杂度），每章只给 title 和 3-5 条 keyPoints + 一句 focus（这章想达成什么）
+- title 要具体不要套话："开场仪式与品牌亮相"好过"项目背景"
+- keyPoints 是要点列表（每条 ≤25 字），不是完整段落
+- focus 一句话说清"这章读完用户应该理解什么"`;
+
+  const userPrompt = `请基于以下信息产出策划方案骨架。
+
+${buildBriefBlock(userInput, orchestratorOutput)}
+
+${buildResearchBlock(researchResults)}
+${buildApprovedConceptBlock(approvedConcept)}
+
+直接输出以下结构的 JSON：
+
+{
+  "planTitle": "方案标题（要有记忆点，不要写成'XX 活动策划方案'这种官样名）",
+  "coreStrategy": "核心策略一句话（≤50字）：这份方案的总命题",
+  "highlights": [
+    "亮点1（≤30字）",
+    "亮点2",
+    "亮点3"
+  ],
+  "sections": [
+    {
+      "title": "章节标题（具体、有判断）",
+      "keyPoints": ["要点1（≤25字）", "要点2", "要点3"],
+      "focus": "这章想让读者理解什么（一句话，≤40字）"
+    }
+  ],
+  "eventDate": "活动日期（如已知，否则空串）",
+  "audienceProfile": "目标受众一句话（≤30字）"
+}
+
+要求：
+- sections 3-5 章，覆盖完整活动周期（前期筹备 → 活动当天 → 后续传播 等关键节点）
+- 每章 keyPoints 互不重复，焦点清晰
+- 不要把"预算/KPI/风险"写成 sections——这些会在第 3 阶段单独产出`;
 
   return { systemPrompt, userPrompt };
 }
 
-module.exports = { buildPlanDocPrompt };
+// ─────────────────────────────────────────────────────────────────────
+// 阶段 2：单章节展开
+// ─────────────────────────────────────────────────────────────────────
+function buildSectionPrompt(input) {
+  const { skeleton = {}, section = {}, userInput = {}, approvedConcept = null } = input;
+  const allSectionTitles = (skeleton.sections || []).map((s, i) => `  ${i + 1}. ${s.title}`).join('\n');
+
+  const systemPrompt = `你是顶级活动策划专家。这是「分阶段生成」的第 2 阶段：展开单章节。
+
+你的任务：把当前章节的 keyPoints 展开成具体可执行的正文 + 落地细节。其他章节会被并行展开，所以你**只写当前这一章**，不要重复其他章节的内容。
+
+硬性要求：
+- 直接输出 JSON，不要前言、不要 markdown、不要代码块围栏、不要 <think>
+- 整体输出**不超过 800 字**
+- narrative 是这一章的正文段落（300-500 字），第一人称（"我们建议"），不要"本章节将"这种官样
+- executionDetails 是具体落地点（3-5 条，每条 ≤40 字），写得让人能直接照着干
+- materials 是物料/视觉/装置等可视化要素（2-4 条，每条 ≤30 字），可选
+- 不要重复其他章节的 keyPoints，专注本章
+- 数字与案例要具体不要"大量""多种"`;
+
+  const userPrompt = `请展开下面这一章。
+
+## 方案上下文
+- 方案标题：${skeleton.planTitle || ''}
+- 核心策略：${skeleton.coreStrategy || ''}
+- 全部章节列表（仅供你了解全貌，不要在本章重复其他章内容）：
+${allSectionTitles || '（无）'}
+
+## 当前章节（你要展开的）
+- 标题：${section.title || ''}
+- 要点：
+${(section.keyPoints || []).map((k, i) => `  ${i + 1}. ${k}`).join('\n') || '（无）'}
+- 焦点：${section.focus || ''}
+
+## 活动基本信息
+品牌：${userInput.brand || '（未指定）'}
+受众：${userInput.audience || '（未明确）'}
+调性：${userInput.tone || '（未明确）'}
+${approvedConcept ? `\n## 已确认主题（必须沿用）\n${approvedConcept.themeName || ''}\n核心：${approvedConcept.coreIdea || ''}` : ''}
+
+输出 JSON：
+{
+  "narrative": "300-500字正文段落",
+  "executionDetails": ["落地点1（≤40字）", "落地点2", "落地点3"],
+  "materials": ["物料/装置1（≤30字）", "物料2"]
+}`;
+
+  return { systemPrompt, userPrompt };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 阶段 3：详情（预算/节奏/KPI/风险/视觉）
+// ─────────────────────────────────────────────────────────────────────
+function buildDetailsPrompt(input) {
+  const { skeleton = {}, expandedSections = [], userInput = {} } = input;
+  const sectionsBrief = expandedSections
+    .map((s, i) => `  ${i + 1}. ${s.title}：${s.narrative ? s.narrative.slice(0, 80) : ''}`)
+    .join('\n');
+
+  const systemPrompt = `你是顶级活动策划专家。这是「分阶段生成」的第 3 阶段：补全方案的预算/节奏/KPI/风险/视觉。
+
+你的任务：基于已经写好的章节内容，给出可量化的预算分解、时间节奏、KPI 指标、风险应对、视觉指引。
+
+硬性要求：
+- 直接输出 JSON，不要前言、不要 markdown、不要代码块围栏、不要 <think>
+- 整体输出**不超过 1200 字**
+- 预算 breakdown 要具体到项（场地/物料/媒介/执行/应急），数字加百分比
+- timeline.phases 给 3-5 个阶段（T-30 / T-7 / 当天 / T+7 等），每阶段 milestone 一句话
+- kpis 给 3-5 条，每条要有具体目标值（不能写"较高""明显提升"）
+- riskMitigation 每条是"风险 + 应对动作"组合，不要只写风险不给方案
+- visualExecutionHints 给现场视觉/空间设计具体建议，imageKeywords 用英文`;
+
+  const userPrompt = `请基于以下方案内容补全详情。
+
+## 方案标题
+${skeleton.planTitle || ''}
+
+## 核心策略
+${skeleton.coreStrategy || ''}
+
+## 已展开章节（仅摘要，供你定预算/节奏/KPI 用）
+${sectionsBrief || '（无）'}
+
+## 活动信息
+品牌：${userInput.brand || '（未指定）'}
+预算量级：${userInput.budget || '（未明确）'}
+${skeleton.eventDate ? `活动日期：${skeleton.eventDate}` : ''}
+
+输出 JSON：
+{
+  "budget": {
+    "total": "${userInput.budget || '待定'}",
+    "breakdown": [
+      { "item": "场地/搭建", "amount": "金额", "percentage": "占比%", "rationale": "≤30字理由" }
+    ]
+  },
+  "timeline": {
+    "eventDate": "${skeleton.eventDate || '待定'}",
+    "phases": [
+      { "phase": "T-30 筹备期", "duration": "时长", "milestone": "≤25字关键产出" }
+    ]
+  },
+  "kpis": [
+    { "metric": "指标名", "target": "具体数字目标", "rationale": "≤30字设定理由" }
+  ],
+  "riskMitigation": [
+    "风险点 + 应对动作（≤40字一条）"
+  ],
+  "visualTheme": {
+    "style": "整体视觉风格（≤30字）",
+    "colorMood": "色彩基调（≤20字）",
+    "imageKeywords": ["english_keyword_1", "english_keyword_2", "english_keyword_3"]
+  },
+  "visualExecutionHints": {
+    "sceneTone": "现场气质一句话（≤25字）",
+    "mustRenderScenes": ["场景1（≤15字）", "场景2", "场景3"],
+    "spatialKeywords": ["english_keyword_1", "english_keyword_2"],
+    "avoidElements": ["应避免元素1（≤15字）"],
+    "onsiteDesignSuggestions": [
+      { "scene": "主舞台/签到区等", "goal": "≤20字承担任务", "designSuggestion": "≤40字具体设计", "visualFocus": ["要素1", "要素2"] }
+    ]
+  }
+}`;
+
+  return { systemPrompt, userPrompt };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 单段美化（轻量、给后台 pipeline 用）
+// ─────────────────────────────────────────────────────────────────────
+function buildPolishSectionPrompt(input) {
+  const { section = {}, expanded = {} } = input;
+  const systemPrompt = `你是资深内容编辑。给你一段策划方案的章节正文，请只做"语言润色"，不增删信息、不改事实。
+
+硬性约束：
+- 不得增加新的观点/数字/案例
+- 不得删减原文任何要点
+- 仅做：句式打磨、官样词替换为第一人称、并列项拆成短句、加强节奏感
+- 输出**只返回润色后的 narrative 文本**，不要 JSON、不要 markdown 标题、不要前言、不要 <think>
+- 长度与原文相近（±20% 以内）`;
+
+  const userPrompt = `章节标题：${section.title || ''}
+
+原文：
+${expanded.narrative || ''}
+
+请输出润色后的正文（纯文本，不要任何标签或代码块）。`;
+
+  return { systemPrompt, userPrompt };
+}
+
+module.exports = {
+  buildSkeletonPrompt,
+  buildSectionPrompt,
+  buildDetailsPrompt,
+  buildPolishSectionPrompt
+};

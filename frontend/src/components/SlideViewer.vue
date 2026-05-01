@@ -162,9 +162,11 @@ watch(() => props.currentIndex, (nextIndex) => {
 
 // ── 幻灯片内联 CSS（注入 iframe）──────────────────────────────
 // 与 src/services/previewRenderer.js 的 SLIDE_CSS 保持同步
+// 字体通过 /api/slide-fonts.css 引入（与服务器 Puppeteer 截图同一套 Inter + Noto Sans SC），
+// 避免预览和最终 PPT 因字体差异出现版式漂移。
 const SLIDE_STYLES = `
 *,*::before,*::after{box-sizing:border-box}*{margin:0;padding:0}
-.slide{width:960px;height:540px;position:relative;overflow:hidden;font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;background-color:#fff;color:#1A1A1A}
+.slide{width:960px;height:540px;position:relative;overflow:hidden;font-family:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;background-color:#fff;color:#1A1A1A}
 .slide-cover{background-color:var(--secondary,#0F172A);display:flex;align-items:center}
 .cover-accent{position:absolute;left:0;top:0;width:8px;height:100%;background-color:var(--primary,#2563EB);z-index:2}
 .cover-deco{position:absolute;right:-60px;top:-80px;width:300px;height:300px;border-radius:50%;background-color:var(--primary,#2563EB);opacity:.07}
@@ -240,7 +242,7 @@ const SLIDE_STYLES = `
 `
 
 function slideSrc(html) {
-  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>body{margin:0;overflow:hidden;background:#fff;width:${SLIDE_WIDTH}px;height:${SLIDE_HEIGHT}px}${SLIDE_STYLES}</style></head><body>${html}</body></html>`
+  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><base href="${window.location.origin}/"><link rel="stylesheet" href="/api/slide-fonts.css"><style>body{margin:0;overflow:hidden;background:#fff;width:${SLIDE_WIDTH}px;height:${SLIDE_HEIGHT}px;font-family:"Inter","Noto Sans SC","PingFang SC",system-ui,sans-serif}${SLIDE_STYLES}</style></head><body>${html}</body></html>`
 }
 
 // ── 缩放幻灯片 ─────────────────────────────────────────────────

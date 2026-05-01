@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "doc_90d470e684f4",
+  "docType": "document",
+  "name": "README",
+  "contentFormat": "tiptap-json",
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "小米 空间索引"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "这个索引用于记录「小米」空间里真正有参考价值的上下文、关键资产和最近任务。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "关键资产"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "当前还没有稳定可复用的空间资产。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "最近任务"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "当前还没有可回顾的任务记录。"
+          }
+        ]
+      }
+    ]
+  },
+  "createdAt": "2026-05-01T16:21:52.711Z",
+  "updatedAt": "2026-05-01T16:21:52.711Z",
+  "indexData": {
+    "summary": "",
+    "assets": [],
+    "recentTasks": []
+  }
+}

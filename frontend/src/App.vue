@@ -11,19 +11,27 @@
       hide-trigger
     >
       <!-- Logo -->
-      <div class="sider-logo">
+      <div
+        class="sider-logo"
+        :class="{ collapsed }"
+        :title="collapsed ? '点击展开侧栏' : ''"
+        @click="onLogoClick"
+      >
         <span class="logo-mark" v-show="collapsed">
-          <PhSparkle :size="22" weight="duotone" />
+          <img :src="logoUrl" alt="Luna" class="logo-img" />
         </span>
         <span class="logo-text-group" v-show="!collapsed">
           <span class="logo-text">Luna</span>
           <span class="logo-sub">活动策划助手</span>
         </span>
-        <a-tooltip :content="collapsed ? '展开侧栏' : '收起侧栏'" position="right">
-          <button class="collapse-btn" @click="collapsed = !collapsed">
-            <PhCaretLeft :size="14" weight="bold" :class="{ 'rotated': collapsed }" />
-          </button>
-        </a-tooltip>
+        <button
+          v-show="!collapsed"
+          class="collapse-btn"
+          @click.stop="collapsed = true"
+          aria-label="收起侧栏"
+        >
+          <PhCaretLeft :size="14" weight="bold" />
+        </button>
       </div>
 
       <!-- 自定义导航列表，绕过 Arco 图标字体限制 -->
@@ -59,12 +67,12 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   PhFolderOpen,
-  PhRobot,
   PhSliders,
   PhCaretLeft,
-  PhSparkle,
   PhLayout,
 } from '@phosphor-icons/vue'
+import IconMuse from '@/components/icons/IconMuse.vue'
+import logoUrl from '@/assets/logo.png'
 
 const router = useRouter()
 const route  = useRoute()
@@ -72,7 +80,7 @@ const APP_SIDER_COLLAPSED_KEY = 'oc_app_sider_collapsed'
 
 const navItems = [
   { path: '/workspace', label: '策划空间', icon: PhFolderOpen },
-  { path: '/agent',     label: '智能助手', icon: PhRobot      },
+  { path: '/agent',     label: '智能助手', icon: IconMuse     },
   { path: '/templates', label: '模版中心', icon: PhLayout     },
   { path: '/settings',  label: '配置中心', icon: PhSliders    },
 ]
@@ -87,6 +95,10 @@ const currentRoute = computed(() => route.path)
 
 function onNavClick(path) { router.push(path) }
 
+function onLogoClick() {
+  if (collapsed.value) collapsed.value = false
+}
+
 watch(collapsed, (value) => {
   try { localStorage.setItem(APP_SIDER_COLLAPSED_KEY, value ? '1' : '0') }
   catch {}
@@ -94,24 +106,21 @@ watch(collapsed, (value) => {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Satisfy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Satisfy&display=swap');
 
 /* ── 全局重置 ── */
 *, *::before, *::after { box-sizing: border-box; }
 html, body, #app { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
-}
 
 /* ── App Shell ── */
-.app-shell { height: 100vh; overflow: hidden; }
+.app-shell { height: 100vh; overflow: hidden; background: var(--bg-stage); }
 
 /* ── Sider ── */
 .app-sider {
-  background: #faf9f7 !important;
+  background: var(--bg-stage-2) !important;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(0,0,0,0.06) !important;
+  border-right: 1px solid var(--line) !important;
 }
 
 .app-sider :deep(.arco-layout-sider-children) {
@@ -122,104 +131,126 @@ body {
 
 /* ── Logo ── */
 .sider-logo {
-  height: 72px;
+  height: 76px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  gap: 12px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
 }
 
+.sider-logo.collapsed {
+  padding: 0;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.sider-logo.collapsed:hover .logo-img {
+  transform: scale(1.06);
+}
+
 .logo-mark {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #44403c;
+  filter: brightness(1.05) contrast(0.9);
+}
+
+.logo-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+  transition: transform var(--dur) var(--ease);
 }
 
 .logo-text-group {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   overflow: hidden;
 }
 
 .logo-text {
-  font-family: 'Satisfy', cursive;
-  font-size: 22px;
+  font-family: var(--font-serif);
+  font-style: italic;
   font-weight: 400;
-  color: #44403c;
+  font-size: 24px;
+  color: var(--ink-strong);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .logo-sub {
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
   font-weight: 400;
-  color: #a8a29e;
+  color: var(--mute);
   white-space: nowrap;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 /* ── Nav ── */
 .sider-nav {
   flex: 1;
-  padding: 8px 0;
+  padding: 14px 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: calc(100% - 16px);
   margin: 0 8px;
-  padding: 0 10px;
-  height: 38px;
+  padding: 0 12px;
+  height: 40px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  color: #57534e;
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 500;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   text-align: left;
-  transition: background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              color      0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              transform  0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background var(--dur-fast) var(--ease),
+              color      var(--dur-fast) var(--ease),
+              transform  var(--dur-fast) var(--ease);
   will-change: transform;
   overflow: hidden;
   white-space: nowrap;
+  position: relative;
 }
 
 .nav-item:hover:not(.active) {
-  background: rgba(68,64,60,0.06);
-  color: #44403c;
+  background: var(--bg-card-hover);
+  color: var(--ink);
   transform: translateX(2px);
 }
 
-/* Active: full-width left bar 指示器 */
+/* Active: 白色细边指示器 */
 .nav-item.active {
-  background: rgba(68,64,60,0.08);
-  color: #1c1917;
-  font-weight: 600;
+  background: var(--bg-card-hover);
+  color: var(--ink-strong);
+  font-weight: 500;
   width: calc(100% - 8px);
   margin-left: 0;
   margin-right: 8px;
-  border-radius: 0 8px 8px 0;
-  padding-left: 18px;
-  box-shadow: inset 3px 0 0 0 #44403c;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding-left: 20px;
+  box-shadow: inset 2px 0 0 0 var(--ink-strong);
 }
 
 .nav-icon {
@@ -229,7 +260,7 @@ body {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--dur-fast) var(--ease);
 }
 
 .nav-item:hover:not(.active) .nav-icon {
@@ -249,22 +280,22 @@ body {
   height: 28px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  color: #a8a29e;
+  color: var(--mute);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.18s ease, color 0.18s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur) var(--ease);
 }
 
 .collapse-btn:hover {
-  background: rgba(68,64,60,0.08);
-  color: #44403c;
+  background: var(--bg-card-hover);
+  color: var(--ink);
 }
 
 .collapse-btn svg {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--dur) var(--ease);
 }
 
 .collapse-btn svg.rotated {
@@ -275,17 +306,17 @@ body {
 .app-content {
   flex: 1;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-stage);
   display: flex;
   flex-direction: column;
 }
 
 /* ── Route transition ── */
 .page-enter-active {
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 .page-leave-active {
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .page-enter-from {
   opacity: 0;

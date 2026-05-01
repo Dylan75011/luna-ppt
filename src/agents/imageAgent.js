@@ -1,7 +1,7 @@
 const BaseAgent = require('./baseAgent');
 const { searchImages, generateMiniMaxImage, downloadImage, processImageForPpt } = require('../services/imageSearch');
 const { analyzeImageForLayout, colorDistance } = require('../services/imageAnalyzer');
-const { getRunAssetDir, toPublicUrl } = require('../services/outputPaths');
+const { getRunAssetDir, getConversationRunAssetDir, toPublicUrl } = require('../services/outputPaths');
 const { pruneRuns } = require('../services/outputRetention');
 const config = require('../config');
 const path   = require('path');
@@ -181,7 +181,7 @@ class ImageAgent extends BaseAgent {
    * @param {{ plan, userInput, taskId, pptOutline, visualPlan }} input
    * @returns {Promise<{ cover: Candidate[], content: Candidate[], end: Candidate[], pages: object[] }>}
    */
-  async run({ plan, userInput, taskId = `img_${Date.now()}`, pptOutline = null, visualPlan = null }) {
+  async run({ plan, userInput, taskId = `img_${Date.now()}`, pptOutline = null, visualPlan = null, conversationId = '' }) {
     console.log('[ImageAgent] 开始搜索配图...');
 
     // ─── Step 1: 确定视觉风格方向 ────────────────────────────────
@@ -253,7 +253,11 @@ class ImageAgent extends BaseAgent {
     // ─── Step 3: 基于风格化搜索词搜索 Pexels + MiniMax 生图 ────────
     const minimaxKey = this.apiKeys?.minimaxApiKey || config.minimaxApiKey;
     const runId = taskId || `img_${Date.now()}`;
-    const outputBase = getRunAssetDir(runId, 'images');
+    // 配图缓存优先放在 per-conversation 临时区，删会话即清理；
+    // 没有 conversationId（脚本/老调用）退回 output/runs/<runId>/images。
+    const outputBase = conversationId
+      ? getConversationRunAssetDir(conversationId, runId, 'images')
+      : getRunAssetDir(runId, 'images');
 
     // 使用风格化搜索词 + 少量变体，保持全局一致性
     const coverSearchQueries = [

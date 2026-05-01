@@ -1,8 +1,128 @@
 // 创意骨架提案工具：在 run_strategy 之前，向用户呈现 3 条差异化方向并确认
 const { proposeConcept } = require('../../skills');
+const { makeSkillStatusBridge } = require('./skillStatusBridge');
 
 const MAX_ITERATIONS = 4;
 const RESEARCH_CONTEXT_MAX_CHARS = 6000;
+
+// 从流式累计原文里"尽力"提取已完成的字段：
+//   - 顶层简单字符串字段（sharedContext / differentiationAxis / recommendation）
+//   - directions 数组里所有已完整闭合的方向对象
+// LLM 还在吐字时调用，返回 partial 对象用于驱动右侧预览面板的骨架渲染。
+// 解析失败时返回 null，调用方应跳过这次 emit。
+function extractStringField(text, ...keys) {
+  for (const key of keys) {
+    // 简单 JSON 字符串匹配，支持转义引号；够用，不追求完整 JSON 词法
+    const re = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`);
+    const m = text.match(re);
+    if (m) {
+      try { return JSON.parse(`"${m[1]}"`); } catch { return m[1]; }
+    }
+  }
+  return '';
+}
+
+function extractDirectionsFromPartial(text) {
+  const dirKeyIdx = text.search(/"directions"\s*:\s*\[/);
+  if (dirKeyIdx === -1) return [];
+  const arrStart = text.indexOf('[', dirKeyIdx);
+  if (arrStart === -1) return [];
+
+  const directions = [];
+  let i = arrStart + 1;
+  while (i < text.length) {
+    while (i < text.length && /[\s,]/.test(text[i])) i++;
+    if (i >= text.length || text[i] === ']') break;
+    if (text[i] !== '{') break;
+
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    let end = -1;
+    for (let j = i; j < text.length; j++) {
+      const c = text[j];
+      if (inString) {
+        if (escape) escape = false;
+        else if (c === '\\') escape = true;
+        else if (c === '"') inString = false;
+        continue;
+      }
+      if (c === '"') { inString = true; continue; }
+      if (c === '{') depth++;
+      else if (c === '}') {
+        depth--;
+        if (depth === 0) { end = j; break; }
+      }
+    }
+    if (end === -1) break; // 当前对象还没流完
+    const objText = text.slice(i, end + 1);
+    try {
+      directions.push(JSON.parse(objText));
+    } catch {
+      // 容忍尾逗号
+      try { directions.push(JSON.parse(objText.replace(/,\s*([}\]])/g, '$1'))); } catch {}
+    }
+    i = end + 1;
+  }
+  return directions;
+}
+
+function parsePartialConcept(rawText) {
+  if (!rawText) return null;
+  const text = String(rawText).replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+  const directions = extractDirectionsFromPartial(text);
+  const sharedContext = extractStringField(text, 'sharedContext', 'shared_context');
+  const differentiationAxis = extractStringField(text, 'differentiationAxis', 'differentiation_axis');
+  const recommendation = extractStringField(text, 'recommendation');
+
+  if (!directions.length && !sharedContext && !differentiationAxis) return null;
+
+  return {
+    sharedContext,
+    differentiationAxis,
+    directions: directions.map((d, i) => ({
+      label: String(d.label || '').trim() || ['A', 'B', 'C'][i] || String(i + 1),
+      codeName: String(d.codeName || d.code_name || '').trim(),
+      themeName: String(d.themeName || d.theme || '').trim(),
+      positioning: String(d.positioning || '').trim(),
+      coreIdea: String(d.coreIdea || d.core_idea || '').trim(),
+      eventFramework: Array.isArray(d.eventFramework) ? d.eventFramework : (Array.isArray(d.framework) ? d.framework : []),
+      creativeAngles: Array.isArray(d.creativeAngles) ? d.creativeAngles : (Array.isArray(d.angles) ? d.angles : []),
+      toneAndStyle: String(d.toneAndStyle || d.tone || '').trim(),
+      upside: String(d.upside || '').trim(),
+      risk: String(d.risk || '').trim(),
+      bestFor: String(d.bestFor || d.best_for || '').trim()
+    })),
+    recommendation
+  };
+}
+
+// 给 propose_concept 用的 partial emitter 工厂：
+// 每次心跳从累计原文里提取 partial concept，emit 一个 partial=true 的 artifact，
+// 让前端右侧面板边流边渲。带去重（directions 数量 + sharedContext 长度无变化时跳过）。
+function createPartialConceptEmitter({ onEvent, iteration }) {
+  let lastSig = '';
+  return function emitPartial(text) {
+    const partial = parsePartialConcept(text);
+    if (!partial) return;
+    const sig = `${partial.directions.length}|${partial.sharedContext.length}|${partial.differentiationAxis.length}|${partial.recommendation.length}`;
+    if (sig === lastSig) return;
+    lastSig = sig;
+    onEvent('artifact', {
+      artifactType: 'concept_proposal',
+      payload: {
+        iteration,
+        partial: true,
+        sharedContext: partial.sharedContext,
+        differentiationAxis: partial.differentiationAxis,
+        directions: partial.directions,
+        recommendation: partial.recommendation,
+        degraded: false
+      }
+    });
+  };
+}
 
 function buildResearchContext(session) {
   const store = Array.isArray(session.researchStore) ? session.researchStore : [];
@@ -75,11 +195,10 @@ async function execProposeConcept(args = {}, session, onEvent) {
       previousConcept,
       userFeedback,
       iteration,
-      onStatus: ({ status }) => {
-        if (status === 'fallback_start') {
-          onEvent('tool_progress', { message: '生成稍慢，切换为稳态兜底创意...' });
-        }
-      }
+      onStatus: makeSkillStatusBridge(onEvent, {
+        skillLabel: '梳理方向',
+        onPartial: createPartialConceptEmitter({ onEvent, iteration })
+      })
     }, session.apiKeys);
   } catch (err) {
     console.warn('[propose_concept] 失败:', err.message);

@@ -157,12 +157,38 @@ async function execBrowserReadPage(args, session, onEvent) {
     return { success: false, reason: resp?.reason || 'empty', error: '页面无内容', hint: '可改用 web_fetch 兜底' };
   }
 
-  onEvent('tool_progress', { message: '页面读取完成' });
+  // 质量信号：让 brain 看到 low_signal 时知道这条不可靠，可以换链或 fallback
+  // 触发条件：正文过短 / 命中登录墙关键词 / 命中风控关键词
+  const content = String(resp.content || '');
+  const charCount = content.length;
+  const lower = content.toLowerCase();
+  const loginWall = /(请先登录|请登录后查看|login required|sign in to continue|verify you are human|verifying you are human|enable javascript|are you a robot|checking your browser)/i.test(content) || /captcha|cloudflare ray id/.test(lower);
+  const tooShort = charCount < 300;
+  const lowSignal = tooShort || loginWall;
+  const meta = {
+    charCount,
+    lowSignal,
+    ...(loginWall && { loginWall: true }),
+    ...(tooShort && { tooShort: true })
+  };
+
+  onEvent('tool_progress', {
+    message: lowSignal
+      ? `页面读取完成但信号弱（${loginWall ? '疑似登录/风控' : `仅 ${charCount} 字`}）`
+      : '页面读取完成'
+  });
+
   return {
     success: true,
     title: resp.title || '',
     url: resp.url || url,
-    content: resp.content
+    content,
+    meta,
+    ...(lowSignal && {
+      hint: loginWall
+        ? '页面要求登录或被风控；如果是公开内容，建议换一条链接或用 web_fetch'
+        : '页面正文过短，建议换一条搜索结果或用 web_fetch'
+    })
   };
 }
 

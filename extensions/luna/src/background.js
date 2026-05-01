@@ -2,9 +2,10 @@
 // 职责：维护与 Node 后端的 WebSocket 连接，收到 op 后分发给对应 handler
 import { searchXiaohongshu, readNotesByUrls, sweepOrphanTabs } from './extractors/xiaohongshu.js';
 import { readPage } from './extractors/readPage.js';
+import { searchBing } from './extractors/webSearch.js';
 
 const DEFAULT_BRIDGE_URL = 'ws://127.0.0.1:3399';
-const VERSION = '0.7.0';
+const VERSION = '0.8.0';
 const RECONNECT_BACKOFF_MS = [1000, 2000, 4000, 8000, 15000];
 
 let ws = null;
@@ -96,6 +97,7 @@ async function dispatch(op, payload) {
     const plat = payload.platform || 'xiaohongshu';
     host = plat === 'xiaohongshu' ? 'www.xiaohongshu.com' : null;
   }
+  else if (op === 'browser_web_search') host = 'www.bing.com';
 
   if (host && !(await ensureGrant(host, 'read'))) {
     throw new Error(`need_user_approval: ${host}（请打开 Luna 扩展 popup，勾选 "allowlist 只读自动放行" 或手动授权）`);
@@ -112,6 +114,9 @@ async function dispatch(op, payload) {
         );
       }
       throw new Error(`unsupported platform: ${payload.platform}`);
+    }
+    case 'browser_web_search': {
+      return await searchBing(payload.query, payload.max_results || 10);
     }
     case 'browser_read_page': {
       return await readPage(payload.url);

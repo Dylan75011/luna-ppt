@@ -855,9 +855,8 @@ defineExpose({ editor, scrollToBottom })
 .slash-icon {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -866,6 +865,8 @@ defineExpose({ editor, scrollToBottom })
   color: #374151;
   flex-shrink: 0;
 }
+.slash-item.selected .slash-icon,
+.slash-item:hover .slash-icon { background: #e5e7eb; }
 
 .slash-label { font-size: 13px; font-weight: 500; color: #111; }
 .slash-desc  { font-size: 11px; color: #9ca3af; margin-top: 1px; }
@@ -930,4 +931,154 @@ defineExpose({ editor, scrollToBottom })
     left: var(--block-toolbar-left) !important;
   }
 }
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES                     ║
+   ╚════════════════════════════════════════════╝ */
+
+.notion-editor-wrap { color: var(--ink); }
+
+.notion-editor .ProseMirror {
+  color: var(--ink-2);
+  caret-color: var(--accent);
+  font-family: var(--font-sans);
+  line-height: 1.8;
+}
+.notion-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--mute);
+  font-style: italic;
+}
+
+/* Headings — editorial serif */
+.notion-editor .ProseMirror h1,
+.notion-editor .ProseMirror h2,
+.notion-editor .ProseMirror h3 {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.notion-editor .ProseMirror h1 { font-size: 2em; line-height: 1.1; }
+.notion-editor .ProseMirror h2 { font-size: 1.55em; line-height: 1.15; }
+.notion-editor .ProseMirror h3 { font-size: 1.2em; line-height: 1.25; }
+
+.notion-editor .ProseMirror p { color: var(--ink-2); }
+.notion-editor .ProseMirror strong { color: var(--ink-strong); font-weight: 500; }
+.notion-editor .ProseMirror em { color: var(--ink); font-style: italic; }
+.notion-editor .ProseMirror a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.notion-editor .ProseMirror a:hover { color: var(--ink-strong); }
+
+/* Blockquote */
+.notion-editor .ProseMirror blockquote {
+  border-left: 2px solid var(--accent);
+  padding: 4px 0 4px 16px;
+  background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 60%);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05em;
+}
+
+/* Code */
+.notion-editor .ProseMirror code {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.notion-editor .ProseMirror pre {
+  background: var(--bg-stage-2);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  overflow-x: auto;
+}
+.notion-editor .ProseMirror pre code { background: transparent; border: none; padding: 0; color: inherit; }
+
+/* Table */
+.notion-editor .ProseMirror table {
+  border-collapse: collapse;
+  border: 1px solid var(--line);
+}
+.notion-editor .ProseMirror table th,
+.notion-editor .ProseMirror table td {
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  color: var(--ink-2);
+}
+.notion-editor .ProseMirror table th {
+  background: var(--bg-card);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* HR */
+.notion-editor .ProseMirror hr { border: none; border-top: 1px solid var(--line); margin: 1.5em 0; }
+
+/* Task list checkbox */
+.notion-editor .ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* Block toolbar / Slash menu containers */
+.block-toolbar,
+.bubble-menu,
+.slash-menu {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+  box-shadow: var(--shadow-rise) !important;
+  border-radius: var(--radius) !important;
+}
+
+/* Block toolbar buttons (实际 class 是 .block-tool-btn) */
+.block-tool-btn,
+.bubble-menu button {
+  background: transparent !important;
+  color: var(--ink-2) !important;
+  border: none !important;
+}
+.block-tool-btn:hover,
+.bubble-menu button:hover {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink) !important;
+}
+
+/* Slash menu rows (实际 class 是 .slash-item / .slash-label / .slash-icon / .slash-desc) */
+.slash-item {
+  background: transparent !important;
+  color: var(--ink-2) !important;
+}
+.slash-item:hover,
+.slash-item.selected {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink) !important;
+}
+.slash-icon {
+  background: var(--bg-card) !important;
+  color: var(--ink-2) !important;
+  border: 1px solid var(--line);
+}
+.slash-item:hover .slash-icon,
+.slash-item.selected .slash-icon {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+  border-color: var(--line-strong);
+}
+.slash-label { color: var(--ink) !important; }
+.slash-desc  { color: var(--mute) !important; }
+.slash-empty { color: var(--mute) !important; }
+.slash-item.danger .slash-label { color: var(--danger) !important; }
+
+/* Selection */
+.notion-editor .ProseMirror ::selection { background: var(--accent); color: var(--bg-stage); }
 </style>

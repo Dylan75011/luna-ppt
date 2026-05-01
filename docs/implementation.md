@@ -32,7 +32,7 @@ luna-ppt/
 │   │
 │   ├── skills/                    # 策划技能
 │   │   ├── strategize.js         # 方案生成（MiniMax）
-│   │   ├── critique.js           # 方案评审（DeepSeek-R1）
+│   │   ├── critique.js           # 方案评审（DeepSeek V4-Pro）
 │   │   └── writeDoc.js           # 文档渲染
 │   │
 │   ├── prompts/                  # 提示词模板
@@ -95,12 +95,12 @@ PORT=3000
 # MiniMax（主力模型）
 MINIMAX_API_KEY=sk-cp-xxx
 MINIMAX_BASE_URL=https://api.minimaxi.com/v1
-MINIMAX_MODEL=MiniMax-M2.5
+MINIMAX_MODEL=MiniMax-M2.7-highspeed
 
 # DeepSeek（仅 Critic）
 DEEPSEEK_API_KEY=sk-xxx
 DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_REASONER_MODEL=deepseek-reasoner
+DEEPSEEK_REASONER_MODEL=deepseek-v4-pro
 
 # 搜索服务（可选）
 TAVILY_API_KEY=

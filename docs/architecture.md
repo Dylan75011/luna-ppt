@@ -121,7 +121,7 @@ idle ──[start]──→ running ──[done]──→ idle
 | `services/` | `imageSearch.js` | 图片搜索：Pexels API + MiniMax 图片生成 |
 | `services/` | `imageAnalyzer.js` | 图片分析：亮度/对比度/安全文字区域 |
 | `skills/` | `strategize.js` | 方案生成（MiniMax） |
-| `skills/` | `critique.js` | 方案评审（DeepSeek-R1） |
+| `skills/` | `critique.js` | 方案评审（DeepSeek V4-Pro） |
 | `skills/` | `writeDoc.js` | 文档渲染（MiniMax） |
 | `prompts/` | `brain.js` | Brain Agent 系统提示词 |
 | `prompts/` | `strategy.js` | 策略提示词 |
@@ -201,7 +201,7 @@ run_strategy 调用
          │
          ▼
 ┌─────────────────┐
-│   critique      │  DeepSeek-R1（方案评审）
+│   critique      │  DeepSeek V4-Pro（方案评审）
 │   (第1轮)        │  评分 < 7.0 → 继续
 └────────┬────────┘
          │ 循环（最多3轮）
@@ -213,7 +213,7 @@ run_strategy 调用
          │
          ▼
 ┌─────────────────┐
-│   critique      │  DeepSeek-R1
+│   critique      │  DeepSeek V4-Pro
 └────────┬────────┘
          │ 通过（≥7.0）或达到最大轮次
          ▼
@@ -419,10 +419,10 @@ PRAGMA: WAL 模式，外键约束开启
 |------|--------|------|
 | `MINIMAX_API_KEY` | — | MiniMax API Key（主力模型） |
 | `MINIMAX_BASE_URL` | `https://api.minimaxi.com/v1` | MiniMax API 地址 |
-| `MINIMAX_MODEL` | `MiniMax-M2.5` | MiniMax 模型名 |
+| `MINIMAX_MODEL` | `MiniMax-M2.7-highspeed` | MiniMax 模型名 |
 | `DEEPSEEK_API_KEY` | — | DeepSeek API Key（仅 Critic） |
 | `DEEPSEEK_BASE_URL` | `https://api.deepseek.com` | DeepSeek API 地址 |
-| `DEEPSEEK_REASONER_MODEL` | `deepseek-reasoner` | DeepSeek Reasoner 模型 |
+| `DEEPSEEK_REASONER_MODEL` | `deepseek-v4-pro` | DeepSeek 推理模型（thinking 模式由代码显式启用） |
 | `TAVILY_API_KEY` | — | Tavily 搜索 Key（可选） |
 | `JINA_API_KEY` | — | Jina Reader Key（可选） |
 | `PEXELS_API_KEY` | — | Pexels 图片搜索 Key |

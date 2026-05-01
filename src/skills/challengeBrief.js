@@ -65,7 +65,10 @@ async function challengeBrief(input, apiKeys = {}) {
       model: 'minimax',
       runtimeKey: apiKeys.minimaxApiKey,
       minimaxModel: apiKeys.minimaxModel,
-      maxTokens: 1500,
+      // 输出最多 3 条 concerns × 平均 200 字 ≈ 600 字 ≈ 800 token 顶天，
+      // 之前 1500 让 LLM 多写 → 多 token = 多生成时间 + JSON 截断/重试概率上升。
+      // 砍到 800 对正常输出零影响，反而让响应更稳更快。
+      maxTokens: 800,
       streaming: false,
       name: 'challengeBrief',
       validate: normalizeChallengeResult,

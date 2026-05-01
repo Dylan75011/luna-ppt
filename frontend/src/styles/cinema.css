@@ -1,0 +1,494 @@
+/* ============================================================
+   Cinema Theme — luna-ppt 全局暗场风格
+   灵感：Demo 03 Cinema Frame
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ── 表面色 ───────────────────────────── */
+  --bg-stage:        #0F0F0E;                          /* 主背景：影院黑 */
+  --bg-stage-2:      #161614;                          /* 次级背景（sidebar / modal） */
+  --bg-rise:         #1A1A18;                          /* 上浮一层（卡片底） */
+  --bg-card:         rgba(255,255,255,0.03);           /* 卡片（透明叠加） */
+  --bg-card-hover:   rgba(255,255,255,0.06);
+  --bg-input:        rgba(255,255,255,0.04);
+  --bg-input-focus:  rgba(255,255,255,0.07);
+  --bg-elevated:     #232321;                          /* dropdown / popover */
+
+  /* ── 文字 ──────────────────────────────── */
+  --ink:             #E8E6E1;                          /* 主文字（暖白） */
+  --ink-strong:      #FFFFFF;                          /* 强调标题 */
+  --ink-2:           rgba(255,255,255,0.7);            /* 次文字 */
+  --ink-3:           rgba(255,255,255,0.5);            /* 辅助 */
+  --mute:            rgba(255,255,255,0.4);            /* meta / 标签 */
+  --mute-2:          rgba(255,255,255,0.28);           /* 极弱 */
+
+  /* ── 描边 ──────────────────────────────── */
+  --line:            rgba(255,255,255,0.08);
+  --line-strong:     rgba(255,255,255,0.18);
+  --line-soft:       rgba(255,255,255,0.04);
+
+  /* ── 强调色（暖绿，借鉴 demo 03 verdict） ─── */
+  --accent:          #C8DCC5;
+  --accent-ink:      #9FBE9C;
+  --accent-soft:     rgba(200,220,197,0.08);
+  --accent-line:     rgba(200,220,197,0.4);
+
+  /* 信息色（仅在状态语义需要时使用，已退饱和） */
+  --info:            #A8C5D6;
+  --info-soft:       rgba(168,197,214,0.08);
+  --warn:            #D6C99B;
+  --warn-soft:       rgba(214,201,155,0.08);
+  --danger:          #D6A89B;
+  --danger-soft:     rgba(214,168,155,0.08);
+
+  /* ── 字体 ──────────────────────────────── */
+  --font-serif:      'Newsreader','Instrument Serif','Songti SC','STSong',Georgia,serif;
+  --font-sans:       'Inter Tight','SF Pro Display','PingFang SC','Helvetica Neue',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:       'Geist Mono','SF Mono','JetBrains Mono','Menlo',monospace;
+
+  /* ── 节奏 ──────────────────────────────── */
+  --radius-sm:       4px;
+  --radius:          8px;
+  --radius-lg:       12px;
+  --shadow-soft:     0 1px 2px rgba(0,0,0,0.4);
+  --shadow-rise:     0 12px 32px -8px rgba(0,0,0,0.6);
+
+  /* ── 缓动 ──────────────────────────────── */
+  --ease:            cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:        160ms;
+  --dur:             280ms;
+  --dur-slow:        600ms;
+}
+
+/* ============================================================
+   全局基础
+   ============================================================ */
+html, body, #app {
+  background: var(--bg-stage);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg-stage);
+}
+
+/* 滚动条：极简暗色 */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); background-clip: padding-box; }
+
+/* ============================================================
+   Editorial 排版工具类
+   组件想用衬线大标题/小帽字时直接挂 class
+   ============================================================ */
+.serif      { font-family: var(--font-serif); letter-spacing: -0.02em; line-height: 1.15; }
+.serif-it   { font-family: var(--font-serif); font-style: italic; letter-spacing: -0.02em; }
+.mono       { font-family: var(--font-mono); }
+.smallcaps  {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.kicker     {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.headline-l {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink-strong);
+}
+.headline-l em { font-style: italic; font-weight: 400; }
+.headline-m {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+}
+
+/* ============================================================
+   Arco Design 暗场覆盖
+   不重写所有组件，只压住明显违和的亮色背景与边框
+   ============================================================ */
+
+/* 顶层 Layout */
+.arco-layout,
+.arco-layout-content,
+.arco-layout-sider {
+  background: var(--bg-stage) !important;
+}
+
+/* 按钮 */
+.arco-btn-primary {
+  background: var(--ink) !important;
+  color: var(--bg-stage) !important;
+  border: none !important;
+  font-weight: 500;
+}
+.arco-btn-primary:hover { background: #FFFFFF !important; }
+.arco-btn-secondary,
+.arco-btn-outline {
+  background: transparent !important;
+  border: 1px solid var(--line-strong) !important;
+  color: var(--ink) !important;
+}
+.arco-btn-secondary:hover,
+.arco-btn-outline:hover {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--ink-3) !important;
+}
+.arco-btn-text {
+  color: var(--ink-2) !important;
+  background: transparent !important;
+}
+.arco-btn-text:hover { color: var(--ink) !important; background: var(--bg-card-hover) !important; }
+
+/* 输入 */
+.arco-input,
+.arco-input-wrapper,
+.arco-textarea,
+.arco-textarea-wrapper,
+.arco-select-view-single,
+.arco-select-view-multiple {
+  background: var(--bg-input) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+.arco-input::placeholder,
+.arco-textarea::placeholder { color: var(--mute) !important; }
+.arco-input-wrapper:focus-within,
+.arco-textarea-wrapper:focus-within,
+.arco-select-view-single.arco-select-view-focus,
+.arco-select-view-multiple.arco-select-view-focus {
+  background: var(--bg-input-focus) !important;
+  border-color: var(--ink-3) !important;
+}
+
+/* Modal / Drawer / Popover */
+.arco-modal,
+.arco-drawer,
+.arco-popover-popup-content,
+.arco-tooltip-content,
+.arco-trigger-menu {
+  background: var(--bg-elevated) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-rise) !important;
+}
+.arco-modal-mask,
+.arco-drawer-mask {
+  background: rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(4px);
+}
+.arco-modal-header,
+.arco-modal-footer,
+.arco-drawer-header,
+.arco-drawer-footer {
+  background: transparent !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+.arco-modal-title,
+.arco-drawer-title { color: var(--ink-strong) !important; font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.015em; }
+
+/* Dropdown / Menu */
+.arco-dropdown,
+.arco-dropdown-list,
+.arco-trigger-menu,
+.arco-menu {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+}
+.arco-dropdown-option,
+.arco-trigger-menu-item,
+.arco-menu-item {
+  color: var(--ink-2) !important;
+}
+.arco-dropdown-option:hover,
+.arco-trigger-menu-item:hover,
+.arco-menu-item:hover {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink) !important;
+}
+.arco-menu-selected,
+.arco-menu-item.arco-menu-selected {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+}
+
+/* Tabs */
+.arco-tabs-tab { color: var(--ink-2) !important; }
+.arco-tabs-tab-active,
+.arco-tabs-tab:hover { color: var(--ink) !important; }
+.arco-tabs-tab-active::before,
+.arco-tabs-header-ink { background: var(--ink-strong) !important; }
+.arco-tabs-header-nav::before { background: var(--line) !important; }
+
+/* Tag */
+.arco-tag {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink-2) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Card */
+.arco-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+  border-radius: var(--radius-lg) !important;
+}
+.arco-card-header,
+.arco-card-footer {
+  background: transparent !important;
+  border-color: var(--line) !important;
+}
+.arco-card-meta-title { color: var(--ink-strong) !important; }
+.arco-card-meta-description { color: var(--ink-3) !important; }
+
+/* Switch */
+.arco-switch {
+  background: rgba(255,255,255,0.12) !important;
+}
+.arco-switch-checked {
+  background: var(--accent-ink) !important;
+}
+
+/* Divider */
+.arco-divider { border-color: var(--line) !important; }
+
+/* Empty / loading / spin */
+.arco-empty-description,
+.arco-spin-tip { color: var(--mute) !important; }
+
+/* Scrollbar inside Arco scrolling areas */
+.arco-scrollbar-track-direction-vertical,
+.arco-scrollbar-track-direction-horizontal { background: transparent !important; }
+.arco-scrollbar-thumb-bar { background: rgba(255,255,255,0.12) !important; }
+
+/* Notification / Message */
+.arco-message,
+.arco-notification {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+}
+
+/* ============================================================
+   通用 cinema 部件（直接挂 class 用）
+   ============================================================ */
+
+/* 卡片 */
+.cn-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.cn-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+}
+
+/* Verdict — 暖绿色发光的判定块 */
+.cn-verdict {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 32px;
+  background: linear-gradient(180deg, var(--accent-soft), transparent 70%);
+  position: relative;
+}
+.cn-verdict::before {
+  content: '';
+  position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: var(--accent-line);
+}
+.cn-verdict .deck {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 14px;
+}
+.cn-verdict h3 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+  color: var(--ink-strong);
+  margin: 0 0 14px;
+}
+.cn-verdict h3 em { font-style: italic; font-weight: 400; color: var(--accent); }
+.cn-verdict p {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* Rail — 工具调用流式轨道 */
+.cn-rail { position: relative; padding-left: 32px; }
+.cn-rail::before {
+  content: '';
+  position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px;
+  background: linear-gradient(180deg, var(--line-strong), var(--line-soft));
+}
+.cn-rail .item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 7px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  position: relative;
+}
+.cn-rail .item::before {
+  content: '';
+  position: absolute; left: -32px; top: 50%;
+  width: 9px; height: 1px;
+  background: var(--line-strong);
+}
+.cn-rail .item .tag {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--ink-2);
+}
+.cn-rail .item .body { font-family: var(--font-sans); font-size: 12.5px; color: var(--ink); }
+.cn-rail .item .body em { color: var(--mute); font-style: normal; margin-left: 6px; }
+.cn-rail .item .count { margin-left: auto; font-size: 10px; color: var(--mute); }
+
+/* Frame — 21:9 案例剧照卡 */
+.cn-frame {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.cn-frame:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+.cn-frame .still {
+  aspect-ratio: 21/9;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a2a28, #1a1a18);
+}
+.cn-frame .still .scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6));
+}
+.cn-frame .still .stamp {
+  position: absolute; top: 12px; left: 12px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  padding: 3px 8px; background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px); border-radius: 2px;
+}
+.cn-frame .body { padding: 18px 20px 20px; }
+.cn-frame .src {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--mute); margin-bottom: 8px;
+}
+.cn-frame h4 {
+  font-family: var(--font-serif); font-weight: 400; font-size: 17px; line-height: 1.3;
+  letter-spacing: -0.015em; color: var(--ink-strong); margin: 0 0 8px;
+}
+.cn-frame p { font-size: 12px; line-height: 1.6; color: var(--ink-3); margin: 0; }
+
+/* 极简标签 chip */
+.cn-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.cn-chip.accent { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+
+/* 文字按钮（简洁箭头风） */
+.cn-link {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--ink);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.cn-link::after { content: '→'; font-size: 12px; }
+.cn-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* 主按钮（cinema 调）：白底黑字反差 */
+.cn-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 20px;
+  background: var(--ink);
+  color: var(--bg-stage);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.cn-btn:hover { background: #FFFFFF; }
+.cn-btn:active { transform: scale(0.98); }
+.cn-btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
+.cn-btn.ghost:hover { background: var(--bg-card-hover); border-color: var(--ink-3); }
+
+/* 暖光氛围 — body 上一层非常微弱的辐射，为了避免纯死黑 */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(900px 500px at 85% 0%, rgba(237,243,236,0.04), transparent 60%),
+    radial-gradient(700px 400px at 0% 100%, rgba(225,243,254,0.03), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+#app { position: relative; z-index: 1; }

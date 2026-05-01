@@ -20,6 +20,8 @@ function buildChallengeBriefPrompt(input) {
 
 输出必须是合法的 JSON，不要包含任何额外文字、Markdown 或代码块。
 
+⚠️**严禁输出 think 推理标签**——这是结构化输出 API，**直接产出最终 JSON**，不要在前面写"让我分析一下""首先我要看看"这种思考过程，也不要用 <think>...</think> 或 <thought>...</thought> 这种标签包裹推理。一个字思考都不要写，token 全部留给 JSON 内容。如果你忍不住要思考，在内心想，输出层就一段 JSON。
+
 JSON 结构：
 {
   "hasConcerns": true 或 false,

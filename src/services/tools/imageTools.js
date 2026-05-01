@@ -1,7 +1,7 @@
 // 图片相关工具：search_images, generate_image, review_uploaded_images
 const path = require('path');
 const { analyzeAgentImages } = require('../visionMcp');
-const { toPublicUrl, getRunAssetDir } = require('../outputPaths');
+const { toPublicUrl, getRunAssetDir, getConversationRunAssetDir } = require('../outputPaths');
 const { buildImageSearchPayload } = require('../imageCanvas');
 const { searchImages, generateMiniMaxImage, downloadImage, processImageForPpt } = require('../imageSearch');
 
@@ -20,7 +20,9 @@ async function execGenerateImage(args, session, onEvent) {
     if (!imageUrl) return { success: false, error: 'MiniMax 生图返回为空，请稍后重试' };
 
     const runId = `gen_${Date.now()}`;
-    const outputBase = getRunAssetDir(runId, 'images');
+    const outputBase = session?.conversationId
+      ? getConversationRunAssetDir(session.conversationId, runId, 'images')
+      : getRunAssetDir(runId, 'images');
     const localPath = path.join(outputBase, `${runId}.jpg`);
     await downloadImage(imageUrl, localPath);
     await processImageForPpt(localPath);
@@ -37,7 +39,13 @@ async function execGenerateImage(args, session, onEvent) {
       }
     });
 
-    return { success: true, url: previewUrl, localPath, prompt, intent };
+    return {
+      success: true,
+      url: previewUrl,
+      markdown: `![${intent || '生成图片'}](${previewUrl})`,
+      prompt,
+      intent
+    };
   } catch (e) {
     return { success: false, error: `生成失败：${e.message}` };
   }

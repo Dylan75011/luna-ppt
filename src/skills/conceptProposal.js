@@ -138,8 +138,20 @@ async function proposeConcept(input, apiKeys = {}) {
       model: 'minimax',
       runtimeKey: apiKeys.minimaxApiKey,
       minimaxModel: apiKeys.minimaxModel,
-      maxTokens: 4000,
+      // 4000→4500：给"思考溢出"留缓冲。MiniMax 推理模型会先吐 <think> 块，即使
+      // prompt 显式禁止仍可能漏出几十到几百 token；4500 token 总额 = 思考缓冲 + 完整
+      // 三方向 JSON（每条方向约 800 token，3 条 ~2400）。
+      maxTokens: 4500,
       streaming: true,
+      streamTotalMs: 45_000,
+      streamRetryLimit: 0,
+      // retryLimit 0→1：第一次输出可能是纯 <think> 块（被 maxTokens 截断没产 JSON），
+      // callLLMJson 检测到 think-only 会用 anti-think 提醒重发——这条提醒只有 retryLimit≥1
+      // 才能跑到。失败再走 repair / fallback。
+      retryLimit: 1,
+      timeoutMs: 20_000,
+      // 修 repair 调用经常超时：repair 也是产 4000 token 大 JSON，20s 远不够。给 90s。
+      repairTimeoutMs: 90_000,
       name: 'conceptProposal',
       validate: normalizeConcept,
       repairHint: '必须是对象，含 directions (数组 3 条，每条含 label/themeName/coreIdea/eventFramework/creativeAngles/upside/risk/bestFor)、sharedContext、differentiationAxis、recommendation',

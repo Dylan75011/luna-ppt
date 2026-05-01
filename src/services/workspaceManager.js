@@ -3,11 +3,16 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { callMinimax } = require('./llmClients');
 const { htmlToTiptap } = require('./richText');
-const { toOutputRelative, toOutputUrl, resolveOutputRelative } = require('./outputPaths');
+const { toOutputRelative, toOutputUrl, resolveOutputRelative, getPromotedDir, getOutputRoot } = require('./outputPaths');
 
 const DATA_DIR = path.resolve('./data');
 const WORKSPACE_FILE = path.join(DATA_DIR, 'workspaces.json');
 const DOCS_DIR = path.join(DATA_DIR, 'docs');
+
+// data/docs/*.json 文件级 schema 版本号。每次给 doc 增删字段、改 contentFormat
+// 含义、或者修改 tiptap 节点结构时递增。读取处做兼容判定，超出已知版本的文件
+// 仍可读但会 console.warn，便于及早发现需要写迁移。
+const DOC_SCHEMA_VERSION = 1;
 
 function createEmptyDocContent() {
   return {
@@ -111,9 +116,14 @@ function writeTree(tree) {
 }
 
 // Atomic write for any JSON file under data/docs (per-doc content files).
+// 自动注入 schemaVersion，避免历史漏写。data 里如果显式带了 schemaVersion 会被尊重
+// （比如未来要落 v2 文件），否则用当前版本号兜底。
 function writeJsonAtomic(filePath, data) {
+  const payload = data && typeof data === 'object' && !Array.isArray(data)
+    ? { schemaVersion: DOC_SCHEMA_VERSION, ...data }
+    : data;
   const tmpFile = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2));
+  fs.writeFileSync(tmpFile, JSON.stringify(payload, null, 2));
   fs.renameSync(tmpFile, filePath);
 }
 
@@ -174,6 +184,50 @@ function normalizeManagedFilePath(filePath = '') {
   return resolveOutputRelative(relative);
 }
 
+// 把临时区文件搬到 output/promoted/<docId>/。返回 promoted 后的绝对路径；
+// 如果源文件已经在 promoted/<docId>/ 下、源不存在、或源在 promoted/ 下别的 docId（罕见）
+// 则按情况降级为 noop / copy，避免破坏已有引用。
+//   - 同盘 → fs.renameSync（即 mv）
+//   - 跨盘 → copyFileSync + unlinkSync 兜底
+//   - 同名冲突 → 自动加 ` (n)` 后缀
+function promoteFileToDoc(absoluteSrcPath, docId) {
+  if (!absoluteSrcPath || !docId) return absoluteSrcPath;
+  const src = path.resolve(absoluteSrcPath);
+  if (!fs.existsSync(src)) return src; // 源不存在，让上层按原路径写到 doc.json 即可
+  const targetDir = getPromotedDir(docId);
+  // 已经在自己的 promoted 目录里：no-op
+  if (src.startsWith(targetDir + path.sep) || src === targetDir) return src;
+  // 同名去重
+  const baseName = path.basename(src);
+  let destName = baseName;
+  let dest = path.join(targetDir, destName);
+  if (fs.existsSync(dest)) {
+    const ext = path.extname(baseName);
+    const stem = baseName.slice(0, baseName.length - ext.length);
+    let n = 1;
+    while (fs.existsSync(dest)) {
+      destName = `${stem} (${n})${ext}`;
+      dest = path.join(targetDir, destName);
+      n += 1;
+    }
+  }
+  try {
+    fs.renameSync(src, dest);
+  } catch (error) {
+    // EXDEV：跨设备 rename 不被支持 → fallback 到 copy+unlink
+    if (error && (error.code === 'EXDEV' || /cross-device/i.test(error.message))) {
+      fs.copyFileSync(src, dest);
+      try { fs.unlinkSync(src); } catch (unlinkErr) {
+        console.warn('[workspaceManager] promoteFileToDoc unlink 源失败:', src, unlinkErr.message);
+      }
+    } else {
+      console.warn('[workspaceManager] promoteFileToDoc rename 失败:', error.message);
+      return src; // 不动，让 doc.json 按原路径走，至少不丢文件
+    }
+  }
+  return dest;
+}
+
 function extractManagedFilePathsFromData(data = {}) {
   const candidates = [
     data.filePath,
@@ -207,6 +261,18 @@ function removeManagedFiles(docIds = []) {
       }
     } catch (error) {
       console.warn('[workspaceManager] 删除产出物文件失败:', targetPath, error.message);
+    }
+  });
+
+  // 新布局下每个 doc 的资产都集中在 output/promoted/<docId>/，这里把整目录 rm
+  // 干掉（含 doc.json 没记录但被同名后缀 / 衍生物占用的子文件），避免空目录残留。
+  docIds.forEach((docId) => {
+    const promotedDir = path.join(getOutputRoot(), 'promoted', docId);
+    if (!fs.existsSync(promotedDir)) return;
+    try {
+      fs.rmSync(promotedDir, { recursive: true, force: true });
+    } catch (error) {
+      console.warn('[workspaceManager] 删除 promoted 目录失败:', promotedDir, error.message);
     }
   });
 }
@@ -634,11 +700,24 @@ function deleteNode(id) {
   return docIds;
 }
 
+// 检查文件 schemaVersion，超出当前 reader 已知范围时 warn 一次，提示需要写迁移；
+// 缺失字段视为 v1（最初引入版本号之前的全部历史 doc）。
+function checkDocSchemaVersion(data, id) {
+  const v = Number(data?.schemaVersion);
+  if (!Number.isFinite(v)) return; // 老文件，没有版本号，按 v1 处理
+  if (v > DOC_SCHEMA_VERSION) {
+    console.warn(
+      `[workspaceManager] 文档 ${id} 的 schemaVersion=${v} 高于当前读取器支持的 ${DOC_SCHEMA_VERSION}，可能存在不兼容字段`
+    );
+  }
+}
+
 // 获取文档内容
 function getContent(id) {
   const f = path.join(DOCS_DIR, id + '.json');
   if (!fs.existsSync(f)) throw new Error('文档不存在: ' + id);
   const data = JSON.parse(fs.readFileSync(f, 'utf8'));
+  checkDocSchemaVersion(data, id);
   if (data.docType === 'document' && !data.contentFormat) {
     data.contentFormat = typeof data.content === 'object' ? 'tiptap-json' : 'legacy-html';
   }
@@ -725,12 +804,18 @@ function ensureTaskFolder(spaceId, folderName) {
 }
 
 // 保存 Agent 生成的 PPT 到指定位置（parentId 优先，默认 spaceId）
+// 文件本体从临时区（output/conversations/<convId>/runs/.../ 或老的 output/runs/...）
+// 搬到 output/promoted/<docId>/，doc.json 记录的 outputRelativePath / downloadUrl 都
+// 跟着指向 promoted 目录。这样：
+//   - 删除 conversation 时直接 rm -rf output/conversations/<convId>/，不会误伤已存资产
+//   - workspace 节点删除时 removeManagedFiles 也能精确清理 promoted/<docId>/
 function savePptToSpace({ spaceId, parentId, name, pptData, downloadUrl, previewSlides }) {
   const targetParent = parentId || spaceId;
   const node = createNode({ parentId: targetParent, name, type: 'document', docType: 'ppt' });
   const f = path.join(DOCS_DIR, node.id + '.json');
-  const filePath = normalizeManagedFilePath(downloadUrl);
-  const outputRelativePath = filePath ? toOutputRelative(filePath) : '';
+  const srcFilePath = normalizeManagedFilePath(downloadUrl);
+  const promotedPath = srcFilePath ? promoteFileToDoc(srcFilePath, node.id) : '';
+  const outputRelativePath = promotedPath ? toOutputRelative(promotedPath) : '';
   const pptxFilename = outputRelativePath
     ? path.basename(outputRelativePath)
     : '';
@@ -741,7 +826,7 @@ function savePptToSpace({ spaceId, parentId, name, pptData, downloadUrl, preview
     pptData,
     previewSlides: previewSlides || [],
     pptxFilename,
-    filePath,
+    filePath: promotedPath || srcFilePath,
     outputRelativePath,
     downloadUrl: outputRelativePath ? `/api/files/download/${outputRelativePath}` : (downloadUrl || ''),
     createdAt: node.createdAt,
@@ -755,10 +840,18 @@ function saveAssetToSpace({ spaceId, parentId, name, docType = 'file', filePath 
   const targetParent = parentId || spaceId;
   const node = createNode({ parentId: targetParent, name, type: 'document', docType });
   const f = path.join(DOCS_DIR, node.id + '.json');
-  const resolvedFilePath = normalizeManagedFilePath(filePath || downloadUrl || previewUrl);
+  const srcFilePath = normalizeManagedFilePath(filePath || downloadUrl || previewUrl);
+  const promotedPath = srcFilePath ? promoteFileToDoc(srcFilePath, node.id) : '';
+  const resolvedFilePath = promotedPath || srcFilePath;
   const outputRelativePath = resolvedFilePath ? toOutputRelative(resolvedFilePath) : '';
-  const normalizedPreviewUrl = previewUrl || (resolvedFilePath ? toOutputUrl(resolvedFilePath) : '');
-  const normalizedDownloadUrl = downloadUrl || (outputRelativePath ? `/api/files/download/${outputRelativePath}` : '');
+  // previewUrl / downloadUrl 如果上层显式传了，且不再指向 promoted 后的实际位置，
+  // 重新基于 promoted 路径生成；调用方传的旧 URL 可能已经失效。
+  const normalizedPreviewUrl = outputRelativePath
+    ? toOutputUrl(resolvedFilePath)
+    : (previewUrl || '');
+  const normalizedDownloadUrl = outputRelativePath
+    ? `/api/files/download/${outputRelativePath}`
+    : (downloadUrl || '');
   const content = {
     id: node.id,
     docType,
@@ -841,5 +934,7 @@ module.exports = {
   ensureSpaceIndex,
   getSpaceIndex,
   saveSpaceIndex,
-  upsertSpaceIndexFromTask
+  upsertSpaceIndexFromTask,
+  // 暴露给迁移脚本 / 测试 —— 业务代码不要直接调，请走 saveAssetToSpace / savePptToSpace
+  _promoteFileToDoc: promoteFileToDoc
 };

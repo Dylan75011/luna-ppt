@@ -34,6 +34,46 @@ function getRunAssetDir(runId, assetType) {
   return ensureDir(path.join(getRunDir(runId), sanitizeSegment(assetType, 'misc')));
 }
 
+// 单条会话的"临时区"根目录。所有 agent 工作过程产出（截图、生图、搜图、PPT 草稿）
+// 都应当落在这里；删除会话时整目录 rm -rf 即可清干净。已经 promote 到 workspace
+// 的资产由 saveAssetToSpace 时移动到 output/promoted/<docId>/，不会受会话清理影响。
+function getConversationTmpDir(conversationId) {
+  const safe = sanitizeSegment(conversationId, '');
+  if (!safe) {
+    // 没拿到 conversationId 时退回旧 runs/ 兜底路径，避免新代码路径强依赖；
+    // 真实生产路径都应当带 conversationId 进来。
+    return ensureDir(path.join(getOutputRoot(), 'runs'));
+  }
+  return ensureDir(path.join(getOutputRoot(), 'conversations', safe));
+}
+
+function getConversationRunDir(conversationId, runId) {
+  const safe = sanitizeSegment(conversationId, '');
+  if (!safe) return getRunDir(runId);
+  return ensureDir(path.join(getConversationTmpDir(conversationId), 'runs', getRunId(runId)));
+}
+
+function getConversationRunAssetDir(conversationId, runId, assetType) {
+  return ensureDir(path.join(
+    getConversationRunDir(conversationId, runId),
+    sanitizeSegment(assetType, 'misc')
+  ));
+}
+
+function getConversationUploadDir(conversationId) {
+  const safe = sanitizeSegment(conversationId, '');
+  if (!safe) return ensureDir(path.join(getOutputRoot(), 'agent-inputs'));
+  return ensureDir(path.join(getConversationTmpDir(conversationId), 'agent-inputs'));
+}
+
+// "已 promote 资产"目录：每个 workspace 文档节点一个子目录，与 data/docs/<docId>.json
+// 一一对应。saveAssetToSpace / savePptToSpace 把临时区文件 mv 到这里，删除 workspace
+// 节点（removeManagedFiles）时整目录清理。这样会话 tmp 与永久资产物理分隔，互不污染。
+function getPromotedDir(docId) {
+  const safe = sanitizeSegment(docId, 'doc');
+  return ensureDir(path.join(getOutputRoot(), 'promoted', safe));
+}
+
 function toOutputRelative(absolutePath) {
   if (!absolutePath) return '';
   const outputRoot = getOutputRoot();
@@ -78,6 +118,11 @@ module.exports = {
   getRunId,
   getRunDir,
   getRunAssetDir,
+  getConversationTmpDir,
+  getConversationRunDir,
+  getConversationRunAssetDir,
+  getConversationUploadDir,
+  getPromotedDir,
   toOutputRelative,
   toOutputUrl,
   toPublicUrl,

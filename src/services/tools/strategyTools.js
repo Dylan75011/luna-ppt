@@ -4,6 +4,7 @@ const { generatePlanDoc, critique } = require('../../skills');
 const wm = require('../workspaceManager');
 const { htmlToTiptap, markdownToTiptap } = require('../richText');
 const { createStallWatcher, emitPlanArtifacts } = require('./helpers');
+const { makeSkillStatusBridge } = require('./skillStatusBridge');
 
 async function execRunStrategy(args, session, onEvent) {
   // 概念确认闸口：若当前 session 已有一版创意骨架但尚未确认，必须先确认
@@ -111,6 +112,8 @@ async function execRunStrategy(args, session, onEvent) {
   }
 
   let plan, markdown, html;
+  let totalSections = 0;
+  let expandedDoneCount = 0;
   try {
     ({ plan, markdown, html } = await generatePlanDoc(
       {
@@ -119,18 +122,90 @@ async function execRunStrategy(args, session, onEvent) {
         userInput,
         approvedConcept,
         round: 1,
-        onStatus: ({ status, error }) => {
+        onStatus: makeSkillStatusBridge(onEvent, {
+          skillLabel: '生成方案',
+          // run_strategy 三阶段（skeleton / section_N / details / polish_grace）+ 每段
+          // 美化的 streaming_heartbeat —— 用 onCustom 把消息文案做得更具进度感
+          onCustom: (status, payload) => {
+            watchdog.bump();
+            if (status === 'streaming_heartbeat') {
+              const name = payload.name || '';
+              if (name === 'planSkeleton') {
+                onEvent('tool_progress', { message: `梳理方案骨架中（${payload.chars || 0} 字）...` });
+              } else if (name.startsWith('planSection_')) {
+                const idx = name.replace('planSection_', '');
+                onEvent('tool_progress', {
+                  message: totalSections
+                    ? `展开第 ${idx}/${totalSections} 章中（${payload.chars || 0} 字）...`
+                    : `展开章节中（${payload.chars || 0} 字）...`
+                });
+              } else if (name === 'planDetails') {
+                onEvent('tool_progress', { message: `补全预算/节奏/KPI 中（${payload.chars || 0} 字）...` });
+              } else {
+                onEvent('tool_progress', { message: `生成方案中（${payload.chars || 0} 字）...` });
+              }
+              return true;
+            }
+            if (status === 'skeleton_ready') {
+              totalSections = payload.sectionCount || 0;
+              onEvent('tool_progress', { message: `骨架已就绪，并发展开 ${totalSections} 章节...` });
+              return true;
+            }
+            if (status === 'sections_start') {
+              totalSections = payload.total || totalSections;
+              return true;
+            }
+            if (status === 'details_start') {
+              onEvent('tool_progress', { message: '章节正文已写完，补全预算/节奏/KPI/视觉...' });
+              return true;
+            }
+            if (status === 'polish_grace_start') {
+              if (payload.pending > 0) {
+                onEvent('tool_progress', { message: `等待 ${payload.pending} 段后台润色收尾...` });
+              }
+              return true;
+            }
+            if (status === 'fallback_start') {
+              const phase = payload.phase ? `${payload.phase} 阶段` : '生成';
+              onEvent('tool_progress', { message: `${phase}失败，切换稳态兜底...` });
+              return true;
+            }
+            return false;
+          }
+        }),
+        // 单段就绪/美化完成回调：转成 plan_section artifact 立即推给前端
+        onSectionExpanded: ({ index, total, section, polished, phase }) => {
           watchdog.bump();
-          if (status === 'fallback_start') {
-            onEvent('tool_progress', { message: '流式生成中断，切换为稳态兜底方案...' });
-          } else if (status === 'beautifying') {
-            onEvent('tool_progress', { message: '文档主体已完成，正在润色排版格式...' });
+          onEvent('artifact', {
+            artifactType: 'plan_section',
+            payload: {
+              round: 1,
+              index,
+              total,
+              title: section.title || `章节 ${index + 1}`,
+              keyPoints: Array.isArray(section.keyPoints) ? section.keyPoints : [],
+              content: { narrative: section.narrative || '' },
+              executionDetails: Array.isArray(section.executionDetails) ? section.executionDetails : [],
+              materials: Array.isArray(section.materials) ? section.materials : [],
+              polished: !!polished,
+              phase: phase || (polished ? 'polished' : 'expanded'),
+              // artifactKey 只用 round + index：title 在 normalize 阶段会被 trim，
+              // 用 title 拼 key 容易导致流式版本与最终版本 key 不一致 → artifacts 数组冗余。
+              artifactKey: `plan_section_r1_${index}`
+            }
+          });
+          if (phase === 'expanded' && !polished) {
+            expandedDoneCount += 1;
+            if (totalSections) {
+              onEvent('tool_progress', {
+                message: `已完成 ${expandedDoneCount}/${totalSections} 章节正文，后台润色中...`
+              });
+            }
           }
         },
         onSection: (accumulatedMarkdown) => {
           watchdog.bump();
           try {
-            // 提取第一行 # 标题作为 docTitle
             const firstHeading = accumulatedMarkdown.match(/^#\s+(.+)$/m);
             if (firstHeading) docTitle = firstHeading[1].trim() || fallbackTitle;
             const tiptap = markdownToTiptap(accumulatedMarkdown);
@@ -167,6 +242,11 @@ async function execRunStrategy(args, session, onEvent) {
   session.bestPlan = plan;
   session.bestScore = null;
   session.lastReview = null;
+  // 关键节点立即落盘：bestPlan 是 build_ppt 的硬护栏依赖，丢失意味着
+  // 用户必须重跑整个 run_strategy。
+  try {
+    require('../agentSession').flushAgentState(session.sessionId, { immediate: true });
+  } catch {}
 
   const tiptapDoc = htmlToTiptap(html);
   session.docMarkdown = markdown;
@@ -264,7 +344,10 @@ async function execReviewStrategy(args, session, onEvent) {
 
   let review;
   try {
-    review = await critique({ plan, round: 1, userInput }, session.apiKeys);
+    review = await critique({
+      plan, round: 1, userInput,
+      onStatus: makeSkillStatusBridge(onEvent, { skillLabel: '专家评审' })
+    }, session.apiKeys);
   } catch (err) {
     console.warn('[review_strategy] critique 失败:', err.message);
     return { success: false, error: err.message };
@@ -272,6 +355,9 @@ async function execReviewStrategy(args, session, onEvent) {
 
   session.bestScore = review.score;
   session.lastReview = review;
+  try {
+    require('../agentSession').flushAgentState(session.sessionId, { immediate: true });
+  } catch {}
 
   onEvent('artifact', {
     artifactType: 'review_feedback',

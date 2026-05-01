@@ -1,4 +1,4 @@
-// Critic Agent 提示词（使用 DeepSeek-R1）
+// Critic Agent 提示词（使用 DeepSeek V4-Pro）
 function buildCriticPrompt(plan, round, userInput) {
   const { brand, productCategory, eventType, budget } = userInput;
 

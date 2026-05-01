@@ -3,7 +3,7 @@
     ref="layoutRef"
     class="chat-layout"
     :class="{ 'preview-open': previewVisible && !previewCollapsed, resizing: isResizing }"
-    :style="{ '--preview-width': `${previewWidth}px`, '--conversation-width': `${conversationSidebarCollapsed ? 56 : 280}px` }"
+    :style="{ '--preview-width': `${previewWidth}px`, '--conversation-width': `${conversationSidebarCollapsed ? 0 : 280}px` }"
   >
     <aside class="chat-conversation-sidebar" :class="{ collapsed: conversationSidebarCollapsed }">
       <div class="conversation-sidebar-head">
@@ -27,7 +27,7 @@
             title="新建对话"
             @click="createNewConversation"
           >
-            +
+            <PhPlus weight="bold" />
           </button>
         </template>
       </div>
@@ -45,7 +45,7 @@
               placeholder="搜索历史对话"
             >
               <template #prefix>
-                <icon-search />
+                <PhMagnifyingGlass />
               </template>
             </a-input>
           </div>
@@ -83,19 +83,6 @@
           </div>
         </template>
 
-        <template v-else>
-          <button
-            v-for="item in conversations.slice(0, 8)"
-            :key="item.id"
-            type="button"
-            class="conversation-mini"
-            :class="{ active: item.id === activeConversationId }"
-            :title="item.title"
-            @click="onConversationChange(item.id)"
-          >
-            {{ item.title.slice(0, 1) || '对' }}
-          </button>
-        </template>
       </div>
     </aside>
     <button
@@ -111,13 +98,14 @@
     <!-- ── 左侧：聊天面板 ── -->
     <div class="chat-panel">
       <!-- 消息历史 -->
-      <div class="chat-history" ref="historyRef">
+      <div class="chat-history" ref="historyRef" @click="onChatHistoryClick">
         <!-- 按时间顺序渲染所有消息 -->
         <div v-for="msg in displayMessages" :key="msg.id" class="bubble-wrap" :class="msg.role">
           
           <!-- 用户消息 -->
           <template v-if="msg.role === 'user'">
-            <div class="bubble user">
+            <div class="bubble user" :class="{ 'bubble--not-sent': msg.notSent }">
+              <span v-if="msg.notSent" class="bubble-not-sent-tag">未发送</span>
               <div v-if="msg.text">{{ msg.text }}</div>
               <div v-if="msg.attachments?.length" class="chat-image-grid">
                 <a
@@ -142,6 +130,7 @@
             <template v-if="msg.kind === 'thinking'">
               <div class="thinking-bubble">
                 <span class="thinking-dot" /><span class="thinking-dot" /><span class="thinking-dot" />
+                <span v-if="msg.label" class="thinking-label">{{ msg.label }}</span>
               </div>
             </template>
             
@@ -149,7 +138,9 @@
             <template v-else-if="msg.kind === 'tool-call'">
               <div class="tool-call-card" :class="{ active: msg.progress }">
                 <div class="tool-call-card-head">
-                  <span class="tool-call-card-icon">{{ toolIcon(msg.tool) }}</span>
+                  <span class="tool-call-card-icon" :class="toolIconTone(msg.tool)">
+                    <component :is="toolIcon(msg.tool)" />
+                  </span>
                   <div class="tool-call-card-content">
                     <div class="tool-call-card-title">{{ msg.display }}</div>
                     <div v-if="msg.progress" class="tool-call-card-progress">{{ msg.progress }}</div>
@@ -332,6 +323,20 @@
               </div>
             </template>
 
+            <template v-else-if="msg.kind === 'error-retry'">
+              <div class="error-retry-card">
+                <div class="error-retry-message">{{ msg.errorMessage }}</div>
+                <button
+                  type="button"
+                  class="error-retry-btn"
+                  :disabled="msg.retryUsed || isRunning"
+                  @click="onRetryFailedTurn(msg)"
+                >
+                  {{ msg.retryUsed ? '已重试' : '🔄 重试上一轮' }}
+                </button>
+              </div>
+            </template>
+
             <template v-else-if="msg.kind === 'process-summary'">
               <div class="process-summary-bubble">
                 <button
@@ -392,8 +397,8 @@
               :class="{ active: i === atMentionIndex }"
               @mousedown.prevent="selectMention(doc)"
             >
-              <icon-file-pdf v-if="doc.docType === 'ppt'" class="at-mention-icon" />
-              <icon-file v-else class="at-mention-icon" />
+              <PhFilePdf v-if="doc.docType === 'ppt'" class="at-mention-icon" />
+              <PhFileText v-else class="at-mention-icon" />
               <div class="at-mention-info">
                 <span class="at-mention-name">{{ doc.name }}</span>
                 <span v-if="doc._folder" class="at-mention-folder">{{ doc._folder }}</span>
@@ -413,10 +418,10 @@
                 @click="pickToolMode(mode)"
               >
                 <span class="tool-picker-icon">
-                  <icon-image v-if="mode.icon === 'image'" />
-                  <icon-layout v-else-if="mode.icon === 'layout'" />
-                  <icon-search v-else-if="mode.icon === 'search'" />
-                  <icon-bulb v-else />
+                  <PhImage v-if="mode.icon === 'image'" />
+                  <PhSquaresFour v-else-if="mode.icon === 'layout'" />
+                  <PhMagnifyingGlass v-else-if="mode.icon === 'search'" />
+                  <PhLightbulb v-else />
                 </span>
                 <div class="tool-picker-meta">
                   <div class="tool-picker-label">{{ mode.label }}</div>
@@ -442,7 +447,7 @@
               <div v-if="!workspacePickerGroups.length" class="ws-picker-empty">无匹配文档</div>
               <template v-for="group in workspacePickerGroups" :key="group.folder || '__root__'">
                 <div v-if="group.folder" class="ws-picker-folder-header">
-                  <icon-folder class="ws-picker-folder-icon" />
+                  <PhFolder class="ws-picker-folder-icon" />
                   <span>{{ group.folder }}</span>
                 </div>
                 <div
@@ -452,8 +457,8 @@
                   :class="{ selected: pendingWorkspaceRefs.some(r => r.id === doc.id), 'ws-picker-item--indented': !!group.folder }"
                   @click="pendingWorkspaceRefs.some(r => r.id === doc.id) ? removeWorkspaceRef(doc.id) : addWorkspaceRef(doc)"
                 >
-                  <icon-file-pdf v-if="doc.docType === 'ppt'" class="ws-picker-icon" />
-                  <icon-file v-else class="ws-picker-icon" />
+                  <PhFilePdf v-if="doc.docType === 'ppt'" class="ws-picker-icon" />
+                  <PhFileText v-else class="ws-picker-icon" />
                   <span class="ws-picker-name">{{ doc.name }}</span>
                   <span v-if="pendingWorkspaceRefs.some(r => r.id === doc.id)" class="ws-picker-check">✓</span>
                 </div>
@@ -468,7 +473,7 @@
             <span class="tool-mode-pill-label">{{ activeToolMode.label }}</span>
             <span class="tool-mode-pill-hint">· {{ activeToolMode.hint }}</span>
             <button type="button" class="tool-mode-pill-remove" title="取消工具模式" @click="clearToolMode">
-              <icon-close />
+              <PhX weight="bold" />
             </button>
           </div>
 
@@ -494,8 +499,8 @@
 
           <div v-if="pendingDocs.length" class="pending-doc-list">
             <div v-for="item in pendingDocs" :key="item.id" class="pending-doc-chip">
-              <icon-file-pdf v-if="item.mimeType === 'application/pdf'" class="pending-doc-icon" />
-              <icon-file v-else class="pending-doc-icon" />
+              <PhFilePdf v-if="item.mimeType === 'application/pdf'" class="pending-doc-icon" />
+              <PhFileText v-else class="pending-doc-icon" />
               <div class="pending-doc-meta">
                 <div class="pending-doc-name">{{ item.name }}</div>
                 <div class="pending-doc-size">{{ formatFileSize(item.size) }}</div>
@@ -507,8 +512,8 @@
           <!-- 空间文档引用 chips -->
           <div v-if="pendingWorkspaceRefs.length" class="pending-ws-refs">
             <div v-for="ref in pendingWorkspaceRefs" :key="ref.id" class="pending-ws-ref-chip">
-              <icon-file-pdf v-if="ref.docType === 'ppt'" class="ws-ref-chip-icon" />
-              <icon-file v-else class="ws-ref-chip-icon" />
+              <PhFilePdf v-if="ref.docType === 'ppt'" class="ws-ref-chip-icon" />
+              <PhFileText v-else class="ws-ref-chip-icon" />
               <span class="ws-ref-chip-name">{{ ref.name }}</span>
               <button type="button" class="ws-ref-chip-remove" @click="removeWorkspaceRef(ref.id)">×</button>
             </div>
@@ -543,7 +548,7 @@
                 title="直接选择工具（跳过自动流程）"
                 @click="toggleToolPicker"
               >
-                <icon-plus />
+                <PhPlus weight="bold" />
               </button>
             </div>
 
@@ -557,7 +562,7 @@
                 :title="spaceDocsFlat.length ? '引用空间文档' : '当前空间暂无文档'"
                 @click="toggleWorkspacePicker"
               >
-                <icon-layers />
+                <PhStackSimple weight="bold" />
               </button>
               <!-- 引用数 badge -->
               <span v-if="pendingWorkspaceRefs.length" class="ws-picker-badge">{{ pendingWorkspaceRefs.length }}</span>
@@ -570,7 +575,7 @@
               :disabled="isRunning"
               @click="triggerImagePicker"
             >
-              <icon-attachment />
+              <PhPaperclip weight="bold" />
             </button>
 
             <!-- 终止按钮（任务运行中显示） -->
@@ -580,7 +585,7 @@
               class="stop-btn"
               @click="stopTask"
             >
-              <icon-record-stop />
+              <PhStop weight="fill" />
             </button>
 
             <!-- 发送按钮 -->
@@ -592,7 +597,7 @@
               :disabled="!inputText.trim() && !pendingImages.length && !pendingDocs.length"
               @click="send"
             >
-              <icon-arrow-up />
+              <PhArrowUp weight="bold" />
             </button>
           </div>
           </div><!-- /input-card -->
@@ -655,8 +660,13 @@
           <!-- 面板头 -->
           <div class="artifact-pane-header">
             <div class="artifact-pane-title-row">
-              <component :is="artifactMsgIcon(displayedArtifact.artifactType)" class="artifact-pane-icon" />
-              <span class="artifact-pane-title">{{ displayedArtifact.title || artifactTypeLabel(displayedArtifact.artifactType) }}</span>
+              <span class="artifact-pane-icon-wrap">
+                <component :is="artifactMsgIcon(displayedArtifact.artifactType)" class="artifact-pane-icon" />
+              </span>
+              <div class="artifact-pane-title-stack">
+                <span class="artifact-pane-kicker">{{ artifactTypeLabel(displayedArtifact.artifactType) }}</span>
+                <span class="artifact-pane-title">{{ displayedArtifact.title || artifactTypeLabel(displayedArtifact.artifactType) }}</span>
+              </div>
             </div>
             <div class="artifact-pane-actions">
               <button v-if="displayedArtifact.artifactType === 'research_result'" type="button" class="pane-action-btn" @click="openSaveResearch">保存</button>
@@ -740,15 +750,30 @@
               </div>
             </template>
 
-            <!-- concept_proposal（右侧面板已很少用到，对话内嵌卡片为主；这里做一个精简概览）-->
+            <!-- concept_proposal：流式过程边写边显示，最终态保留供对照 -->
             <template v-else-if="displayedArtifact.artifactType === 'concept_proposal'">
               <div class="pane-section">
-                <div class="pane-label">创意方向对比 · 第 {{ displayedArtifact.payload?.iteration || 1 }} 版</div>
+                <div class="pane-label concept-pane-label">
+                  <span>创意方向对比 · 第 {{ displayedArtifact.payload?.iteration || 1 }} 版</span>
+                  <span v-if="displayedArtifact.payload?.partial" class="concept-streaming">
+                    <span class="concept-streaming-dot"></span>梳理中
+                  </span>
+                </div>
                 <div v-if="displayedArtifact.payload?.differentiationAxis" class="pane-text">{{ displayedArtifact.payload.differentiationAxis }}</div>
               </div>
               <div v-if="displayedArtifact.payload?.sharedContext" class="pane-section">
                 <div class="pane-label">共享判断</div>
                 <div class="pane-text">{{ displayedArtifact.payload.sharedContext }}</div>
+              </div>
+              <div
+                v-if="displayedArtifact.payload?.partial && !(displayedArtifact.payload?.directions?.length)"
+                class="pane-section concept-skeleton"
+              >
+                <div class="concept-skeleton-row" v-for="n in 3" :key="n">
+                  <div class="concept-skeleton-bar concept-skeleton-bar--label"></div>
+                  <div class="concept-skeleton-bar"></div>
+                  <div class="concept-skeleton-bar concept-skeleton-bar--short"></div>
+                </div>
               </div>
               <div v-for="(d, i) in (displayedArtifact.payload?.directions || [])" :key="d.label || i" class="pane-section">
                 <div class="pane-label">{{ d.label || String.fromCharCode(65 + i) }} · {{ d.codeName || '' }} · {{ d.themeName || '—' }}</div>
@@ -806,6 +831,35 @@
 
             <template v-else-if="displayedArtifact.artifactType === 'image_canvas' || displayedArtifact.artifactType === 'image_search_result'">
               <ImageCanvasPanel :payload="displayedArtifact.payload || {}" />
+            </template>
+
+            <template v-else-if="displayedArtifact.artifactType === 'generated_image'">
+              <div class="generated-image-pane">
+                <button
+                  v-if="displayedArtifact.payload?.url"
+                  type="button"
+                  class="generated-image-card"
+                  @click="openChatImageLightbox(normalizeChatImageUrl(displayedArtifact.payload.url), displayedArtifact.payload.intent || '生成图片')"
+                >
+                  <img
+                    :src="normalizeChatImageUrl(displayedArtifact.payload.url)"
+                    :alt="displayedArtifact.payload.intent || '生成图片'"
+                    loading="lazy"
+                  />
+                </button>
+                <div class="pane-section">
+                  <div class="pane-label">用途</div>
+                  <div class="pane-text">{{ displayedArtifact.payload?.intent || '生成图片' }}</div>
+                </div>
+                <div v-if="displayedArtifact.payload?.prompt" class="pane-section">
+                  <div class="pane-label">Prompt</div>
+                  <div class="pane-text">{{ displayedArtifact.payload.prompt }}</div>
+                </div>
+                <div v-if="displayedArtifact.payload?.url" class="generated-image-actions">
+                  <a :href="normalizeChatImageUrl(displayedArtifact.payload.url)" target="_blank" rel="noopener">新标签打开</a>
+                  <a :href="normalizeChatImageUrl(displayedArtifact.payload.url)" download>下载图片</a>
+                </div>
+              </div>
             </template>
 
             <!-- ppt_outline -->
@@ -906,6 +960,25 @@
                   </div>
                 </div>
               </template>
+            </template>
+
+            <!-- 对话图片合集预览 -->
+            <template v-else-if="displayedArtifact.artifactType === 'chat_image_set'">
+              <div class="chat-image-set">
+                <div class="chat-image-set-meta">共 {{ displayedArtifact.payload?.images?.length || 0 }} 张图片，点击放大查看。</div>
+                <div class="chat-image-set-grid">
+                  <button
+                    v-for="img in (displayedArtifact.payload?.images || [])"
+                    :key="img.id || img.url"
+                    type="button"
+                    class="chat-image-set-card"
+                    @click="openChatImageLightbox(img.url, img.alt)"
+                  >
+                    <img :src="img.url" :alt="img.alt || ''" loading="lazy" />
+                    <span v-if="img.alt" class="chat-image-set-cap">{{ img.alt }}</span>
+                  </button>
+                </div>
+              </div>
             </template>
 
             <!-- fallback -->
@@ -1064,6 +1137,27 @@
       </a-form>
     </a-modal>
 
+    <!-- 对话内图片放大预览 -->
+    <a-modal
+      v-model:visible="chatImageLightbox.visible"
+      :footer="false"
+      :width="980"
+      :unmount-on-close="true"
+      :mask-closable="true"
+      class="chat-image-lightbox-modal"
+    >
+      <template #title>
+        <div class="chat-image-lightbox-title">{{ chatImageLightbox.alt || '图片预览' }}</div>
+      </template>
+      <div v-if="chatImageLightbox.url" class="chat-image-lightbox-stage">
+        <img :src="chatImageLightbox.url" :alt="chatImageLightbox.alt || ''" class="chat-image-lightbox-img" />
+      </div>
+      <div v-if="chatImageLightbox.url" class="chat-image-lightbox-actions">
+        <a :href="chatImageLightbox.url" target="_blank" rel="noopener" class="chat-image-lightbox-btn">在新标签打开</a>
+        <a :href="chatImageLightbox.url" download class="chat-image-lightbox-btn primary">下载图片</a>
+      </div>
+    </a-modal>
+
   </div>
 </template>
 
@@ -1077,11 +1171,14 @@ import SlideViewer from '../components/SlideViewer.vue'
 import PlanDocumentPanel from '../components/PlanDocumentPanel.vue'
 import PptEditor from '../components/PptEditor.vue'
 import ImageCanvasPanel from '../components/ImageCanvasPanel.vue'
+import { IconMobile, IconCompass, IconCamera } from '@arco-design/web-vue/es/icon'
 import {
-  IconMobile, IconCompass, IconCamera, IconRecordStop,
-  IconBulb, IconSearch, IconEdit, IconCheckCircle, IconLayout, IconAttachment,
-  IconLayers, IconFile, IconFilePdf, IconFolder, IconPlus, IconImage, IconClose
-} from '@arco-design/web-vue/es/icon'
+  PhMagnifyingGlass, PhLightbulb, PhCheckCircle, PhClipboardText, PhPalette,
+  PhImagesSquare, PhGlobe, PhWrench, PhFileText, PhFilePdf, PhFolder, PhX,
+  PhPlus, PhStackSimple, PhPaperclip, PhStop, PhArrowUp, PhImage, PhSquaresFour,
+  PhFrameCorners, PhRows, PhPresentationChart, PhNotePencil, PhSealQuestion,
+  PhChatCircleText, PhSealCheck
+} from '@phosphor-icons/vue'
 
 const router   = useRouter()
 const settings = useSettingsStore()
@@ -1115,9 +1212,30 @@ const activeTaskIntent = ref(null)
 const currentTaskTurnId = ref('')
 const processSummaryState = ref({})
 
-// 工具图标映射
+// 工具图标映射（Phosphor SVG）
 function toolIcon(tool) {
-  return { search_images: '🖼️', web_search: '🔍', web_fetch: '🌐', propose_concept: '💡', approve_concept: '✅', run_strategy: '📋', build_ppt: '🎨' }[tool] || '🔧'
+  return {
+    search_images: PhImagesSquare,
+    web_search: PhMagnifyingGlass,
+    web_fetch: PhGlobe,
+    propose_concept: PhLightbulb,
+    approve_concept: PhCheckCircle,
+    run_strategy: PhClipboardText,
+    build_ppt: PhPalette,
+  }[tool] || PhWrench
+}
+
+// 工具图标语义色（轻底色 + 强调色）
+function toolIconTone(tool) {
+  return {
+    search_images: 'tool-tone--violet',
+    web_search:    'tool-tone--blue',
+    web_fetch:     'tool-tone--blue',
+    propose_concept: 'tool-tone--amber',
+    approve_concept: 'tool-tone--green',
+    run_strategy:  'tool-tone--slate',
+    build_ppt:     'tool-tone--rose',
+  }[tool] || 'tool-tone--slate'
 }
 
 function createTaskTurnId() {
@@ -1455,6 +1573,17 @@ function renderAiTextToHtml(value = '') {
     .replace(/&nbsp;/gi, ' ')
     .trim()
 
+  // 抽取 markdown 图片，避免被段落/转义流程吃掉，最后再替换回 <img>
+  const inlineImages = []
+  source = source.replace(
+    /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g,
+    (_, alt, url) => {
+      const idx = inlineImages.length
+      inlineImages.push({ alt: String(alt || '').trim(), url: String(url || '').trim() })
+      return `IMG${idx}`
+    }
+  )
+
   const lines = source.split('\n')
   const blocks = []
   let listItems = []
@@ -1464,7 +1593,8 @@ function renderAiTextToHtml(value = '') {
 
   const flushParagraph = () => {
     if (!paragraph.length) return
-    blocks.push(`<p>${parseInlineRichText(paragraph.join('<br />'))}</p>`)
+    // 先按行 escape + 解析 inline rich text，再用真实 <br /> 连接，避免 <br /> 被一并 escape
+    blocks.push(`<p>${paragraph.map(line => parseInlineRichText(line)).join('<br />')}</p>`)
     paragraph = []
   }
 
@@ -1563,7 +1693,52 @@ function renderAiTextToHtml(value = '') {
   flushParagraph()
   flushList()
   flushCode()
-  return blocks.join('')
+  let html = blocks.join('')
+
+  if (inlineImages.length) {
+    // 仅由图片占位（可被 <br /> 分隔）组成的段落直接拆出 <p>，避免成内联段落
+    html = html.replace(
+      /<p>\s*((?:IMG\d+(?:\s*<br\s*\/?>\s*)?)+)\s*<\/p>/g,
+      (_, group) => group.replace(/<br\s*\/?>/gi, '')
+    )
+    const renderImg = (img) => {
+      const safeUrl = escapeHtml(normalizeChatImageUrl(img.url))
+      const safeAlt = escapeHtml(img.alt || '')
+      return `<img class="ai-inline-image" src="${safeUrl}" alt="${safeAlt}" data-ai-image="1" loading="lazy" />`
+    }
+    html = html.replace(/IMG(\d+)/g, (_, idx) => {
+      const img = inlineImages[Number(idx)]
+      if (!img?.url) return ''
+      return renderImg(img)
+    })
+    if (inlineImages.length > 2) {
+      // 同一段连续 ≥3 张图聚合成横向 strip + "在右侧预览全部" 按钮
+      const imgRe = /<img class="ai-inline-image"[^>]+>/
+      const consecutive = new RegExp(
+        `(?:${imgRe.source}\\s*){3,}`,
+        'g'
+      )
+      html = html.replace(consecutive, (match) => {
+        const urls = []
+        match.replace(/src="([^"]+)"/g, (_, u) => { urls.push(u); return '' })
+        return `<div class="ai-image-strip" data-image-strip="1">${match}<button type="button" class="ai-image-strip-cta" data-image-strip-cta="1">在右侧预览全部 ${urls.length} 张图片</button></div>`
+      })
+    }
+  }
+
+  return html
+}
+
+function normalizeChatImageUrl(url = '') {
+  const raw = String(url || '').trim()
+  if (!raw) return ''
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('/api/')) return raw
+  if (raw.startsWith('/output/')) return raw
+  const outputIndex = raw.indexOf('/output/')
+  if (outputIndex >= 0) return raw.slice(outputIndex)
+  const runsIndex = raw.indexOf('output/runs/')
+  if (runsIndex >= 0) return `/${raw.slice(runsIndex)}`
+  return raw
 }
 
 function resolveAiHtml(text = '', html = '') {
@@ -1600,6 +1775,57 @@ function pushMsg(role, text, html, extra = {}) {
   nextTick(() => {
     if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
   })
+}
+
+// ── 对话内图片预览：单图 lightbox / 多图右侧面板 ──
+const chatImageLightbox = reactive({ visible: false, url: '', alt: '' })
+
+function openChatImageLightbox(url, alt = '') {
+  if (!url) return
+  chatImageLightbox.url = url
+  chatImageLightbox.alt = alt
+  chatImageLightbox.visible = true
+}
+
+function openChatImageSetInPane(images) {
+  const list = (Array.isArray(images) ? images : [])
+    .filter(item => item?.url)
+    .map((item, idx) => ({
+      id: `chat_img_${idx}_${item.url}`,
+      url: item.url,
+      alt: item.alt || ''
+    }))
+  if (!list.length) return
+  activeArtifact.value = {
+    artifactType: 'chat_image_set',
+    title: `对话图片预览 · ${list.length} 张`,
+    payload: { images: list }
+  }
+  previewCollapsed.value = false
+}
+
+function onChatHistoryClick(event) {
+  const target = event.target
+  if (!target || !(target instanceof HTMLElement)) return
+
+  const cta = target.closest('[data-image-strip-cta]')
+  if (cta) {
+    event.preventDefault()
+    const strip = cta.closest('[data-image-strip]')
+    if (!strip) return
+    const imgs = Array.from(strip.querySelectorAll('img.ai-inline-image')).map(img => ({
+      url: img.getAttribute('src') || '',
+      alt: img.getAttribute('alt') || ''
+    }))
+    openChatImageSetInPane(imgs)
+    return
+  }
+
+  const img = target.closest('img.ai-inline-image')
+  if (img) {
+    event.preventDefault()
+    openChatImageLightbox(img.getAttribute('src') || '', img.getAttribute('alt') || '')
+  }
 }
 
 function pushAiMessage(message) {
@@ -1868,9 +2094,11 @@ const latestArtifactCardMessage = computed(() => {
   return null
 })
 const displayedArtifact = computed(() => {
-  // 实时状态（不需要对应 message 卡片）：PPT 流式输出、文档流式预览
+  // 实时状态（不需要对应 message 卡片）：PPT 流式输出、文档流式预览、对话图片预览、创意方向流式预览
   if (activeArtifact.value?.artifactType === 'ppt_slides') return activeArtifact.value
   if (activeArtifact.value?.artifactType === 'plan_document') return activeArtifact.value
+  if (activeArtifact.value?.artifactType === 'chat_image_set') return activeArtifact.value
+  if (activeArtifact.value?.artifactType === 'concept_proposal') return activeArtifact.value
   // 其余产出物：先匹配已推入消息流的 artifact card，再降级到最新卡片
   if (activeArtifact.value?.artifactId) {
     const matched = messages.value.find(msg => msg.kind === 'artifact-card' && msg.artifactId === activeArtifact.value.artifactId)
@@ -1900,13 +2128,17 @@ const hasStrategyPreview = computed(() =>
   !!latestReviewFeedback.value ||
   !!latestPptOutline.value ||
   artifacts.value.some(item =>
+    item.artifactType === 'concept_proposal' ||
     item.artifactType === 'image_search_result' ||
+    item.artifactType === 'generated_image' ||
     item.artifactType === 'image_canvas' ||
     item.artifactType === 'note_detail'
   )
 )
 const previewVisible = computed(() => {
   if (docContent.value || resultSlides.value.length > 0) return true
+  if (activeArtifact.value?.artifactType === 'chat_image_set') return true
+  if (activeArtifact.value?.artifactType === 'generated_image') return true
   return hasStrategyPreview.value
 })
 const focusedPlanDraft = computed(() => latestPlanDraft.value)
@@ -2048,6 +2280,7 @@ function artifactTypeLabel(type) {
     task_brief: '任务理解',
     research_result: '搜索研究',
     image_search_result: '找图结果',
+    generated_image: '生成图片',
     note_detail: '笔记内容',
     concept_proposal: '创意方向对比',
     brief_challenge: 'Brief 审视',
@@ -2063,19 +2296,20 @@ function artifactTypeLabel(type) {
 
 function artifactMsgIcon(type) {
   return {
-    task_brief: IconBulb,
-    research_result: IconSearch,
-    image_search_result: IconCamera,
-    note_detail: IconSearch,
-    concept_proposal: IconBulb,
-    brief_challenge: IconBulb,
-    plan_draft: IconEdit,
-    plan_document: IconEdit,
-    review_feedback: IconCheckCircle,
-    image_canvas: IconCamera,
-    ppt_outline: IconLayout,
-    ppt_slides: IconFile,
-  }[type] || IconEdit
+    task_brief: PhLightbulb,
+    research_result: PhMagnifyingGlass,
+    image_search_result: PhImagesSquare,
+    generated_image: PhImage,
+    note_detail: PhFileText,
+    concept_proposal: PhLightbulb,
+    brief_challenge: PhSealQuestion,
+    plan_draft: PhNotePencil,
+    plan_document: PhFileText,
+    review_feedback: PhChatCircleText,
+    image_canvas: PhFrameCorners,
+    ppt_outline: PhRows,
+    ppt_slides: PhPresentationChart,
+  }[type] || PhNotePencil
 }
 
 function pptLayoutLabel(layout) {
@@ -2507,6 +2741,9 @@ const filteredConversations = computed(() => {
     String(item.title || '').toLowerCase().includes(keyword)
   )
 })
+function conversationTs(item) {
+  return new Date(item.updatedAt || item.lastMessageAt || item.createdAt || 0).getTime()
+}
 const groupedConversations = computed(() => {
   const now = Date.now()
   const groups = [
@@ -2514,8 +2751,14 @@ const groupedConversations = computed(() => {
     { key: 'week', title: '近 7 天', items: [] },
     { key: 'earlier', title: '更早', items: [] }
   ]
-  filteredConversations.value.forEach((item) => {
-    const ts = new Date(item.updatedAt || item.lastMessageAt || item.createdAt || 0).getTime()
+  // 先做一次稳定排序：时间倒序，时间相同用 id 倒序兜底，避免后端时间戳并列时顺序漂移
+  const sorted = [...filteredConversations.value].sort((a, b) => {
+    const diff = conversationTs(b) - conversationTs(a)
+    if (diff !== 0) return diff
+    return String(b.id || '').localeCompare(String(a.id || ''))
+  })
+  sorted.forEach((item) => {
+    const ts = conversationTs(item)
     const diffDays = Math.floor((now - ts) / 86400000)
     if (diffDays <= 0) groups[0].items.push(item)
     else if (diffDays < 7) groups[1].items.push(item)
@@ -2765,10 +3008,44 @@ function restoreFromConversation(detail) {
   toolPickerVisible.value = false
   syncQuickRepliesFromMessages()
 
+  // 用户上次切走时后端 session 可能还在跑（前端 SSE 已断）。回到这个对话后
+  // 异步问下后端 status，活的就重连 SSE，让 backlog 把切走期间漏掉的 tool_call /
+  // text_delta / done 等事件全回放出来。否则 UI 会停在"半截"的最后状态。
+  if (currentSessionId.value) {
+    reattachBrainSSE(currentSessionId.value, activeConversationId.value)
+  }
+
   nextTick(() => {
     restoringConversation.value = false
     if (historyRef.value) historyRef.value.scrollTop = historyRef.value.scrollHeight
   })
+}
+
+// 切回历史对话时尝试重新订阅后端 SSE。后端 /status 告诉我们 session 是否还活着 +
+// 当前 status；活的就 connectBrainSSE，让 backlog 把漏掉的事件回放出来。
+async function reattachBrainSSE(sessionId, conversationId) {
+  if (!sessionId) return false
+  try {
+    const r = await fetch(`/api/agent/${sessionId}/status`)
+    if (!r.ok) return false
+    const s = await r.json()
+    if (!s.alive) return false
+    if (s.status !== 'running' && s.status !== 'waiting_for_user') return false
+    // 守一下：后端绑定的 conversation 必须跟前端当前活跃对话一致，避免把别的对话
+    // 的事件灌进来
+    if (s.conversationId && conversationId && s.conversationId !== conversationId) return false
+
+    isRunning.value = true
+    if (wsState.value === 'welcome' || wsState.value === 'failed') wsState.value = 'execution'
+    progressLabel.value = s.status === 'waiting_for_user' ? '等待你的回复...' : '继续推进...'
+
+    const url = s.streamUrl || `/api/agent/stream/${sessionId}`
+    connectBrainSSE(url, { onResolve: () => {}, conversationId })
+    return true
+  } catch (err) {
+    console.warn('[reattachBrainSSE] failed:', err.message)
+    return false
+  }
 }
 
 function clearConversationView() {
@@ -3300,13 +3577,14 @@ function stopTask() {
 
 // ── Brain Agent 任务 ──────────────────────────────────────────────
 async function runBrainTask(text, images = [], docs = [], workspaceRefs = [], forceTool = '') {
-  const isContinuing = !!currentSessionId.value  // 是否复用现有 session
+  const shouldReuseSession = !!currentSessionId.value  // 是否复用现有后端上下文
+  const isContinuingTask = wsState.value === 'execution' || wsState.value === 'streaming' || waitingForClarification.value
   const taskSeed = text || docs[0]?.name || images[0]?.name || '文件需求'
   isRunning.value = true
   waitingForClarification.value = false
   wasManuallyStopped.value = false
   resetProcessedStreamEvents()
-  if (!isContinuing) {
+  if (!shouldReuseSession) {
     resetSteps()
     brainPlanItems.value = defaultBrainPlan()
     currentTask.value = {
@@ -3315,10 +3593,10 @@ async function runBrainTask(text, images = [], docs = [], workspaceRefs = [], fo
     }
   }
   taskMode.value = 'brain'
-  progress.value = isContinuing ? Math.max(progress.value, 8) : 8
-  progressLabel.value = isContinuing ? '继续推进...' : '正在理解需求...'
+  progress.value = shouldReuseSession ? Math.max(progress.value, 8) : 8
+  progressLabel.value = isContinuingTask ? '继续推进...' : '正在理解需求...'
   wsState.value = 'execution'
-  publishActivity(isContinuing ? `继续任务：${taskSeed.slice(0, 48)}` : `收到新任务：${taskSeed.slice(0, 48)}`)
+  publishActivity(isContinuingTask ? `继续任务：${taskSeed.slice(0, 48)}` : `收到消息：${taskSeed.slice(0, 48)}`)
 
   // 立即显示 loading 气泡，不等 SSE 连上
   pushAiMessage({ kind: 'thinking' })
@@ -3352,11 +3630,48 @@ async function runBrainTask(text, images = [], docs = [], workspaceRefs = [], fo
         forceTool
       })
     }).then(r => r.json()).then(res => {
-      if (!res.success) throw new Error(res.message || '启动失败')
+      if (!res.success) {
+        // 409 + 已有的 streamUrl：后端有别的 session 还在跑（用户上一轮中途切了路由
+        // 没收尾），把它当成"重新接续"而不是"启动失败"——重订阅 SSE，让 backlog
+        // 把漏掉的事件回放出来。这条消息本身没发出去，提示用户。
+        if (res.streamUrl && res.sessionId && (res.status === 'running' || res.status === 'waiting_for_user')) {
+          currentSessionId.value = res.sessionId
+          // 1) 把这一轮提前 push 的 task-log（"收到消息：xxx"/"继续任务：xxx"）回滚——
+          //    任务都没真发出去，不该在过程时间轴里留下虚假的"任务已收到"。
+          // 2) 把用户消息气泡视觉降级（mark notSent），让用户清楚知道"这条没发"——
+          //    避免用户对照 AI 后续输出（其实是上一轮在跑）以为 AI 在回这一轮。
+          // 3) 移除 thinking 占位。
+          const taskLogText = isContinuingTask ? `继续任务：${taskSeed.slice(0, 48)}` : `收到消息：${taskSeed.slice(0, 48)}`
+          messages.value = messages.value.filter(m => {
+            if (m.kind === 'thinking') return false
+            if (m.kind === 'task-log' && m.text === taskLogText) return false
+            return true
+          })
+          // 标记最近一条 user 消息为"未发送"——前端有 m.notSent 的 UI 处理（dim + 标签）
+          const lastUserIdx = (() => {
+            for (let i = messages.value.length - 1; i >= 0; i--) {
+              if (messages.value[i]?.role === 'user') return i
+            }
+            return -1
+          })()
+          if (lastUserIdx >= 0) {
+            messages.value[lastUserIdx] = { ...messages.value[lastUserIdx], notSent: true }
+          }
+          const note = res.status === 'waiting_for_user'
+            ? '上面这条消息没发出去——会话还在等你回上一个澄清，请回完澄清再继续，或先点终止。'
+            : '上面这条消息没发出去——会话还有任务在跑，等它结束再发，或先点终止。已重新订阅事件流接续看进度。'
+          pushMsg('ai', '', note)
+          connectBrainSSE(res.streamUrl, { onResolve: done, conversationId: taskConversationId })
+          return
+        }
+        throw new Error(res.message || '启动失败')
+      }
       currentSessionId.value = res.sessionId
       replaceLatestUserAttachments(res.attachments || [])
       connectBrainSSE(res.streamUrl, { onResolve: done, conversationId: taskConversationId })
     }).catch(err => {
+      // catch 里也把 thinking 占位移掉——否则会留一个永远转的 loading 气泡
+      messages.value = messages.value.filter(m => m.kind !== 'thinking')
       pushMsg('ai', '', `启动失败：${err.message}`)
       isRunning.value = false
       wsState.value = 'welcome'
@@ -3393,6 +3708,22 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
   function popThinking() {
     if (!isActiveTask()) return
     messages.value = messages.value.filter(m => m.kind !== 'thinking')
+  }
+
+  // brain 主循环 done 时如果还有 propose_concept / run_strategy 之类的工具被转后台，
+  // 后端继续推 background_done / artifact / clarification。这里维护剩余计数 +
+  // 暂缓收尾，等所有后台任务回收完毕再真正关 SSE / 解锁输入框。否则用户看到的
+  // 就是"输入框解锁了但右边永远没出方案"。
+  let pendingBgCount = 0
+  let doneDeferredData = null
+  function finalizeDone() {
+    if (isActiveTask()) {
+      popThinking()
+      handleDone(doneDeferredData || { mode: 'brain' })
+    }
+    closeSseConnection()
+    isRunning.value = false
+    resolve()
   }
 
   sse.addEventListener('thinking', () => {
@@ -3434,6 +3765,36 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
       if (shouldSurfaceProgressMessage(d.message)) {
         publishActivity(d.message, d.timestamp || Date.now())
       }
+    }
+  })
+
+  // 后台任务回收：之前因预算超时被转后台的工具，现在真实结果回来了。
+  // 后端会同时把结果作为系统注入的 user message push 进 session.messages，
+  // 下一轮 LLM 调用模型会看到——前端这里只负责把"已完成"提示给用户看。
+  sse.addEventListener('background_done', e => {
+    const d = JSON.parse(e.data)
+    if (!isLiveTask()) return
+    const elapsedSec = d.elapsedMs ? Math.round(d.elapsedMs / 1000) : null
+    const elapsedTxt = elapsedSec != null ? `（耗时 ${elapsedSec}s）` : ''
+    const text = d.status === 'success'
+      ? `${d.toolName} 后台任务已完成${elapsedTxt}，结果将在下一轮提供给 AI`
+      : `${d.toolName} 后台任务失败${elapsedTxt}`
+    publishActivity(text, d.timestamp || Date.now())
+    // 精准更新对应 tool-call 气泡的 progress 字段（不再是"运行中"）
+    const matched = [...messages.value].reverse().find(m => m.kind === 'tool-call' && m.toolCallId === d.toolCallId)
+    if (matched) matched.progress = text
+
+    // 如果之前 done 因有后台任务被推迟收尾，这里倒计；归零时正式收尾。
+    if (pendingBgCount > 0) {
+      pendingBgCount -= 1
+      // 更新 thinking 占位的副标题
+      const thinking = messages.value.find(m => m.kind === 'thinking')
+      if (thinking) {
+        thinking.label = pendingBgCount > 0
+          ? `后台还在跑 ${pendingBgCount} 项任务...`
+          : '后台任务完成，整理结果...'
+      }
+      if (pendingBgCount === 0) finalizeDone()
     }
   })
 
@@ -3708,6 +4069,10 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
     if (!isLiveTask()) return
     handleDocOpened(JSON.parse(e.data))
   })
+  sse.addEventListener('doc_preview_updated', e => {
+    if (!isLiveTask()) return
+    handleDocPreviewUpdated(JSON.parse(e.data))
+  })
   sse.addEventListener('slide_added', e => {
     if (!isLiveTask()) return
     handleSlideAdded(JSON.parse(e.data))
@@ -3717,9 +4082,24 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
     streamingMsgId = null
     streamingText = ''
     streamingMeta = null
+    const data = (() => { try { return JSON.parse(e.data || '{}') } catch { return {} } })()
+
+    // brain 主循环结束但后台还有 propose_concept / run_strategy 在跑：
+    // 推迟收尾。否则关了 SSE 后续 artifact / clarification 推回来都丢了。
+    const bgCount = Number(data.backgroundPending || 0)
+    if (bgCount > 0) {
+      pendingBgCount = bgCount
+      doneDeferredData = data
+      if (isActiveTask()) {
+        popThinking()
+        pushAiMessage({ kind: 'thinking', label: `后台还在跑 ${bgCount} 项任务...` })
+      }
+      return
+    }
+
     if (isActiveTask()) {
       popThinking()
-      handleDone(JSON.parse(e.data))
+      handleDone(data)
     }
     closeSseConnection()
     isRunning.value = false
@@ -3738,6 +4118,16 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
           const d = JSON.parse(e.data)
           if (d.message) pushMsg('ai', '', d.message)
           failedReason.value = d.message || '任务执行出错'
+          // 后端给了 retryable + lastUserMessage：渲染一个"重试上一轮"按钮，
+          // 用户点了就用同一条消息重发，免去手动复制
+          if (d.retryable && d.lastUserMessage) {
+            pushAiMessage({
+              kind: 'error-retry',
+              errorMessage: d.message || 'AI 调用失败',
+              lastUserMessage: d.lastUserMessage,
+              retryUsed: false
+            })
+          }
         } catch {}
       } else if (!failedReason.value) {
         failedReason.value = '任务连接中断，请重试。'
@@ -3765,21 +4155,37 @@ function handleArtifact(d) {
     return
   }
 
-  // 创意方向：只在对话内渲染完整内容卡片，不进右侧预览面板
+  // 创意方向：
+  // - 流式 partial 阶段（payload.partial === true）：只更新右侧 artifacts 数组驱动预览，
+  //   不动对话流，避免对话卡反复闪烁。
+  // - 最终态：照常渲染对话内 concept-card；artifacts 也保留同步，让右侧预览继续可见。
   if (d.artifactType === 'concept_proposal') {
-    const existingConceptIdx = messages.value.findIndex(
-      msg => msg.kind === 'concept-card' && msg.iteration === payload.iteration
+    const iteration = payload.iteration || 1
+    const existingArtIdx = artifacts.value.findIndex(
+      item => item.artifactType === 'concept_proposal' && (item.payload?.iteration || 1) === iteration
     )
-    const conceptMsg = {
-      kind: 'concept-card',
-      iteration: payload.iteration || 1,
-      activeDirectionIndex: 0,
-      payload
-    }
-    if (existingConceptIdx >= 0) {
-      Object.assign(messages.value[existingConceptIdx], conceptMsg)
-    } else {
-      pushAiMessage(conceptMsg)
+    const conceptArtifact = existingArtIdx >= 0
+      ? { ...artifacts.value[existingArtIdx], payload }
+      : { id: `concept_${iteration}_${Date.now()}`, artifactType: 'concept_proposal', payload }
+    if (existingArtIdx >= 0) artifacts.value.splice(existingArtIdx, 1)
+    artifacts.value.unshift(conceptArtifact)
+    activeArtifact.value = conceptArtifact
+
+    if (!payload.partial) {
+      const existingConceptIdx = messages.value.findIndex(
+        msg => msg.kind === 'concept-card' && msg.iteration === iteration
+      )
+      const conceptMsg = {
+        kind: 'concept-card',
+        iteration,
+        activeDirectionIndex: 0,
+        payload
+      }
+      if (existingConceptIdx >= 0) {
+        Object.assign(messages.value[existingConceptIdx], conceptMsg)
+      } else {
+        pushAiMessage(conceptMsg)
+      }
     }
     return
   }
@@ -3815,7 +4221,7 @@ function handleArtifact(d) {
   if (d.artifactType === 'ppt_page') return
 
   // 在对话流中插入产出物卡片，并自动切换右侧面板
-  const cardTypes = ['research_result', 'note_detail', 'image_search_result', 'review_feedback', 'image_canvas', 'ppt_outline']
+  const cardTypes = ['research_result', 'note_detail', 'image_search_result', 'generated_image', 'review_feedback', 'image_canvas', 'ppt_outline']
   if (cardTypes.includes(d.artifactType)) {
     const cardMsg = existingIndex >= 0
       ? messages.value.find(msg => msg.kind === 'artifact-card' && msg.artifactId === artifact.id)
@@ -3845,7 +4251,7 @@ function handleArtifact(d) {
       : 'PPT 结构已确认，开始生成页面...'
     if (wsState.value !== 'done') wsState.value = 'execution'
   }
-  if (['plan_draft', 'review_feedback', 'image_canvas', 'image_search_result', 'ppt_outline'].includes(d.artifactType)) {
+  if (['plan_draft', 'review_feedback', 'image_canvas', 'image_search_result', 'generated_image', 'ppt_outline'].includes(d.artifactType)) {
     publishActivity(`${artifactTypeLabel(d.artifactType)}已更新：${artifactTimelineText({ artifactType: d.artifactType, payload: d.payload || {} })}`, d.timestamp || Date.now())
   }
 
@@ -3861,6 +4267,7 @@ function artifactCardTitle(type, payload) {
       : `笔记内容：${n0?.title || '已抓取'}`;
   }
   if (type === 'image_search_result') return `找图结果：${payload.summary?.totalImages || 0} 张候选图`
+  if (type === 'generated_image') return `生成图片：${payload.intent || '已生成'}`
   if (type === 'concept_proposal') {
     const dirs = Array.isArray(payload.directions) ? payload.directions : []
     return `创意方向对比 · 第 ${payload.iteration || 1} 版（${dirs.length || 3} 条方向）`
@@ -3891,6 +4298,7 @@ function artifactCardSummary(type, payload) {
     return imgCount > 0 ? `${imgCount} 张图${body ? ' · ' + body : ''}` : body
   }
   if (type === 'image_search_result') return payload.summaryText || `已找到 ${payload.summary?.totalImages || 0} 张图片，可在右侧继续筛选。`
+  if (type === 'generated_image') return payload.prompt || '图片已生成，可在右侧预览和下载。'
   if (type === 'concept_proposal') {
     const dirs = Array.isArray(payload.directions) ? payload.directions : []
     if (dirs.length) return dirs.map(d => `${d.label || ''} ${d.codeName || d.themeName || ''}`).filter(s => s.trim()).join(' / ')
@@ -3945,6 +4353,9 @@ function artifactCardChips(type, payload) {
     if (payload.summary?.searchedImages) chips.push(`${payload.summary.searchedImages}张搜图`)
     return chips.slice(0, 3)
   }
+  if (type === 'generated_image') {
+    return [payload.intent || 'AI 生图'].filter(Boolean).slice(0, 3)
+  }
   if (type === 'ppt_outline') {
     return (Array.isArray(payload.pages) ? payload.pages : [])
       .slice(0, 3)
@@ -3958,6 +4369,25 @@ function artifactCardChips(type, payload) {
     return chips.slice(0, 3)
   }
   return []
+}
+
+// 写型工具（patch / find_replace / append / update / save）结束后无副作用刷新预览
+// 区别于 handleDocReady：不 pushAiMessage，不改 progressLabel，不设 quickReplies
+// 区别于 handleDocOpened：不创建新的 artifact-card，仅在已经在预览这份文档时静默刷新；
+// 如果用户当前看的是别的内容（图/PPT），切到 document 视图但不打扰对话流
+function handleDocPreviewUpdated(d) {
+  if (!d?.docContent) return
+  docContent.value = d.docContent
+  if (d.title) docTitle.value = d.title
+  isDocStreaming.value = false
+  docStreamProgress.value = 100
+  docStreamPhase.value = 'final'
+  // 只有当前不在 ppt/image 等其他预览状态时才切到 document，避免 agent 后台改文档
+  // 把用户正在看的 PPT 预览给抢走
+  if (wsState.value !== 'ppt' && wsState.value !== 'image') {
+    wsState.value = 'document'
+    previewCollapsed.value = false
+  }
 }
 
 function handleDocOpened(d) {
@@ -4049,6 +4479,16 @@ function handleDocReady(d) {
 function onReviewRequest() {
   if (isRunning.value) return
   sendMessage('请对这版方案进行专家评审，给出评分和改进建议')
+}
+
+// 用户点"重试上一轮"按钮：把上次的输入填回 inputText，再触发一次 send()。
+// 这样能复用全部现有发送逻辑（attachments 不能 retry，但文本类失败这是最常见的 90%+）
+function onRetryFailedTurn(msg) {
+  if (msg.retryUsed || isRunning.value) return
+  msg.retryUsed = true
+  inputText.value = msg.lastUserMessage || ''
+  // 触发 send()——会按现有逻辑接到当前会话或新建
+  send()
 }
 
 function handleDocSectionAdded(d) {
@@ -4553,9 +4993,29 @@ onUnmounted(() => {
 }
 
 .tool-call-card-icon {
-  font-size: 16px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #475569;
+  font-size: 14px;
   flex-shrink: 0;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
+.tool-call-card.active .tool-call-card-icon {
+  transform: scale(1.04);
+}
+
+/* ── Icon 语义色调（Phosphor 容器） ───────────────────────────── */
+.tool-tone--blue   { background: rgba(59, 130, 246, 0.10); color: #2563eb; }
+.tool-tone--violet { background: rgba(139, 124, 246, 0.12); color: #7c5cff; }
+.tool-tone--amber  { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+.tool-tone--green  { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.tool-tone--rose   { background: rgba(244, 63, 94, 0.10); color: #e11d48; }
+.tool-tone--slate  { background: rgba(15, 23, 42, 0.06); color: #475569; }
 
 .tool-call-card-content {
   flex: 1;
@@ -4729,6 +5189,228 @@ onUnmounted(() => {
   background: rgba(68, 64, 60, 0.05);
   color: #1c1917;
   font-weight: 700;
+}
+
+/* ── 对话内联图片 ── */
+.ai-message-card :deep(img.ai-inline-image) {
+  display: block;
+  max-width: min(100%, 420px);
+  width: auto;
+  height: auto;
+  margin: 10px 0;
+  border-radius: 12px;
+  border: 1px solid rgba(68, 64, 60, 0.08);
+  background: #f5f5f4;
+  cursor: zoom-in;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+
+.ai-message-card :deep(img.ai-inline-image:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(28, 25, 23, 0.10);
+}
+
+.ai-message-card :deep(.ai-image-strip) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(245, 239, 231, 0.45);
+  border: 1px solid rgba(68, 64, 60, 0.08);
+}
+
+.ai-message-card :deep(.ai-image-strip img.ai-inline-image) {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.ai-message-card :deep(.ai-image-strip-cta) {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 9px 14px;
+  border: 1px solid rgba(28, 25, 23, 0.85);
+  background: #1c1917;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  justify-self: end;
+  transition: background .14s ease, transform .14s ease;
+}
+
+.ai-message-card :deep(.ai-image-strip-cta:hover) {
+  background: #292524;
+  transform: translateY(-1px);
+}
+
+/* ── 对话图片 lightbox ── */
+.chat-image-lightbox-modal :deep(.arco-modal-body) {
+  padding: 16px;
+}
+
+.chat-image-lightbox-title {
+  font-size: 14px;
+  color: #1c1917;
+  font-weight: 600;
+  max-width: 760px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-image-lightbox-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1c1917;
+  border-radius: 12px;
+  padding: 18px;
+  min-height: 320px;
+}
+
+.chat-image-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.chat-image-lightbox-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.chat-image-lightbox-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(68, 64, 60, 0.18);
+  background: #fff;
+  color: #1c1917;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .14s ease;
+}
+
+.chat-image-lightbox-btn:hover {
+  background: #fafaf9;
+}
+
+.chat-image-lightbox-btn.primary {
+  background: #1c1917;
+  color: #fff;
+  border-color: #1c1917;
+}
+
+.chat-image-lightbox-btn.primary:hover {
+  background: #292524;
+}
+
+/* ── 右侧面板：对话图片合集 ── */
+.chat-image-set {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px 18px;
+}
+
+.chat-image-set-meta {
+  font-size: 12px;
+  color: #78716c;
+}
+
+.chat-image-set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.chat-image-set-card {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: #fafaf9;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: zoom-in;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+
+.chat-image-set-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(28, 25, 23, 0.10);
+}
+
+.chat-image-set-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #e7e5e4;
+}
+
+.chat-image-set-cap {
+  display: block;
+  padding: 8px 12px 10px;
+  font-size: 12px;
+  color: #1c1917;
+  text-align: left;
+  line-height: 1.4;
+  background: #fff;
+}
+
+/* ── 右侧面板：生成图片 ── */
+.generated-image-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.generated-image-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(68, 64, 60, 0.10);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f5f4;
+  cursor: zoom-in;
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.06);
+}
+
+.generated-image-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.generated-image-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.generated-image-actions a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(68, 64, 60, 0.18);
+  background: #fff;
+  color: #1c1917;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 /* ── 澄清卡片 ── */
@@ -4929,10 +5611,13 @@ onUnmounted(() => {
 }
 
 .research-pane-source {
-  padding: 1px 6px;
-  background: rgba(0,0,0,0.04);
-  border-radius: 3px;
+  padding: 2px 9px;
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 999px;
   font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+  letter-spacing: 0.02em;
 }
 
 .research-pane-list {
@@ -4947,17 +5632,20 @@ onUnmounted(() => {
 .research-pane-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  background: #fafafa;
-  border: 1px solid rgba(0,0,0,0.05);
-  border-radius: 4px;
-  transition: background 0.15s, border-color 0.15s;
+  gap: 6px;
+  padding: 12px 14px;
+  background: #fbfbfd;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 10px;
+  transition: background 0.25s ease, border-color 0.25s ease,
+              box-shadow 0.25s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .research-pane-item:hover {
-  background: #f4f6fa;
-  border-color: rgba(var(--arcoblue-6), 0.2);
+  background: #ffffff;
+  border-color: rgba(var(--arcoblue-6), 0.22);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
 }
 
 .research-pane-item-head {
@@ -5019,9 +5707,19 @@ a.research-pane-title:hover {
   gap: 14px;
   padding: 20px 22px 22px;
   background: #fff;
-  border: 1px solid #f0f0f2;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03),
+              0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.note-detail-item:hover {
+  border-color: rgba(15, 23, 42, 0.10);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04),
+              0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
 .note-detail-head {
@@ -5902,19 +6600,26 @@ a.note-detail-title:hover {
 }
 
 .artifact-msg-card-icon-wrap {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #F8FAFC;
-  border: 1px solid rgba(0,0,0,0.06);
+  background: #eef1f5;
+  border-radius: 8px;
+  transition: background 0.25s ease, transform 0.25s ease;
 }
 
 .artifact-msg-card-icon {
-  font-size: 14px;
+  font-size: 15px;
   color: #64748B;
+  transition: color 0.25s ease;
+}
+
+.artifact-msg-card:hover .artifact-msg-card-icon-wrap {
+  background: #e2e8f0;
+  transform: translateY(-1px);
 }
 
 .artifact-msg-card-copy {
@@ -5938,8 +6643,7 @@ a.note-detail-title:hover {
 }
 
 .artifact-msg-card--active .artifact-msg-card-icon-wrap {
-  background: rgba(var(--arcoblue-6), 0.08);
-  border-color: rgba(var(--arcoblue-6), 0.24);
+  background: rgba(var(--arcoblue-6), 0.14);
 }
 
 .artifact-msg-card-title {
@@ -6317,18 +7021,7 @@ a.note-detail-title:hover {
 }
 
 .chat-conversation-sidebar.collapsed {
-  border-right-color: transparent;
-}
-
-.chat-conversation-sidebar.collapsed .conversation-sidebar-head {
-  padding: 12px 6px 6px;
-  min-height: 44px;
-  border-bottom-color: transparent;
-}
-
-.chat-conversation-sidebar.collapsed .conversation-sidebar-body {
-  padding: 8px 6px 14px;
-  align-items: center;
+  border-right: none;
 }
 
 .conversation-sidebar-head {
@@ -6342,18 +7035,22 @@ a.note-detail-title:hover {
 }
 
 .conversation-create-btn {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: none;
-  border-radius: 6px;
+  border-radius: 7px;
   background: transparent;
   color: #a8a29e;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.18s ease, color 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
 }
+.conversation-create-btn:active { transform: scale(0.94); }
 
 .conversation-sidebar-rail-toggle {
   position: absolute;
@@ -6507,7 +7204,7 @@ a.note-detail-title:hover {
 .conversation-group-stack {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .conversation-list-empty {
@@ -6530,25 +7227,30 @@ a.note-detail-title:hover {
 
 .conversation-pill {
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 11px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   display: flex;
   align-items: flex-start;
   gap: 8px;
   cursor: pointer;
-  transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+  transition: background 0.22s ease, box-shadow 0.22s ease,
+              color 0.22s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
 }
 
 .conversation-pill:hover {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transform: translateX(2px);
 }
 
 .conversation-pill.active {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: none;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06),
+              inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+  transform: none;
 }
 
 .conversation-pill-copy {
@@ -6584,30 +7286,6 @@ a.note-detail-title:hover {
   color: #b6c0cd;
   line-height: 1;
   padding: 2px 0 0;
-}
-
-.conversation-mini {
-  width: 32px;
-  height: 32px;
-  margin: 0 auto 8px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #57534e;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
-}
-
-.conversation-mini:hover {
-  background: rgba(var(--arcoblue-6), 0.08);
-  color: rgb(var(--arcoblue-6));
-}
-
-.conversation-mini.active {
-  color: rgb(var(--arcoblue-6));
-  background: rgb(var(--arcoblue-1));
 }
 
 .task-hud {
@@ -6824,9 +7502,25 @@ a.note-detail-title:hover {
 /* 气泡 */
 .bubble-wrap {
   display: flex;
+  animation: bubble-enter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .bubble-wrap.user { justify-content: flex-end; }
 .bubble-wrap.ai   { justify-content: flex-start; }
+
+@keyframes bubble-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-wrap { animation: none; }
+}
 
 .bubble {
   max-width: 85%;
@@ -6839,6 +7533,24 @@ a.note-detail-title:hover {
 .bubble.user {
   color: #1c1917;
   font-weight: 500;
+}
+
+/* 用户消息发送失败（如 409：会话忙碌时这条消息没真发出去）的视觉降级 */
+.bubble.user.bubble--not-sent {
+  opacity: 0.55;
+  position: relative;
+}
+
+.bubble-not-sent-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  margin-right: 6px;
+  border-radius: 4px;
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+  letter-spacing: 0.4px;
 }
 
 .bubble.ai {
@@ -7122,6 +7834,41 @@ a.note-detail-title:hover {
   font-size: 12px;
   line-height: 1.6;
   color: #57534e;
+}
+
+.error-retry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  max-width: 520px;
+}
+.error-retry-message {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #7f1d1d;
+}
+.error-retry-btn {
+  align-self: flex-start;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #dc2626;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.error-retry-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+.error-retry-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
 }
 
 .ai-rich-message {
@@ -7859,15 +8606,16 @@ a.note-detail-title:hover {
   border-radius: 50%;
   background: rgba(255,255,255,0.12);
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   margin-left: 2px;
   padding: 0;
-  transition: background 0.15s;
+  transition: background 0.18s ease, transform 0.15s ease;
 }
+.tool-mode-pill-remove:active { transform: scale(0.92); }
 .tool-mode-pill-remove:hover { background: rgba(255,255,255,0.24); }
 /* ── end 工具直达 ── */
 
@@ -8006,23 +8754,32 @@ a.note-detail-title:hover {
 
 .attach-btn {
   margin-right: auto;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: #eef2ff;
-  color: #44403c;
+  background: rgba(15, 23, 42, 0.04);
+  color: #57534e;
   font-size: 15px;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s;
+  transition: background 0.22s ease, color 0.22s ease,
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
 }
 
 .attach-btn:hover:not(:disabled) {
-  background: #dbeafe;
-  color: #0f172a;
+  background: #eef2ff;
+  color: rgb(var(--arcoblue-6));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+.attach-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+  box-shadow: none;
 }
 
 .attach-btn:disabled {
@@ -8032,51 +8789,68 @@ a.note-detail-title:hover {
 
 /* 发送按钮 */
 .send-btn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
-  background: rgba(0,0,0,0.06);
-  color: #9ca3af;
+  background: rgba(15, 23, 42, 0.05);
+  color: #a8a29e;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: default;
   flex-shrink: 0;
-  transition: background 0.18s, color 0.18s, transform 0.12s;
+  transition: background 0.22s ease, color 0.22s ease,
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
 }
 
 .send-btn--active {
   background: #1c1917;
   color: #fff;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
 }
 
 .send-btn--active:hover {
-  background: #44403c;
-  transform: scale(1.06);
+  background: #0f172a;
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.22);
+}
+
+.send-btn--active:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
 }
 
 .stop-btn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
   background: #fee2e2;
   color: #dc2626;
-  font-size: 15px;
+  font-size: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.18s, transform 0.12s;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.18);
+  transition: background 0.2s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
 }
 
 .stop-btn:hover {
-  background: #fca5a5;
-  transform: scale(1.06);
+  background: #fecaca;
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(220, 38, 38, 0.24);
+}
+
+.stop-btn:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
 }
 
 /* ── 右侧工作区 ── */
@@ -8109,46 +8883,93 @@ a.note-detail-title:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   flex-shrink: 0;
-  background: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
 }
 
 .artifact-pane-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  min-width: 0;
+}
+
+.artifact-pane-icon-wrap {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: rgba(59, 130, 246, 0.10);
+  color: #2563eb;
+  transition: background 0.25s ease, transform 0.25s ease;
 }
 
 .artifact-pane-icon {
-  font-size: 16px;
+  font-size: 17px;
+  color: inherit;
+}
+
+.artifact-pane-title-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.artifact-pane-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94A3B8;
+  line-height: 1;
 }
 
 .artifact-pane-title {
   font-size: 14px;
   font-weight: 600;
   color: #1E293B;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .artifact-pane-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .pane-action-btn {
-  padding: 4px 12px;
-  border: 1px solid #CBD5E1;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 8px;
   background: #fff;
   font-size: 12px;
-  color: #57534e;
+  font-weight: 500;
+  color: #475569;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s ease, color 0.2s ease,
+              background 0.2s ease, box-shadow 0.22s ease,
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .pane-action-btn:hover {
-  border-color: rgb(var(--arcoblue-6));
+  border-color: rgba(var(--arcoblue-6), 0.45);
   color: rgb(var(--arcoblue-6));
+  background: rgba(var(--arcoblue-6), 0.04);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+.pane-action-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .artifact-pane-body {
@@ -8172,6 +8993,70 @@ a.note-detail-title:hover {
   color: #94A3B8;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.concept-pane-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.concept-streaming {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #6366f1;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.concept-streaming-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #6366f1;
+  animation: concept-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes concept-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.concept-skeleton {
+  gap: 14px;
+}
+
+.concept-skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.concept-skeleton-bar {
+  height: 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef0f3 0%, #f6f7f9 50%, #eef0f3 100%);
+  background-size: 200% 100%;
+  animation: concept-shimmer 1.4s linear infinite;
+}
+
+.concept-skeleton-bar--label {
+  width: 35%;
+  height: 8px;
+}
+
+.concept-skeleton-bar--short {
+  width: 60%;
+}
+
+@keyframes concept-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .pane-text {
@@ -9624,6 +10509,12 @@ a.note-detail-title:hover {
 .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
 .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
 
+.thinking-label {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--ink-2, #94a3b8);
+}
+
 @keyframes thinking-bounce {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
   40% { transform: translateY(-6px); opacity: 1; }
@@ -10175,25 +11066,1034 @@ a.note-detail-title:hover {
   font-size: 14px;
   text-align: center;
 }
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES — 暗场胶片风                              ║
+   ║  注入位置：scoped style 末尾                                       ║
+   ║  原则：靠 cascade 后置压住前面所有亮色规则；不动原始 6200 行 CSS    ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+/* ── 主布局壳 ───────────────────────────── */
+.chat-layout { background: var(--bg-stage); color: var(--ink); }
+.chat-panel,
+.chat-content,
+.chat-main { background: var(--bg-stage); color: var(--ink); }
+
+/* 左侧历史对话栏 */
+.chat-conversation-sidebar {
+  background: var(--bg-stage-2);
+  border-right: 1px solid var(--line);
+  color: var(--ink);
+}
+.chat-history,
+.chat-history-list { background: transparent; color: var(--ink); }
+.chat-history h1, .chat-history h2, .chat-history h3,
+.chat-conversation-sidebar h1, .chat-conversation-sidebar h2, .chat-conversation-sidebar h3 {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.conversation-pill,
+.history-item,
+.chat-history-item {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid transparent;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.conversation-pill:hover,
+.history-item:hover,
+.chat-history-item:hover {
+  background: var(--bg-card-hover);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.conversation-pill.active,
+.history-item.active,
+.chat-history-item.active {
+  background: var(--bg-card-hover);
+  color: var(--ink-strong);
+  border-color: var(--line-strong);
+}
+
+/* ── 聊天区域内容 ───────────────────────── */
+.chat-messages,
+.chat-stream,
+.message-list { background: transparent; color: var(--ink); }
+
+/* 消息气泡 */
+.bubble,
+.bubble-wrap,
+.message-bubble,
+.ai-message-card,
+.ai-rich-message {
+  background: transparent;
+  color: var(--ink);
+}
+.bubble.user,
+.user-bubble,
+.message-bubble.user {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink-strong);
+  border-radius: var(--radius-lg);
+  padding: 6px 12px;
+}
+.ai-rich-summary,
+.ai-message-card .summary {
+  color: var(--ink-2);
+}
+
+/* 内联段落（v-html 注入的子元素需用 :deep() 穿透 scoped 边界） */
+.bubble :deep(p),
+.ai-message-card :deep(p),
+.ai-rich-message :deep(p) { color: var(--ink-2); }
+.bubble :deep(strong),
+.ai-message-card :deep(strong) { color: var(--ink-strong); }
+.ai-message-card :deep(li) { color: var(--ink-2); }
+.ai-message-card :deep(li::marker) { color: var(--mute); }
+.ai-message-card :deep(h1),
+.ai-message-card :deep(h2),
+.ai-message-card :deep(h3) { color: var(--ink-strong); }
+.ai-message-card :deep(hr) { border-top-color: var(--line); }
+.bubble :deep(code),
+.ai-message-card :deep(code) {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.ai-message-card :deep(pre) {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* 表格（v-html 注入，必须用 :deep 穿透 scoped 边界，否则不命中） */
+.ai-message-card :deep(.ai-table-wrap) {
+  border: 1px solid var(--line) !important;
+  background: var(--bg-card) !important;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ai-message-card :deep(table) {
+  background: transparent !important;
+  color: var(--ink-2) !important;
+}
+.ai-message-card :deep(th) {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+  border-color: var(--line) !important;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.ai-message-card :deep(td) {
+  border-color: var(--line) !important;
+  color: var(--ink-2) !important;
+}
+.ai-message-card :deep(table a),
+.ai-message-card :deep(td a),
+.ai-message-card :deep(th a) {
+  color: var(--accent) !important;
+}
+
+/* ── 输入区 ────────────────────────────── */
+.chat-input-area,
+.chat-input-wrap,
+.input-area {
+  background: transparent;
+  border-top: none;
+}
+.chat-textarea,
+.input-textarea,
+textarea.chat-textarea {
+  background: var(--bg-input);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+}
+.chat-textarea::placeholder { color: var(--mute); }
+.chat-textarea:focus { background: var(--bg-input-focus); border-color: var(--ink-3); outline: none; }
+
+/* Input 内的图标按钮 — 无边框，纯 icon button */
+.attach-btn,
+.send-btn,
+.input-action-btn,
+.tool-picker-btn {
+  background: transparent !important;
+  color: var(--ink-3) !important;
+  border: none !important;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.attach-btn:hover,
+.send-btn:hover,
+.input-action-btn:hover,
+.tool-picker-btn:hover {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink) !important;
+}
+.send-btn { color: var(--accent-ink) !important; }
+.send-btn:hover { color: var(--accent) !important; }
+
+/* ── 思考过程 ───────────────────────────── */
+.thinking-group,
+.thinking-toggle,
+.thinking-step {
+  background: transparent;
+  color: var(--ink-2);
+}
+.thinking-toggle { color: var(--ink-2); }
+.thinking-toggle:hover { background: var(--bg-card-hover); color: var(--ink); }
+.thinking-step {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+}
+.thinking-step-time {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.thinking-step-content { color: var(--ink-2); }
+.thinking-icon { color: var(--ink-3); }
+
+/* ── 工具调用 ───────────────────────────── */
+.tool-calls-group { color: var(--ink); }
+.tool-calls-toggle {
+  background: transparent;
+  color: var(--ink-2);
+}
+.tool-calls-toggle:hover { background: var(--bg-card-hover); color: var(--ink); }
+.tool-calls-chevron { color: var(--mute); }
+
+.previous-tool-calls { background: transparent; }
+.tool-call-mini {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+.tool-call-mini-icon { color: var(--ink-3); }
+.tool-call-mini-text { color: var(--ink-2); }
+
+.tool-call-card { background: transparent; }
+.tool-call-card-icon {
+  background: var(--bg-card);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.tool-call-card-title { color: var(--ink); font-family: var(--font-sans); font-weight: 500; }
+.tool-call-card-progress { color: var(--mute); font-family: var(--font-mono); font-size: 11px; }
+.tool-call-card-result {
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+}
+.tool-call-card-result-summary { color: var(--ink-2); }
+
+/* 图标语义色（暗场退饱和版） */
+.tool-tone--blue   { background: rgba(168,197,214,0.10); color: #A8C5D6; border-color: rgba(168,197,214,0.18); }
+.tool-tone--violet { background: rgba(196,189,222,0.10); color: #C4BDDE; border-color: rgba(196,189,222,0.18); }
+.tool-tone--amber  { background: rgba(214,201,155,0.10); color: #D6C99B; border-color: rgba(214,201,155,0.18); }
+.tool-tone--green  { background: var(--accent-soft);     color: var(--accent); border-color: var(--accent-line); }
+.tool-tone--rose   { background: rgba(214,168,155,0.10); color: #D6A89B; border-color: rgba(214,168,155,0.18); }
+.tool-tone--slate  { background: var(--bg-card);         color: var(--ink-2); border-color: var(--line); }
+
+/* ── Brief Card ─────────────────────────── */
+.brief-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  position: relative;
+}
+/* 内部 sections 不要再加 bg/border（避免框中框） */
+.brief-card-block,
+.brief-card-block--inline {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+/* 用极轻的顶部分隔线代替整框 */
+.brief-card .brief-card-block + .brief-card-block { border-top: 1px solid var(--line) !important; }
+.brief-card-block--inline { border-top: none !important; padding-top: 4px !important; }
+
+.brief-card-head { color: var(--ink-strong); }
+.brief-card-brand,
+.brief-card-kicker,
+.brief-card-label,
+.brief-card-label-inline {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.brief-card-text,
+.brief-card-text-inline {
+  color: var(--ink) !important;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.brief-card-chips { gap: 6px; }
+.brief-card-chip {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+}
+.brief-card-list { color: var(--ink-2); }
+.brief-card-list li::marker { color: var(--mute); }
+
+/* ── Challenge Card (Critic) ────────────── */
+.challenge-card,
+.challenge-card--clean {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.challenge-card-head { color: var(--ink-strong); }
+.challenge-card-kicker {
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.challenge-card-assessment { color: var(--ink-2); font-size: 14px; line-height: 1.7; }
+.challenge-card-concern {
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid var(--line);
+  border-left: none;
+  color: var(--ink-2);
+}
+.challenge-card-concern--high   { box-shadow: inset 2px 0 0 0 #D6A89B; }
+.challenge-card-concern--medium { box-shadow: inset 2px 0 0 0 #D6C99B; }
+.challenge-card-concern--low    { box-shadow: inset 2px 0 0 0 var(--accent); }
+.challenge-card-concern-head    { color: var(--ink); }
+.challenge-card-concern-axis,
+.challenge-card-concern-sev {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.challenge-card-concern-issue       { color: var(--ink); }
+.challenge-card-concern-why         { color: var(--ink-3); font-style: italic; }
+.challenge-card-concern-resolution  { color: var(--ink-2); }
+.challenge-card-concern-resolution-label {
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Concept Card (策划方向) ────────────── */
+.concept-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.concept-card--degraded { opacity: 0.7; }
+/* 内部 block 不要再加 bg/border（避免框中框） */
+.concept-card-block,
+.concept-card-block--inline {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+.concept-card .concept-card-block + .concept-card-block { border-top: 1px solid var(--line) !important; }
+.concept-card-block--inline { border-top: none !important; }
+.concept-card-head,
+.concept-card-direction {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.concept-card-axis,
+.concept-card-label,
+.concept-card-label-inline {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.concept-card-positioning,
+.concept-card-framework,
+.concept-card-shared,
+.concept-card-rec-text { color: var(--ink-2); line-height: 1.7; }
+.concept-card-rec-label,
+.concept-card-recommendation {
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.concept-card-tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.concept-card-tab--active {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+  color: var(--ink-strong);
+}
+.concept-card-cta { color: var(--ink); }
+.concept-card-degraded-note { color: var(--mute); font-style: italic; }
+.concept-card-footer { border-top: 1px solid var(--line); color: var(--ink-3); }
+
+/* ── Clarification ──────────────────────── */
+.clarification-card,
+.clarification-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.clarification-header { color: var(--ink-strong); font-family: var(--font-serif); }
+.clarification-question { color: var(--ink); }
+.clarification-copy { color: var(--ink-2); }
+.clarification-icon { color: var(--accent); }
+.clarification-input {
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.clarification-input:focus { border-color: var(--ink-3); background: var(--bg-input-focus); outline: none; }
+.clarification-answered {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--ink-2);
+}
+
+/* ── Artifact (检索/研究) ───────────────── */
+/* 对话内嵌的小卡保留卡片样式，但右侧大面板（pane / panel）应该是面板，非卡片 */
+.artifact-card,
+.artifact-msg-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+/* 右侧整片研究面板：不要外框，直接铺在暗场画布上 */
+.artifact-pane,
+.artifact-panel {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--ink);
+}
+/* pane-header 的浅色 gradient 也得压住 */
+.artifact-pane-header {
+  background: transparent !important;
+}
+.artifact-msg-card--active {
+  border-color: var(--line-strong);
+  background: var(--bg-card-hover);
+}
+.artifact-msg-card-icon-wrap,
+.artifact-pane-icon-wrap {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+}
+.artifact-msg-card-kicker,
+.artifact-pane-kicker {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.artifact-msg-card-title,
+.artifact-pane-title,
+.artifact-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.artifact-msg-card-summary { color: var(--ink-2); }
+.artifact-msg-card-chips,
+.artifact-chip-row { gap: 6px; }
+.artifact-msg-chip,
+.artifact-chip {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  border-radius: var(--radius-sm);
+}
+/* artifact-msg-card-copy 是正文容器，不是按钮 — 去掉边框 */
+.artifact-msg-card-copy {
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  padding: 0;
+}
+.artifact-msg-card-view-btn {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+}
+.artifact-msg-card-view-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--ink-3);
+}
+.artifact-msg-card-footer { border-top: 1px solid var(--line); color: var(--ink-3); }
+.artifact-paragraph { color: var(--ink-2); line-height: 1.7; }
+.artifact-timeline { border-left: 1px solid var(--line); }
+.artifact-timeline-item { color: var(--ink-2); }
+.artifact-timeline-text { color: var(--ink); }
+.artifact-timeline-type {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.artifact-pane-actions { border-top: 1px solid var(--line); }
+.artifact-pane-header { border-bottom: 1px solid var(--line); }
+.artifact-pane-body { background: transparent; }
+.artifact-score { color: var(--accent); font-family: var(--font-mono); }
+
+/* Artifact modal 内部 */
+.artifact-modal-content { color: var(--ink-2); }
+.artifact-modal-label,
+.artifact-modal-section {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.artifact-modal-text { color: var(--ink-2); }
+.artifact-modal-highlight { background: var(--accent-soft); color: var(--accent); padding: 0 4px; border-radius: 2px; }
+.artifact-modal-chip,
+.artifact-modal-page-item,
+.artifact-modal-section-item {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+}
+.artifact-modal-json {
+  background: var(--bg-stage-2);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+}
+.artifact-modal-score { color: var(--accent); font-family: var(--font-mono); }
+
+/* ── Build summary（方案构建总结） ───────── */
+.build-summary {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.build-summary-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.build-summary-desc { color: var(--ink-2); }
+.build-summary-copy {
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.build-summary-copy:hover { background: var(--bg-card-hover); border-color: var(--ink-3); }
+
+/* ── @-mention dropdown ─────────────────── */
+.at-mention-dropdown {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-rise);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+.at-mention-item { color: var(--ink-2); }
+.at-mention-item:hover,
+.at-mention-item.active { background: var(--bg-card-hover); color: var(--ink); }
+.at-mention-icon { color: var(--ink-3); }
+.at-mention-name { color: var(--ink); }
+.at-mention-info { color: var(--mute); font-family: var(--font-mono); font-size: 10.5px; }
+.at-mention-folder { color: var(--mute); font-size: 11px; }
+
+/* ── Loading ────────────────────────────── */
+.chat-loading,
+.chat-loading-orb {
+  color: var(--ink);
+}
+.chat-loading-text { color: var(--ink-2); }
+.chat-loading-detail { color: var(--mute); font-family: var(--font-mono); font-size: 11px; }
+.chat-loading-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  border-radius: 999px;
+}
+.chat-loading-bar-inner {
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.chat-loading-copy { color: var(--ink-2); }
+
+/* ── Image cards ────────────────────────── */
+.chat-image-card,
+.chat-image-set-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.chat-image-name,
+.chat-image-set-cap,
+.chat-image-set-meta {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.chat-image-thumb { background: var(--bg-stage-2); }
+.chat-image-grid,
+.chat-image-set-grid { gap: 8px; }
+
+/* Lightbox */
+.chat-image-lightbox-modal { background: rgba(0,0,0,0.85); }
+.chat-image-lightbox-stage { background: transparent; }
+.chat-image-lightbox-title { color: var(--ink-strong); font-family: var(--font-serif); font-weight: 400; }
+.chat-image-lightbox-actions { color: var(--ink); }
+.chat-image-lightbox-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.chat-image-lightbox-btn:hover { background: rgba(255,255,255,0.16); }
+
+/* AI inline strip */
+.ai-image-strip {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.ai-image-strip-cta {
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ai-image-strip-cta:hover { background: var(--bg-card-hover); border-color: var(--ink-3); }
+.ai-inline-image { border: 1px solid var(--line); border-radius: var(--radius-sm); }
+
+/* Rich toggles */
+.ai-rich-toggle {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.ai-rich-toggle:hover { color: var(--ink); }
+
+/* ── Empty / placeholder ─────────────────── */
+.empty-state { color: var(--mute); }
+.empty-icon { color: var(--ink-3); opacity: 0.4; }
+.empty-text { color: var(--mute); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; }
+
+/* ── 通用文字色补偿（兜底） ───────────────── */
+.chat-layout h1, .chat-layout h2, .chat-layout h3, .chat-layout h4, .chat-layout h5 { color: var(--ink-strong); }
+.chat-layout a { color: var(--accent); }
+.chat-layout a:hover { color: var(--ink-strong); }
+.chat-layout hr { border-color: var(--line); }
+
+/* ── Sidebar rail toggle / Panel resizer ─── */
+.conversation-sidebar-rail-toggle,
+.panel-resizer-toggle {
+  background: var(--bg-stage-2);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.conversation-sidebar-rail-toggle:hover,
+.panel-resizer-toggle:hover {
+  background: var(--bg-card-hover);
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+.panel-resizer { background: transparent; }
+.panel-resizer:hover { background: var(--accent-soft); }
+
+/* ── Input card / textarea (Arco wrapped) ─ */
+.input-card,
+.input-card-outer {
+  background: var(--bg-stage-2) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-lg);
+  color: var(--ink);
+}
+.input-card-outer { background: transparent !important; border: none !important; }
+/* 用 :deep() 穿透 scoped 边界，覆盖前面 8578-8607 的 #fff 规则 */
+:deep(.chat-textarea),
+:deep(.chat-textarea .arco-textarea-wrapper),
+:deep(.chat-textarea .arco-textarea-wrapper:hover),
+:deep(.chat-textarea .arco-textarea-wrapper.arco-textarea-focus) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+:deep(.chat-textarea textarea) {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.7;
+}
+:deep(.chat-textarea textarea::placeholder) {
+  color: var(--mute) !important;
+}
+:deep(.chat-textarea textarea:focus) {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+/* ── Inline image fallback ────────────────── */
+.ai-inline-image {
+  background: var(--bg-stage-2) !important;
+  border: 1px solid var(--line);
+}
+
+/* ── Workspace embedded preview (.ws-*) ──── */
+.ws-workspace,
+.ws-empty,
+.ws-pane,
+.ws-content {
+  background: var(--bg-stage) !important;
+  color: var(--ink);
+}
+.ws-workspace * { color: inherit; }
+
+/* ── Note detail (xiaohongshu 笔记预览) ───── */
+.note-detail-list,
+.note-detail-pane { background: transparent; }
+.note-detail-item,
+.note-detail-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink);
+  border-radius: var(--radius);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.note-detail-item:hover,
+.note-detail-card:hover {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--line-strong) !important;
+}
+.note-detail-head { color: var(--ink-strong); font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.015em; }
+.note-detail-title { color: var(--ink-strong); font-family: var(--font-serif); font-weight: 400; }
+.note-detail-meta,
+.note-detail-source,
+.note-detail-time {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.note-detail-text,
+.note-detail-content { color: var(--ink-2); line-height: 1.7; }
+.note-detail-badge {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid rgba(214,168,155,0.2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+}
+.note-detail-tag {
+  background: var(--bg-card-hover);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+}
+.note-detail-tags { gap: 4px; }
+.note-detail-image,
+.note-detail-thumb { background: var(--bg-stage-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.note-detail-empty { color: var(--mute); font-style: italic; font-family: var(--font-mono); font-size: 11px; }
+
+/* ── Research pane (右侧搜索结果列表) ──── */
+.research-pane,
+.research-pane-list { background: transparent; color: var(--ink); }
+.research-pane-head { color: var(--ink-strong); border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 14px; }
+.research-pane-query {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.research-pane-meta {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+.research-pane-item {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.research-pane-item:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+.research-pane-item-head { color: var(--ink-strong); }
+.research-pane-index {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.research-pane-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.research-pane-snippet { color: var(--ink-2); line-height: 1.65; }
+.research-pane-source,
+.research-pane-domain {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Step / Plan / PPT outline ─────────── */
+.step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+.step-card.active,
+.step-card.current {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+}
+.section-live-item {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.section-live-item.final {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.plan-structure,
+.ppt-outline {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+.highlight-section {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+
+/* ── Tabs (preview / concept-detail) ───── */
+.preview-tab,
+.concept-detail-tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.preview-tab.active,
+.concept-detail-tab--active,
+.concept-card-tab--active {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+  color: var(--ink-strong);
+}
+
+/* ── Picker items (workspace / tool dropdowns) ── */
+.ws-picker-item,
+.tool-picker-item {
+  background: transparent;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+}
+.ws-picker-item:hover,
+.tool-picker-item:hover {
+  background: var(--bg-card-hover);
+  color: var(--ink);
+}
+
+/* ── Stop button ─────────────────────────── */
+.stop-btn {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+}
+.stop-btn:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ── Conversation sidebar 文字（修对比度） ── */
+.conversation-sidebar-head { color: var(--ink); }
+.conversation-sidebar-body-title,
+.conversation-sidebar-section-title {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.conversation-sidebar-copy { color: var(--ink); }
+.conversation-pill-title { color: var(--ink) !important; font-weight: 400; }
+.conversation-pill-meta,
+.conversation-pill-time {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.conversation-pill.active .conversation-pill-title { color: var(--ink-strong) !important; }
+.conversation-pill-actions { color: var(--mute); }
+.conversation-pill-actions:hover { color: var(--ink); }
+
+/* ── Pane action buttons（artifact / preview 工具栏） ── */
+.pane-action-btn,
+.preview-action-btn {
+  background: transparent !important;
+  color: var(--ink-2) !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.pane-action-btn:hover,
+.preview-action-btn:hover {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink) !important;
+  border-color: var(--ink-3) !important;
+}
+
+/* ── 全局兜底：sidebar 内任何 #1c1917/#0f0f0e 暗色文字反转为暖白 ── */
+.chat-conversation-sidebar :where(span, div, button) {
+  /* 不强制 — 仅在已知 class 上压色 */
+}
+.conversation-sidebar-search input {
+  background: var(--bg-input);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.conversation-sidebar-search input::placeholder { color: var(--mute); }
+
+/* ── Artifact pane variants ──────────────── */
+.artifact-pane--ppt {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* ── 兜底 sweep：把所有残留 white 容器统一拉暗 ─── */
+.chat-layout :where(
+  .conversation-pill.active,
+  .conversation-sidebar-rail-toggle:hover
+) {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+  border-color: var(--line-strong) !important;
+}
 </style>
 
 <style>
 /* Arco Modal 会 teleport 到 body，scoped :deep() 无法命中，因此单独用全局块覆盖 */
 .concept-detail-modal .arco-modal {
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line);
   box-shadow:
-    0 20px 60px -20px rgba(24,24,27,0.18),
-    0 0 0 1px rgba(24,24,27,0.04);
+    0 32px 80px -24px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.04);
 }
 .concept-detail-modal .arco-modal-body {
   padding: 24px 36px 32px;
+  color: var(--ink-2);
 }
 .concept-detail-modal .arco-modal-header {
-  padding: 24px 36px 16px;
+  padding: 28px 36px 18px;
   height: auto;
   min-height: 64px;
   align-items: flex-start;
   border-bottom: none;
+  background: transparent !important;
 }
 .concept-detail-modal .arco-modal-title {
   display: block;
@@ -10202,13 +12102,703 @@ a.note-detail-title:hover {
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
-  line-height: 1.4;
+  line-height: 1.3;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong) !important;
 }
 .concept-detail-modal .arco-modal-close-btn {
-  color: #a1a1aa;
-  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--mute);
+  transition: color var(--dur) var(--ease);
 }
 .concept-detail-modal .arco-modal-close-btn:hover {
-  color: #09090b;
+  color: var(--ink);
+}
+
+/* ── 统一 AI 侧对话卡片宽度 ─────────────────
+   原各类卡片用 85% / 92% / 700~850px 混搭，开预览后 .chat-history
+   解除 900px 限制，宽度差异更明显。这里对齐到同一上限。 */
+.bubble-wrap.ai > .bubble,
+.bubble-wrap.ai > .tool-call-card,
+.bubble-wrap.ai > .clarification-card,
+.bubble-wrap.ai > .brief-card,
+.bubble-wrap.ai > .concept-card,
+.bubble-wrap.ai > .challenge-card,
+.bubble-wrap.ai > .artifact-msg-card,
+.bubble-wrap.ai > .error-retry-card,
+.bubble-wrap.ai > .process-summary-bubble {
+  width: 100%;
+  max-width: 760px;
+}
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA bulk overrides — task / conversation / preview / page
+   ║  原 scoped CSS 写死了 #1c1917 / #44403c / #57534e / #a8a29e
+   ║  这里按语义梯度统一映射到 cinema tokens
+   ╚════════════════════════════════════════════╝ */
+
+/* ── 主标题级 → ink-strong ── */
+.task-summary-title,
+.task-hud-title,
+.task-card-title,
+.task-card-section-title,
+.task-card-focus-text,
+.conversation-list-empty-title,
+.quick-reply-question,
+.quick-reply-item-title,
+.ws-picker-name,
+.tool-picker-label,
+.pending-image-name,
+.preview-stage-title,
+.strategy-hero-title,
+.preview-block-title,
+.research-card-title,
+.research-item-title,
+.plan-outline-title,
+.plan-draft-title,
+.section-live-title,
+.section-live-item-title,
+.section-item-title,
+.ppt-build-title,
+.ppt-build-stage-title,
+.ppt-build-card-title,
+.ppt-outline-title,
+.ppt-page-name,
+.tool-call-result-summary,
+.panel-title,
+.highlight-title,
+.structure-title,
+.structure-item-title,
+.artifact-list-item {
+  color: var(--ink-strong) !important;
+}
+
+/* ── 次级文字 → ink-2 ── */
+.queue-item-text,
+.quick-reply-item,
+.ws-ref-chip-name,
+.pane-text,
+.pane-numbered-item,
+.pane-page-title,
+.tool-call-bubble,
+.tool-call-result-details,
+.process-summary-text,
+.research-item-summary,
+.research-card-summary,
+.research-card-points,
+.plan-outline-desc,
+.section-live-points,
+.section-live-item-desc,
+.strategy-hero-desc,
+.preview-stage-desc,
+.highlight-text,
+.highlight-item,
+.finding-item,
+.exec-error-message,
+.exec-log-text,
+.ppt-build-desc,
+.ppt-build-progress-text,
+.task-card-error,
+.task-card-log-text,
+.task-log-text,
+.task-summary-subtitle,
+.task-card-subtitle,
+.task-hud-subtitle,
+.artifact-modal-list,
+.page-num,
+.page-title {
+  color: var(--ink-2) !important;
+}
+
+/* ── 辅助文字 / chip / meta → mute ── */
+.tool-call-card-toggle,
+.tool-call-card-details,
+.tool-call-progress,
+.section-points,
+.conversation-create-btn,
+.conversation-sidebar-space-label,
+.conversation-group-title,
+.conversation-list-empty-desc,
+.task-hud-chip,
+.task-hud-log-text,
+.task-hud-log-time,
+.task-card-chip,
+.task-card-meta,
+.task-card-focus-label,
+.task-card-focus-status,
+.task-card-log-time,
+.task-log-time,
+.queue-header,
+.queue-item-type,
+.quick-reply-label,
+.quick-reply-helper,
+.quick-reply-item-desc,
+.ws-ref-chip-icon,
+.ws-ref-chip-remove,
+.ws-picker-hint,
+.ws-picker-empty,
+.ws-picker-icon,
+.ws-picker-folder-icon,
+.ws-picker-folder-header,
+.tool-picker-head,
+.tool-picker-hint,
+.tool-picker-icon,
+.pending-image-size,
+.pending-image-remove,
+.pane-list,
+.exec-chip,
+.exec-log-time,
+.strategy-meta-card,
+.ppt-build-metric,
+.ppt-build-card-num,
+.ppt-build-card-status,
+.ppt-page-layout,
+.process-summary-time,
+.panel-badge,
+.structure-item-points,
+.section-item-points,
+.workspace-empty,
+.section-num {
+  color: var(--mute) !important;
+}
+
+/* ── 数字标号 / 信息色 → accent-ink ── */
+.page-layout,
+.panel-save-btn,
+.structure-num,
+.section-item-num,
+.ppt-page-num,
+.score-num {
+  color: var(--accent-ink) !important;
+}
+
+/* ── arco 输入子元素 ── */
+:deep(.arco-input),
+:deep(.arco-select-view-value) {
+  color: var(--ink) !important;
+}
+
+/* ── Concept trio 分组 label：保留语义但调成 cinema 强调色 ── */
+.concept-card-trio-cell--up .concept-card-trio-label,
+.concept-card-trio-cell--down .concept-card-trio-label,
+.concept-detail-trio-cell--up .concept-detail-trio-label,
+.concept-detail-trio-cell--down .concept-detail-trio-label {
+  color: var(--accent) !important;
+}
+
+/* ── lightbox primary 按钮 ── */
+.chat-image-lightbox-btn.primary {
+  background: var(--ink) !important;
+  color: var(--bg-stage) !important;
+  border-color: var(--ink) !important;
+}
+.generated-image-actions { color: var(--ink) !important; }
+
+/* ── tool tone 系列：去掉浅色背景，改成 cinema 暗调 ── */
+.tool-tone--blue   { background: var(--info-soft) !important;     color: var(--info) !important; }
+.tool-tone--green  { background: var(--accent-soft) !important;   color: var(--accent) !important; }
+.tool-tone--slate  { background: var(--bg-card) !important;       color: var(--ink-2) !important; }
+
+/* ── chat-history h 标签兜底 ── */
+.chat-history h1, .chat-history h2, .chat-history h3 {
+  color: var(--ink-strong) !important;
+}
+
+/* ── Quick-reply (ask_user suggestion) ─────────────
+   原 scoped 写死了 #fff / rgba(255,255,255,0.92) 浅色底，
+   暗场下需要把容器和每个 option 卡片改成 cinema 卡面色。 */
+.quick-reply-bar {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 12px 28px -18px rgba(0,0,0,0.55) !important;
+}
+.quick-reply-item {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink-2) !important;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.quick-reply-item:hover:not(:disabled) {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--line-strong) !important;
+}
+
+/* ── 输入区附件 chip / 卡片（pending refs / docs / images）───
+   原 scoped 用 #f5f5f4 / #f0f4ff / #faf9f7 / #e4e6ea 浅底浅边，
+   在暗场会变成亮色岛。统一翻成 cinema 卡面 + 暗边。 */
+.pending-ws-ref-chip {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+}
+.pending-doc-chip {
+  background: var(--info-soft) !important;
+  border: 1px solid var(--info-line, var(--line)) !important;
+}
+.pending-doc-icon { color: var(--info) !important; }
+.pending-doc-name { color: var(--ink) !important; }
+.pending-doc-size { color: var(--info) !important; }
+.pending-image-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+}
+
+/* ── Workspace picker 二级头（文件夹分组标题）────── */
+.ws-picker-folder-header {
+  background: var(--bg-card-hover) !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+/* ── 图片集合卡片：caption / 占位图底色 ─────────── */
+.chat-image-set-cap {
+  background: var(--bg-card) !important;
+  color: var(--mute) !important;
+}
+.chat-image-set-card img {
+  background: var(--bg-stage-2) !important;
+}
+
+/* ── 右侧面板生成图卡（artifact image）────────── */
+.generated-image-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+}
+
+/* ── 对话卡片：cinema verdict-风渐变 + 顶部细线 ─────
+   参考 demo 03 的 .d3-verdict / cinema.css 的 .cn-verdict。
+   只对"判定/产出物"类卡片注入精致渐变，tool-call 等流式过程保留扁平。 */
+.bubble-wrap.ai > .brief-card,
+.bubble-wrap.ai > .challenge-card,
+.bubble-wrap.ai > .concept-card,
+.bubble-wrap.ai > .artifact-msg-card,
+.bubble-wrap.ai > .clarification-card {
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.045) 0%,
+      rgba(255,255,255,0.012) 55%,
+      rgba(255,255,255,0.005) 100%
+    );
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 12px 28px -18px rgba(0,0,0,0.55);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.bubble-wrap.ai > .brief-card::before,
+.bubble-wrap.ai > .challenge-card::before,
+.bubble-wrap.ai > .concept-card::before,
+.bubble-wrap.ai > .artifact-msg-card::before,
+.bubble-wrap.ai > .clarification-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.22) 35%,
+    rgba(255,255,255,0.22) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* 偏"积极/创意"语义：暖绿色调渐变（accent 调） */
+.bubble-wrap.ai > .challenge-card--clean,
+.bubble-wrap.ai > .concept-card {
+  background:
+    linear-gradient(180deg,
+      var(--accent-soft) 0%,
+      rgba(200,220,197,0.025) 50%,
+      transparent 100%
+    );
+}
+.bubble-wrap.ai > .challenge-card--clean::before,
+.bubble-wrap.ai > .concept-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-line) 35%,
+    var(--accent-line) 65%,
+    transparent 100%
+  );
+}
+
+/* hover：轻微提亮边线，整体浮起 1px */
+.bubble-wrap.ai > .brief-card:hover,
+.bubble-wrap.ai > .challenge-card:hover,
+.bubble-wrap.ai > .concept-card:hover,
+.bubble-wrap.ai > .artifact-msg-card:hover,
+.bubble-wrap.ai > .clarification-card:hover {
+  border-color: var(--line-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 16px 36px -20px rgba(0,0,0,0.65);
+}
+
+/* artifact-msg-card 选中：用 accent 渐变压住默认渐变，保留高亮语义 */
+.bubble-wrap.ai > .artifact-msg-card--active {
+  background:
+    linear-gradient(180deg,
+      var(--accent-soft) 0%,
+      rgba(200,220,197,0.04) 60%,
+      transparent 100%
+    );
+  border-color: var(--accent-line);
+}
+.bubble-wrap.ai > .artifact-msg-card--active::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-line) 35%,
+    var(--accent-line) 65%,
+    transparent 100%
+  );
+}
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA child-element overrides
+   ║  父级 class 已覆盖，但写死的 li/strong/th/span 子选择器
+   ║  specificity 更高，需要显式压住
+   ╚════════════════════════════════════════════╝ */
+
+/* AI markdown 卡片：h3 / strong / th 子元素 */
+.ai-message-card :deep(h3),
+.ai-message-card :deep(strong) {
+  color: var(--ink-strong) !important;
+}
+.ai-message-card :deep(th) {
+  color: var(--ink) !important;
+  background: var(--bg-card-hover) !important;
+}
+
+/* Brief Card 假设列表 — 用户反馈红框区域 */
+.brief-card-list,
+.brief-card-list li {
+  color: var(--ink-2) !important;
+}
+.brief-card-list li::marker { color: var(--mute) !important; }
+
+/* Concept Card / Concept Detail 列表项 */
+.concept-card-angles li,
+.concept-card-framework li,
+.concept-detail-angles li,
+.concept-detail-framework li {
+  color: var(--ink-2) !important;
+}
+.concept-card-angles li::marker,
+.concept-card-framework li::marker,
+.concept-detail-angles li::marker,
+.concept-detail-framework li::marker {
+  color: var(--mute) !important;
+}
+
+/* Challenge Card 风险点解决方案 */
+.challenge-card-concern-resolution span:last-child {
+  color: var(--ink-2) !important;
+}
+
+/* 各种侧栏 / 卡片 list / meta 子元素 */
+.pane-list li,
+.artifact-list-item span,
+.research-card-points span,
+.section-live-points span {
+  color: var(--ink-2) !important;
+}
+.strategy-meta-card span,
+.ppt-build-metric span {
+  color: var(--mute) !important;
+}
+.strategy-meta-card strong,
+.ppt-build-metric strong {
+  color: var(--ink-strong) !important;
+}
+
+/* finding 列表前缀符号 */
+.finding-item::before {
+  color: var(--accent-ink) !important;
+}
+
+/* 图片操作链接 */
+.generated-image-actions a {
+  color: var(--ink) !important;
+}
+
+/* 对话搜索框 arco input deep */
+:deep(.conversation-search .arco-input) {
+  color: var(--ink) !important;
+}
+:deep(.conversation-search .arco-input::placeholder) {
+  color: var(--mute) !important;
+}
+:deep(.conversation-search .arco-input-prefix) {
+  color: var(--mute) !important;
+}
+
+/* ── Tool picker dropdown 容器（+ 按钮弹层） ───── */
+.tool-picker-dropdown {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-rise) !important;
+  border-radius: var(--radius) !important;
+}
+.tool-picker-head {
+  border-bottom: 1px solid var(--line) !important;
+}
+.tool-picker-item.selected {
+  background: var(--bg-card-hover) !important;
+}
+.tool-picker-icon {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-2) !important;
+}
+.tool-picker-item.selected .tool-picker-icon {
+  background: var(--ink-strong) !important;
+  color: var(--bg-stage) !important;
+}
+.tool-picker-check {
+  color: var(--ink-strong) !important;
+}
+
+/* ── Tool mode pill（已选工具浮条） ──────────── */
+.tool-mode-pill {
+  background: var(--ink) !important;
+  color: var(--bg-stage) !important;
+}
+.tool-mode-pill-dot {
+  background: var(--accent) !important;
+}
+.tool-mode-pill-hint {
+  color: rgba(15, 15, 14, 0.6) !important;
+}
+
+/* ── Workspace picker 容器（@ 引用弹层，对称问题） ─ */
+.ws-picker-dropdown,
+.ws-picker {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow-rise) !important;
+  border-radius: var(--radius) !important;
+}
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA — Concept card / Concept detail
+   ║  原 CSS 整片白底亮色岛，需要全量翻暗
+   ╚════════════════════════════════════════════╝ */
+
+/* === Concept Card（聊天内嵌） === */
+.concept-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+}
+.concept-card:hover {
+  border-color: var(--line-strong) !important;
+  box-shadow: var(--shadow-rise) !important;
+}
+.concept-card--degraded {
+  background: var(--bg-card) !important;
+  border-color: rgba(214,168,155,0.25) !important;
+}
+
+.concept-card-version {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+}
+.concept-card-axis {
+  color: var(--ink) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.concept-card-shared {
+  color: var(--mute) !important;
+}
+
+.concept-card-tabs {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--line) !important;
+}
+.concept-card-tab {
+  color: var(--ink-3) !important;
+  background: transparent !important;
+}
+.concept-card-tab:hover {
+  color: var(--ink) !important;
+}
+.concept-card-tab--active {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+  box-shadow: 0 0 0 1px var(--line-strong) !important;
+}
+
+.concept-card-theme {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.concept-card-positioning {
+  color: var(--ink-2) !important;
+}
+.concept-card-label,
+.concept-card-label-inline {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+}
+.concept-card-text,
+.concept-card-text-inline {
+  color: var(--ink-2) !important;
+}
+
+.concept-card-framework li,
+.concept-card-angles li {
+  color: var(--ink-2) !important;
+}
+.concept-card-framework li::marker {
+  color: var(--ink-2) !important;
+}
+.concept-card-angles li::marker {
+  color: var(--mute) !important;
+}
+
+.concept-card-trio {
+  border-top: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+.concept-card-trio-cell + .concept-card-trio-cell {
+  border-left: 1px solid var(--line) !important;
+}
+.concept-card-trio-cell--up   .concept-card-trio-label { color: var(--accent) !important; }
+.concept-card-trio-cell--risk .concept-card-trio-label { color: var(--danger) !important; }
+.concept-card-trio-cell--fit  .concept-card-trio-label { color: var(--ink-2) !important; }
+.concept-card-trio-text {
+  color: var(--ink-2) !important;
+}
+
+.concept-card-recommendation {
+  background: var(--accent-soft) !important;
+  border-left-color: var(--accent) !important;
+}
+.concept-card-rec-label {
+  color: var(--accent-ink) !important;
+  font-family: var(--font-mono);
+}
+.concept-card-rec-text {
+  color: var(--ink-2) !important;
+}
+
+.concept-card-footer {
+  border-top: 1px solid var(--line) !important;
+}
+.concept-card-cta {
+  color: var(--mute) !important;
+}
+.concept-card-cta:hover,
+.concept-card .concept-card-direction:hover ~ .concept-card-footer .concept-card-cta {
+  color: var(--accent) !important;
+}
+
+.concept-card-degraded-note {
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
+  border-left-color: var(--danger) !important;
+}
+
+.concept-streaming { color: var(--accent-ink) !important; }
+.concept-streaming-dot { background: var(--accent) !important; }
+
+/* === Concept Detail Modal === */
+.concept-detail-version {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+}
+.concept-detail-theme {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.concept-detail-axis {
+  color: var(--ink-2) !important;
+}
+
+.concept-detail-body {
+  scrollbar-color: var(--line) transparent !important;
+}
+.concept-detail-body::-webkit-scrollbar-thumb {
+  background: var(--line) !important;
+}
+
+.concept-detail-label {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+}
+.concept-detail-text {
+  color: var(--ink-2) !important;
+}
+.concept-detail-text--muted {
+  color: var(--ink-3) !important;
+}
+
+.concept-detail-framework li,
+.concept-detail-angles li {
+  color: var(--ink-2) !important;
+}
+.concept-detail-framework li::marker {
+  color: var(--ink-2) !important;
+}
+.concept-detail-angles li::marker {
+  color: var(--mute) !important;
+}
+
+.concept-detail-degraded {
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
+  border-left-color: var(--danger) !important;
+}
+
+.concept-detail-tabs {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--line) !important;
+}
+.concept-detail-tab {
+  background: transparent !important;
+  color: var(--ink-3) !important;
+}
+.concept-detail-tab:hover {
+  color: var(--ink) !important;
+}
+.concept-detail-tab--active {
+  background: var(--bg-card-hover) !important;
+  color: var(--ink-strong) !important;
+  box-shadow: 0 0 0 1px var(--line-strong) !important;
+}
+
+.concept-detail-trio {
+  border-top: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+.concept-detail-trio-cell + .concept-detail-trio-cell {
+  border-left: 1px solid var(--line) !important;
+}
+.concept-detail-trio-cell--up   .concept-detail-trio-label { color: var(--accent) !important; }
+.concept-detail-trio-cell--risk .concept-detail-trio-label { color: var(--danger) !important; }
+.concept-detail-trio-cell--fit  .concept-detail-trio-label { color: var(--ink-2) !important; }
+.concept-detail-trio-text {
+  color: var(--ink-2) !important;
+}
+
+.concept-detail-recommendation {
+  background: var(--accent-soft) !important;
+  border-left-color: var(--accent) !important;
+}
+.concept-detail-recommendation-label {
+  color: var(--accent-ink) !important;
 }
 </style>

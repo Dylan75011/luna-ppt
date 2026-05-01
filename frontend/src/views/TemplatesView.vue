@@ -981,7 +981,7 @@ function clearSpotlight(e) {
 }
 .plan-card:hover  { border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.07); transform: translateY(-2px); }
 .plan-card:active { transform: translateY(0) scale(0.99); }
-.plan-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+.plan-card.selected { border-color: var(--ink-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink-strong) 12%, transparent); }
 
 .card-glow {
   pointer-events: none; position: absolute; inset: 0; border-radius: inherit; z-index: 0;
@@ -1725,6 +1725,372 @@ function clearSpotlight(e) {
 .slide-fade-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
 .slide-fade-enter-from { opacity: 0; transform: scale(0.98); }
 .slide-fade-leave-to { opacity: 0; transform: scale(1.02); }
+
+/* ╔════════════════════════════════════════════╗
+   ║  CINEMA THEME OVERRIDES                     ║
+   ╚════════════════════════════════════════════╝ */
+
+.tpl-root { background: var(--bg-stage); color: var(--ink); }
+
+/* Header */
+.tpl-category-label {
+  background: var(--bg-card-hover);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+.tpl-title {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: -0.025em;
+}
+.tpl-subtitle {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* Tab pills */
+.tpl-tabs {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px;
+}
+.tab-pill {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+}
+.tab-pill:hover:not(.active) { color: var(--ink); background: var(--bg-card-hover); }
+.tab-pill.active {
+  background: var(--bg-card-hover);
+  color: var(--ink-strong);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+/* ════════════════════════════════════════════
+   Plan / Layout cards — Cinema Frame style
+   21:9 黑场 still + REF stamp + 时间戳 + 衬线标题 + → 链接
+   ════════════════════════════════════════════ */
+
+.plan-card,
+.layout-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column;
+  min-height: 280px;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.plan-card:hover,
+.layout-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+.plan-card.selected,
+.layout-card.selected {
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+/* card-glow 关掉，cinema frame 不要这种光斑 */
+.card-glow { display: none !important; }
+
+/* card-inner 重排：top 撑开成 21:9 stage */
+.card-inner {
+  padding: 0 !important;
+  gap: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+}
+
+/* card-top → 21:9 cinematic still */
+.card-top {
+  position: relative;
+  aspect-ratio: 21/9;
+  padding: 0 !important;
+  background:
+    radial-gradient(420px circle at 75% 30%, rgba(237,243,236,0.06), transparent 60%),
+    radial-gradient(380px circle at 20% 80%, rgba(225,243,254,0.04), transparent 60%),
+    linear-gradient(135deg, #2a2a28, #0e0e0d);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.card-top::before {
+  /* 模糊抽象图形装饰 */
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 70% 50%, rgba(255,255,255,0.04) 0 80px, transparent 81px),
+    radial-gradient(circle at 70% 50%, transparent 0 120px, rgba(255,255,255,0.02) 121px, transparent 130px);
+  pointer-events: none;
+}
+.card-top::after {
+  /* scrim 加深底部，让标签可读 */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5));
+  pointer-events: none;
+}
+
+/* card-icon → 不再显示主区，改为左上角 REF stamp 容器（藏掉原 icon，用伪元素加文字） */
+.card-icon {
+  position: absolute !important;
+  top: 14px !important;
+  left: 14px !important;
+  width: auto !important;
+  height: auto !important;
+  background: rgba(0,0,0,0.55) !important;
+  color: var(--ink) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  padding: 4px 10px !important;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+.card-icon svg { width: 12px !important; height: 12px !important; opacity: 0.85; }
+
+/* slides-badge → 右下角时间戳风 */
+.card-slides-badge {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  background: transparent !important;
+  color: rgba(255,255,255,0.7) !important;
+  border: none !important;
+  padding: 0 !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  z-index: 2;
+}
+
+/* card-text → body 区，padding 完整 */
+.card-text {
+  padding: 22px 24px 0 !important;
+  flex: 0 0 auto !important;
+}
+.card-name {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif) !important;
+  font-weight: 400 !important;
+  font-size: 18px !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.015em !important;
+  margin: 0 0 8px !important;
+}
+.card-desc {
+  color: var(--ink-3) !important;
+  font-size: 12.5px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+}
+
+/* outline-chips（slide 标题）→ 转成"小帽来源"风格的内联文字行，去掉 chip 视觉 */
+.outline-chips {
+  padding: 12px 24px 0 !important;
+  display: block !important;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.outline-chips .chip {
+  display: inline !important;
+  background: transparent !important;
+  color: inherit !important;
+  border: none !important;
+  padding: 0 !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+}
+/* chip 之间用 · 分隔 */
+.outline-chips .chip + .chip::before {
+  content: ' · ';
+  color: var(--mute-2);
+}
+
+/* card-footer → 简化为底部链接行 */
+.card-footer {
+  padding: 16px 24px 18px !important;
+  margin-top: auto !important;
+  border-top: 1px solid var(--line);
+}
+.footer-tags { display: none !important; }
+
+/* preview-btn → cinema underline link with → */
+.preview-btn {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--ink) !important;
+  border-radius: 0 !important;
+  padding: 2px 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.preview-btn::after {
+  content: '→';
+  font-size: 13px;
+  margin-left: 2px;
+}
+.preview-btn:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: transparent !important;
+}
+/* 隐掉原本 PhEye 图标 */
+.preview-btn svg { display: none !important; }
+
+/* ════════════════════════════════════════════
+   Layout cards (PPT 排版) — 保留 mini-slide 预览
+   只统一 typography / 边框 / 色板 到 cinema 调
+   ════════════════════════════════════════════ */
+
+.layout-card {
+  min-height: auto !important;
+  display: flex !important;
+  flex-direction: column;
+}
+.slide-strip {
+  background: var(--bg-stage-2);
+  padding: 10px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.mini-slide {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.layout-meta {
+  padding: 16px 18px 18px !important;
+}
+.layout-name {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif) !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  letter-spacing: -0.015em !important;
+}
+.layout-desc {
+  color: var(--ink-3) !important;
+  font-family: var(--font-sans);
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+.active-badge {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border: 1px solid var(--accent-line);
+  font-family: var(--font-mono);
+  font-size: 9.5px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 2px !important;
+  padding: 2px 6px !important;
+}
+.active-badge svg { display: none; }
+.active-badge::before { content: '已应用'; font-family: inherit; }
+/* 注：上面 ::before 会和模板里 "已应用" 文字重复，所以重新隐藏文字仅保留我们插入的 */
+.active-badge { font-size: 0 !important; }
+.active-badge::before { font-size: 9.5px !important; }
+
+.swatches { gap: 5px !important; margin-top: 6px !important; }
+.swatch {
+  width: 10px !important;
+  height: 10px !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+.active-badge {
+  background: var(--ink-strong);
+  color: var(--bg-stage);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.active-ring { box-shadow: 0 0 0 2px var(--line-strong); }
+
+/* Doc item */
+.doc-item {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius);
+}
+.doc-item:hover { background: var(--bg-card-hover); border-color: var(--line-strong); }
+.doc-item-header { color: var(--ink-strong); font-family: var(--font-serif); font-weight: 400; }
+.doc-num {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.doc-title { color: var(--ink-strong); font-family: var(--font-serif); font-weight: 400; }
+.doc-points { color: var(--ink-2); }
+
+/* Fullscreen preview overlay */
+.fullscreen-header,
+.fullscreen-nav,
+.fullscreen-close,
+.fullscreen-counter,
+.fullscreen-dots {
+  color: var(--ink);
+}
+.fullscreen-close,
+.fullscreen-nav {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  backdrop-filter: blur(8px);
+}
+.fullscreen-close:hover,
+.fullscreen-nav:hover { background: rgba(0,0,0,0.7); border-color: var(--ink-3); }
+.fullscreen-dot { background: var(--line-strong); }
+.fullscreen-dot.current { background: var(--accent); }
+.fullscreen-counter {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-2);
+}
+
+/* Headers */
+.tpl-root h1, .tpl-root h2, .tpl-root h3 { color: var(--ink-strong); }
 </style>
 
 <style>
@@ -1749,9 +2115,62 @@ function clearSpotlight(e) {
   display: none;
 }
 .tpl-preview-modal .arco-modal-close-icon {
-  color: #57534e;
+  color: var(--mute);
 }
 .tpl-preview-modal .arco-modal-close-icon:hover {
-  color: #1c1917;
+  color: var(--ink);
+}
+
+/* ── Preview modal 内文 ─────────────────────── */
+.modal-badge {
+  color: var(--mute) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.modal-title {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.modal-badge-tag {
+  color: var(--ink-2) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--line) !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.modal-badge-tag.active {
+  color: var(--ink-strong) !important;
+  background: var(--bg-card-hover) !important;
+  border-color: var(--line-strong) !important;
+}
+.modal-desc {
+  color: var(--ink-2) !important;
+}
+.modal-section-title {
+  color: var(--ink-strong) !important;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.style-tag-value {
+  color: var(--ink-2) !important;
+}
+.prompt-icon {
+  color: var(--mute) !important;
+}
+.prompt-text {
+  color: var(--ink-2) !important;
+}
+.doc-title {
+  color: var(--ink-strong) !important;
+}
+.doc-points li {
+  color: var(--ink-2) !important;
 }
 </style>

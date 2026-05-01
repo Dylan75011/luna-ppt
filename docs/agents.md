@@ -2,7 +2,7 @@
 
 ## Brain Agent（核心）
 
-**模型**：MiniMax（主力）+ DeepSeek-R1（仅 Critic）
+**模型**：MiniMax（主力）+ DeepSeek V4-Pro（仅 Critic）
 **模式**：ReAct（Reasoning + Acting）+ Function Calling
 **职责**：理解用户意图，自主选择工具完成活动策划全流程
 
@@ -227,7 +227,7 @@ const filteredText = rawText.replace(thinkBlockRegex, '').trim();
    输入：brief + research_context + round(=1) + previousFeedback(=null)
    输出：plan JSON
 
-2. critique（DeepSeek-R1）
+2. critique（DeepSeek V4-Pro）
    输入：完整 plan JSON + brief
    输出：{ score, scores{}, strengths[], weaknesses[], specificFeedback }
 
@@ -375,7 +375,7 @@ SSE 推送多个 `slide_added` 事件（每页一个），最后推送 `done`。
 
 ### critique（src/skills/critique.js）
 
-**模型**：DeepSeek-R1（reasoner 模型，纯推理输出）
+**模型**：DeepSeek V4-Pro（thinking 模式，返回链式推理）
 **调用方式**：`prompts/critic.js` 构建 prompt → `callDeepseekReasoner()` → `extractJson()`
 
 **输入**：完整策划方案 JSON + 用户 brief（含 brand/eventType/budget/productCategory）

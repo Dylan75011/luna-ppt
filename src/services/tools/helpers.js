@@ -141,21 +141,29 @@ function emitPlanArtifacts(onEvent, plan = {}, round = 1, review = null) {
       planTitle: plan.planTitle || '',
       coreStrategy: plan.coreStrategy || '',
       highlights: Array.isArray(plan.highlights) ? plan.highlights.slice(0, 5) : [],
-      degraded: !!plan.degraded
+      degraded: !!plan.degraded,
+      artifactKey: `plan_draft_r${round}`
     }
   });
 
+  // artifactKey 与 generatePlanDoc 流式阶段保持一致（plan_section_r{round}_{index}），
+  // 这样最终 emit 是"刷新"而不是追加；前端按 key 替换流式版本。
+  // 只用 round + index：title 在 normalize 阶段可能被 trim，避免 key 不一致。
   (Array.isArray(plan.sections) ? plan.sections : []).forEach((section, index) => {
     onEvent('artifact', {
       artifactType: 'plan_section',
       payload: {
         round,
         index,
+        total: plan.sections.length,
         title: section.title || `章节 ${index + 1}`,
         keyPoints: Array.isArray(section.keyPoints) ? section.keyPoints : [],
         content: {
           narrative: section.narrative || ''
-        }
+        },
+        polished: true,
+        phase: 'final',
+        artifactKey: `plan_section_r${round}_${index}`
       }
     });
   });
@@ -221,6 +229,11 @@ function getToolDisplay(toolName, args) {
       const modeMap = { replace: '替换', append: '内追加', prepend: '前置', delete: '删除' };
       const m = modeMap[String(args.mode || 'replace').toLowerCase()] || '编辑';
       return `章节${m}：${args.heading || ''}`;
+    }
+    case 'find_replace_in_doc': {
+      const find = (args.find || '').slice(0, 24);
+      const replace = (args.replace || '').slice(0, 24);
+      return `查找替换：${find} → ${replace}${args.scope_heading ? `（限定 ${args.scope_heading}）` : ''}`;
     }
     case 'append_workspace_doc':    return `在文档末尾追加：${args.doc_id || ''}`;
     case 'list_workspace_docs':     return '查看空间文档列表';

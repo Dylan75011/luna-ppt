@@ -112,7 +112,11 @@ function fallbackHeuristic(text) {
 }
 
 async function classifyTaskIntentWithLLM(text = '', { session = null, documents = [], workspaceDocs = [], attachments = [] } = {}) {
-  const runtimeKey = session?.apiKeys?.minimaxApiKey || '';
+  // 兜底到 process.env.MINIMAX_API_KEY——和其它 LLM client（createMinimaxClient）一致。
+  // 之前只看 session.apiKeys.minimaxApiKey，前端 localStorage 没填时（依赖服务端 env）
+  // 这里会抛错，detectTaskIntent 兜成 chat，导致所有任务都被错分类成闲聊，
+  // prompt 失去工具 nudge，模型把 function_call 输出成纯文本伪语法。
+  const runtimeKey = session?.apiKeys?.minimaxApiKey || process.env.MINIMAX_API_KEY || '';
   const priorIntentType = session?.taskIntent?.type || '';
   const priorIntentLabel = session?.taskIntent?.label || '';
 

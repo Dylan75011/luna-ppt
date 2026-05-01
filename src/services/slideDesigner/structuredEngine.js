@@ -472,7 +472,9 @@ function renderStructuredRegion(page, region, blocks, style, gridSpec) {
     : `display:flex;flex-direction:${stack === 'horizontal' ? 'row' : 'column'};gap:${gap};justify-content:${justifyMap[region.valign || 'start']};align-items:${alignMap[region.align || 'start']};`;
   const placement = resolveStructuredGridPlacement(region, gridSpec);
 
-  return `<div class="sc-region" style="grid-column:${placement.colStart} / ${placement.colEnd};grid-row:${placement.rowStart} / ${placement.rowEnd};align-self:start;min-height:${minH};height:auto;padding:${pad};overflow:visible;${panelStyle}${surfaceStyle}">
+  // data-region 让外部测量脚本可以把 DOM 节点映射回 page.regions[name]，
+  // 这样溢出处理时知道要压缩哪一组 textBlocks（block.region == region.name）。
+  return `<div class="sc-region" data-region="${esc(region.name || '')}" style="grid-column:${placement.colStart} / ${placement.colEnd};grid-row:${placement.rowStart} / ${placement.rowEnd};align-self:start;min-height:${minH};height:auto;padding:${pad};overflow:visible;${panelStyle}${surfaceStyle}">
     <div class="sc-stack" style="${innerStyle}">${contentHtml}</div>
   </div>`;
 }

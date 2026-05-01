@@ -7,6 +7,7 @@ const { renderToHtml } = require('../previewRenderer');
 const wm = require('../workspaceManager');
 const { toPublicUrl } = require('../outputPaths');
 const { buildImageCanvasPayload } = require('../imageCanvas');
+const { createStallWatcher } = require('./helpers');
 
 async function execBuildPpt(args, session, onEvent) {
   const { bestPlan, userInput, apiKeys } = session;
@@ -22,8 +23,20 @@ async function execBuildPpt(args, session, onEvent) {
   const imageMap = {};
   let imageCandidates = {};
 
+  // 兜底心跳：build_ppt 内部走多个 BaseAgent 子类（pptBuilder / imageAgent /
+  // eventVisualDesigner），它们的 callLLMJson 不传 onStatus，无法接到底层 chunk
+  // 心跳。25s 没 bump 就推一次 tool_progress 给 brainAgent，刷新它的 idle
+  // watchdog（PROGRESS_EVENT_TYPES 包含 tool_progress），避免 60s idle budget
+  // 误判 build_ppt 整体挂死。
+  let stallStage = '正在生成 PPT';
+  const stall = createStallWatcher(() => {
+    onEvent('tool_progress', { message: `${stallStage}（仍在处理中）...` });
+  });
+
   try {
+    stallStage = '正在生成 PPT 大纲';
     onEvent('tool_progress', { message: '正在生成 PPT 大纲...' });
+    stall.bump();
 
     const pptData = await pptBuilderAgent.run({
       plan: bestPlan,
@@ -31,7 +44,9 @@ async function execBuildPpt(args, session, onEvent) {
       docContent: args.note || session.docHtml || '',
       imageMap,
       onOutlineReady: async (outline, total) => {
+        stallStage = '正在设计活动现场效果图';
         onEvent('tool_progress', { message: '正在根据方案设计活动现场效果图建议...' });
+        stall.bump();
         const visualPlan = await visualDesignerAgent.run({
           plan: bestPlan,
           pptOutline: outline,
@@ -41,6 +56,7 @@ async function execBuildPpt(args, session, onEvent) {
           console.warn('[build_ppt] 活动图设计失败:', err.message);
           return null;
         });
+        stall.bump();
 
         if (visualPlan?.pages?.length) {
           outline.pages = (outline.pages || []).map((page, index) => ({
@@ -49,12 +65,21 @@ async function execBuildPpt(args, session, onEvent) {
           }));
         }
 
+        stallStage = '正在匹配背景图';
         onEvent('tool_progress', { message: '正在结合策划内容与页面结构匹配背景图...' });
-        imageCandidates = await imageAgent.run({ plan: bestPlan, userInput, pptOutline: outline, visualPlan })
+        stall.bump();
+        imageCandidates = await imageAgent.run({
+          plan: bestPlan,
+          userInput,
+          pptOutline: outline,
+          visualPlan,
+          conversationId: session.conversationId || ''
+        })
           .catch(err => {
             console.warn('[build_ppt] 配图搜索失败:', err.message);
             return {};
           });
+        stall.bump();
         for (const category of ['cover', 'content', 'end']) {
           const list = imageCandidates?.[category];
           if (list && list.length > 0 && list[0].localPath) {
@@ -76,13 +101,22 @@ async function execBuildPpt(args, session, onEvent) {
         });
       },
       onPageReady: (page, index, total, theme) => {
+        stallStage = `正在生成第 ${index + 1}/${total} 页`;
         const html = renderToHtml({ pages: [page], theme })[0];
         onEvent('slide_added', { html, index, total });
+        stall.bump();
       }
     });
 
+    stallStage = '正在打包 PPT 文件';
+    onEvent('tool_progress', { message: '页面已生成完毕，正在打包 PPT 文件...' });
+    stall.bump();
     const filename = `ppt_${Date.now()}.pptx`;
-    const result = await generatePPT(pptData, filename, { runId: session.spaceId || `tool_${Date.now()}` });
+    const result = await generatePPT(pptData, filename, {
+      runId: session.spaceId || `tool_${Date.now()}`,
+      conversationId: session.conversationId || ''
+    });
+    stall.bump();
     const downloadUrl = result.path;
     const previewSlides = renderToHtml(pptData);
 
@@ -149,6 +183,8 @@ async function execBuildPpt(args, session, onEvent) {
     return { success: true, downloadUrl, pageCount: pptData?.pages?.length || 0 };
   } catch (err) {
     throw new Error(`PPT 生成失败：${err.message}`);
+  } finally {
+    stall.stop();
   }
 }
 
