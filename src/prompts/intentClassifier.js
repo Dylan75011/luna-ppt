@@ -23,6 +23,8 @@ function buildIntentClassifierPrompt({
 - strategy: 从零或基于素材做活动方案、策划案、创意方向（产出新的"方案"）
 - ppt: 生成、改写、优化、重排 PPT
 
+**只判断 userMessage 字段。** context.lastAssistantMessage 是 AI 上一轮的回复，仅供你**参考语境**——它**不是**用户的当前消息。哪怕 userMessage 很短、看起来像是 lastAssistantMessage 的片段，也按 userMessage 字面表达判断意图。**禁止**输出"用户提供的内容类似AI回复"、"用户粘贴了上一轮回复"、"用户说'继续'"（除非 userMessage 字面就是"继续"）这类把上下文当成用户输入的 reason。reason 必须直接引用 userMessage 中的具体词语，与 userMessage 字面对应。
+
 判断原则：
 1. 以语义理解为主，禁止只看关键词。重点看用户"想要的产物"是什么。
 2. 用户有错别字、口语、省略表达时按最可能意图判断。
@@ -37,6 +39,8 @@ function buildIntentClassifierPrompt({
 7. 如果用户明确要图片结果，区分 image_search（要现成图）和 image_generate（AI 生图）。要案例/数据/趋势/竞品信息时判 research，不要误判成找图。
 8. 如果用户表达很模糊（比如只说"帮我搞一下"、"看看怎么做"、没有任何动作动词或目标产物），把 needsClarification 置为 true，confidence 给 0.3 以下，type 给你最猜测的那个；外层会转成澄清对话。
 9. 如果用户的描述跨多个任务（既要查资料又要出方案），按"用户最终想要的最终产物"判，不要拆分。
+10. **询问"具体品牌/产品/事件"的反馈/评价/口碑/销量/数据/动态/最新消息/上市情况** → 一律 research（用户要新鲜事实信息），不要因为是疑问句就判 chat。例如"YU7 反馈怎么样"、"特斯拉销量如何"、"问界 M9 最新消息"——都是 research。chat 是寒暄/常识题/聊天的地方，不是查事实的地方。
+11. 不要因为上一轮 Agent 在邀请用户问问题就把这一轮的具体提问判成 chat。每轮应当独立看用户实际想要什么。
 
 输出严格 JSON，不要解释文字，不要 markdown 代码块。思考过程请控制在 100 字以内，判断完毕后立刻输出 JSON。`;
 

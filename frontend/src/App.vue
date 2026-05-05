@@ -40,7 +40,7 @@
           v-for="item in navItems"
           :key="item.path"
           class="nav-item"
-          :class="{ active: currentRoute === item.path }"
+          :class="{ active: isNavActive(item.path) }"
           @click="onNavClick(item.path)"
         >
           <span class="nav-icon">
@@ -53,10 +53,13 @@
 
     <!-- 右侧内容 -->
     <a-layout class="app-content">
-      <router-view v-slot="{ Component }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" />
-        </transition>
+      <router-view v-slot="{ Component, route: r }">
+        <!-- key 锁在顶层 view（workspace / agent / templates / settings），
+             nodeId / spaceId / conversationId 变化时不卸载重挂，避免丢失页面状态。
+             不再包 <transition mode=out-in>：它与 <component :is> 配合时会卡住
+             leave 流程（page-enter-from + page-leave-active 同时挂在 DOM 上），
+             导致目标组件 setup 不重跑、URL 无法自动升级 -->
+        <component :is="Component" :key="topLevelKey(r)" />
       </router-view>
     </a-layout>
   </a-layout>
@@ -91,7 +94,20 @@ function loadCollapsedState() {
 }
 
 const collapsed    = ref(loadCollapsedState())
-const currentRoute = computed(() => route.path)
+
+// 当前路径是否落在 nav item 的子树下（前缀匹配，支持 /workspace/:nodeId、/agent/:spaceId/c/:conversationId）
+function isNavActive(navPath) {
+  const current = route.path || '/'
+  if (current === navPath) return true
+  return current.startsWith(navPath + '/')
+}
+
+// router-view key：把同一顶层 view 的不同子路径合并成同一个 key，
+// 避免在 /workspace ↔ /workspace/:nodeId 切换时把整个 WorkspaceView 卸载重挂。
+function topLevelKey(r) {
+  const seg = (r.path || '/').split('/')[1] || 'root'
+  return seg
+}
 
 function onNavClick(path) { router.push(path) }
 

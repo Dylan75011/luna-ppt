@@ -172,14 +172,88 @@ async function callMinimaxWithToolsStream(messages, tools, options = {}, onChunk
     }
   }
 
-  const toolCalls = Object.keys(toolCallsMap).length > 0
-    ? Object.values(toolCallsMap)
-    : undefined;
+  const toolCallsMapValues = Object.values(toolCallsMap);
+  // 兜底解析 MiniMax 在文本里直接吐 XML 工具调用（<minimax:tool_call><invoke name="X">
+  // <parameter name="Y">Z</parameter></invoke></minimax:tool_call>）的 case。
+  // 这种情况 delta.tool_calls 永远不会触发，OpenAI 风格的 function-calling API 用不上，
+  // brain 看到的就是一段文本——前端 UI 显示成 "小米汽车 2026 新车发布 计划\n5" 这种伪
+  // 工具卡片。这里把 XML 块从 content 里提出来转成正常 tool_calls 给 brain 主循环执行。
+  const xmlExtracted = extractMinimaxXmlToolCalls(fullContent);
+  if (xmlExtracted.toolCalls.length) {
+    fullContent = xmlExtracted.cleanContent;
+    for (const tc of xmlExtracted.toolCalls) toolCallsMapValues.push(tc);
+    console.warn(`[callMinimaxWithToolsStream] 从文本中救回 ${xmlExtracted.toolCalls.length} 个 minimax XML tool_call`);
+  }
+
+  const toolCalls = toolCallsMapValues.length > 0 ? toolCallsMapValues : undefined;
 
   return {
     message: { role: 'assistant', content: fullContent || null, tool_calls: toolCalls },
     finish_reason: finishReason
   };
+}
+
+/**
+ * 从 LLM 的文本输出里解析 MiniMax 原生的 XML 风格 tool_call 块。
+ *
+ * MiniMax 推理模型偶尔（尤其在长 conversation history 下）会绕过 OpenAI tools API，
+ * 直接在 content 里写 `<minimax:tool_call>` XML：
+ *
+ *   <minimax:tool_call>
+ *     <invoke name="web_search">
+ *       <parameter name="query">小米汽车 2026 计划</parameter>
+ *       <parameter name="max_results">5</parameter>
+ *     </invoke>
+ *   </minimax:tool_call>
+ *
+ * 用宽容正则提取 invoke 块，转换成标准 { id, type:'function', function:{name, arguments} }。
+ * arguments 必须是 JSON 字符串（OpenAI spec），按 parameter 类型推断 number/boolean。
+ */
+function extractMinimaxXmlToolCalls(content = '') {
+  if (!content || typeof content !== 'string') {
+    return { cleanContent: content || '', toolCalls: [] };
+  }
+  // 不要求 <minimax:tool_call> 包裹（模型有时只吐 <invoke>），直接抓所有 invoke 块
+  const invokeRe = /<invoke\s+name=["']([^"']+)["']\s*>([\s\S]*?)<\/invoke>/gi;
+  const paramRe = /<parameter\s+name=["']([^"']+)["']\s*>([\s\S]*?)<\/parameter>/gi;
+  const toolCalls = [];
+  let cleanContent = content;
+  let match;
+  let counter = 0;
+  while ((match = invokeRe.exec(content)) !== null) {
+    const fnName = String(match[1] || '').trim();
+    const inner = match[2] || '';
+    if (!fnName) continue;
+    const args = {};
+    let pmatch;
+    paramRe.lastIndex = 0;
+    while ((pmatch = paramRe.exec(inner)) !== null) {
+      const key = String(pmatch[1] || '').trim();
+      const rawVal = String(pmatch[2] || '').trim();
+      if (!key) continue;
+      // 类型推断：纯整数 → number，true/false → boolean，否则 string
+      let val;
+      if (/^-?\d+$/.test(rawVal)) val = parseInt(rawVal, 10);
+      else if (/^-?\d+\.\d+$/.test(rawVal)) val = parseFloat(rawVal);
+      else if (rawVal === 'true' || rawVal === 'false') val = rawVal === 'true';
+      else val = rawVal;
+      args[key] = val;
+    }
+    toolCalls.push({
+      id: `recovered_minimax_xml_${Date.now()}_${counter++}`,
+      type: 'function',
+      function: { name: fnName, arguments: JSON.stringify(args) }
+    });
+  }
+  if (toolCalls.length) {
+    // 把 invoke 块和外层 minimax:tool_call 包装一起从 content 里删干净
+    cleanContent = content
+      .replace(/<minimax:tool_call>[\s\S]*?<\/minimax:tool_call>/gi, '')
+      .replace(invokeRe, '')
+      .replace(/<minimax:tool_call>|<\/minimax:tool_call>/gi, '')
+      .trim();
+  }
+  return { cleanContent, toolCalls };
 }
 
 /**

@@ -130,6 +130,33 @@ function writeDebugSnapshot(name, payload) {
 }
 
 /**
+ * 在 messages 最前面（或合并进首条 system）注入 anti-think 指令，
+ * 强制模型不要使用 <think>/<thought> 标签，token 全部留给 JSON。
+ * MiniMax 推理模型默认会先 think 再输出，maxTokens 紧时思考会吃光预算，
+ * 导致 JSON 截断 → 解析失败 → 重试一轮才加 anti-think → 用户每次至少多等 10-20s。
+ */
+function prependAntiThink(messages, repairHint = '') {
+  const directive = '⚠️ 输出格式硬约束（必读）：\n'
+    + '- 只输出**最终的合法 JSON 对象**，**禁止**使用 <think>、<thought>、思考链、铺垫话语\n'
+    + '- 不要先 reasoning 再 JSON——直接以 `{` 开头\n'
+    + '- 完整结构必须在一次输出里收完，不能截断'
+    + (repairHint ? `\n- 字段要求：${repairHint}` : '');
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return [{ role: 'system', content: directive }, ...(messages || [])];
+  }
+  const first = messages[0];
+  if (first?.role === 'system' && typeof first.content === 'string') {
+    // 合并到现有 system message 末尾，避免堆两条 system 信息
+    return [
+      { ...first, content: `${first.content}\n\n${directive}` },
+      ...messages.slice(1)
+    ];
+  }
+  // 没有 system message，前面插一条
+  return [{ role: 'system', content: directive }, ...messages];
+}
+
+/**
  * 剥离推理模型可能泄漏的 <think> 标签
  * 覆盖三种形态：
  *   1) <think>X</think>正文           → 保留正文
@@ -343,15 +370,23 @@ async function repairJsonOutput(rawText, options = {}) {
     ? repairTimeoutMs
     : Math.max((timeoutMs || 0) * 3, 60_000);
 
+  // repair 也用 anti-think 强约束——MiniMax 推理模型偶尔会把 repair 当对话题，
+  // 返回"这份 JSON 格式已经合法，无需修复。"这种中文释义而不是修后的 JSON，
+  // 导致 repair 自身解析失败。直接禁掉思考链路 + 强制纯 JSON 输出。
   const repairMessages = [
     {
       role: 'system',
-      content: '你是 JSON 修复器。你的任务是把用户提供的内容修复成合法 JSON，只修格式，不改语义，不补充解释，不输出代码块。'
+      content: '你是 JSON 修复器。你的任务是把用户提供的内容修复成合法 JSON。\n\n'
+        + '⚠️ 输出格式硬约束：\n'
+        + '- 只输出**修复后的完整 JSON 对象**，**禁止**使用 <think>、<thought>、思考链、铺垫话语、释义、解释\n'
+        + '- 不要先 reasoning 再 JSON——直接以 `{` 开头\n'
+        + '- 不要写"这份 JSON 已经合法"、"无需修复"这种中文释义——即使内容已经合法，也直接把它原样输出\n'
+        + '- 只修格式，不改语义，不补充解释，不输出 markdown 代码块'
     },
     {
       role: 'user',
       content:
-        `请把下面内容修复为合法 JSON。` +
+        `请把下面内容修复为合法 JSON，直接输出修复后的 JSON 对象。` +
         `${repairHint ? `\n\n结构要求：${repairHint}` : ''}` +
         `\n\n原始内容如下：\n${rawText}`
     }
@@ -384,9 +419,15 @@ async function callLLMJson(messages, options = {}) {
     onStatus,
     fallback,
     retryLimit = RETRY_LIMIT,
+    antiThink = true,  // 默认开启：JSON 调用从一开始就禁推理标签，省掉"必败首发"
     ...rest
   } = options;
-  let msgs = messages;
+  // 预注入 anti-think 指令到第一条 system 消息（如果有）或最前面：
+  // MiniMax 推理模型默认会先输出 <think>...</think> 思考块，遇上 maxTokens=800-1500 这种
+  // 紧的预算时，think 块本身就把 token 吃光了，根本来不及输出 JSON。第一次必败 → 重试
+  // 才加 anti-think → 用户每次都至少多等 10-20s。
+  // 把 anti-think 提前到首发，正常情况一次就过。
+  let msgs = antiThink ? prependAntiThink(messages, repairHint) : messages;
   let lastError;
   let lastRawText = '';
 

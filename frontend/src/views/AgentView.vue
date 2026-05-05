@@ -1164,7 +1164,7 @@
 <script setup>
 import { ref, reactive, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useSettingsStore } from '../stores/settings'
 import { workspaceApi } from '../api/workspace'
 import SlideViewer from '../components/SlideViewer.vue'
@@ -1181,6 +1181,7 @@ import {
 } from '@phosphor-icons/vue'
 
 const router   = useRouter()
+const route    = useRoute()
 const settings = useSettingsStore()
 const layoutRef = ref(null)
 const CONVERSATION_SIDEBAR_COLLAPSED_KEY = 'oc_conversation_sidebar_collapsed'
@@ -2800,15 +2801,23 @@ async function loadSpaces() {
     spaces.value = ((res.data?.spaces) || []).filter(n => n.type === 'space')
     if (!spaces.value.length) return
 
-    const savedId = selectedSpaceId.value
-    const validSaved = savedId && spaces.value.some(s => s.id === savedId)
+    // 选择优先级：URL > localStorage > 第一个
+    const urlSpaceId = route.params.spaceId || ''
+    const savedId    = selectedSpaceId.value
+    const candidate  = (urlSpaceId && spaces.value.some(s => s.id === urlSpaceId))
+      ? urlSpaceId
+      : (savedId && spaces.value.some(s => s.id === savedId))
+        ? savedId
+        : spaces.value[0].id
+    const urlConvId  = route.params.conversationId || ''
 
-    if (!validSaved) {
-      // 没有有效的持久化选择，选第一个（watcher 会触发 loadConversationsForSpace）
-      selectedSpaceId.value = spaces.value[0].id
+    if (candidate !== selectedSpaceId.value) {
+      // URL/默认 与 localStorage 不一致 → 写入触发 watcher（watcher 会带上 URL conversationId）
+      selectedSpaceId.value = candidate
     } else {
-      // 空间 ID 没有改变，watcher 不会触发，手动加载对话
-      await loadConversationsForSpace(savedId)
+      // 没变化，watcher 不会触发，手动拉
+      await loadConversationsForSpace(candidate, urlConvId)
+      scheduleAgentRouteSync()
     }
   } catch {}
 }
@@ -3103,7 +3112,7 @@ function syncQuickRepliesFromMessages() {
   if (!quickReplyOptions.value.length) clearQuickReplies()
 }
 
-async function loadConversationsForSpace(spaceId) {
+async function loadConversationsForSpace(spaceId, preferConversationId = '') {
   if (!spaceId) {
     conversations.value = []
     activeConversationId.value = ''
@@ -3114,7 +3123,11 @@ async function loadConversationsForSpace(spaceId) {
     const res = await workspaceApi.listConversations(spaceId)
     conversations.value = res.data || []
     if (conversations.value.length) {
-      const nextId = conversations.value.find(item => item.id === activeConversationId.value)?.id || conversations.value[0].id
+      // 优先级：URL 指定 > 当前 active（仍存在） > 列表第一项
+      const preferred = preferConversationId
+        && conversations.value.find(item => item.id === preferConversationId)?.id
+      const sticky = conversations.value.find(item => item.id === activeConversationId.value)?.id
+      const nextId = preferred || sticky || conversations.value[0].id
       await openConversation(nextId)
     } else {
       activeConversationId.value = ''
@@ -3363,11 +3376,65 @@ if (typeof window !== 'undefined') {
 watch(selectedSpaceId, async (spaceId, prevId) => {
   if (spaceId === prevId) return
   try { localStorage.setItem(SELECTED_SPACE_KEY, spaceId || '') } catch {}
-  await loadConversationsForSpace(spaceId)
+  // 切空间时若 URL 指定了 conversationId 且属于该空间，优先打开它
+  await loadConversationsForSpace(spaceId, route.params.conversationId || '')
+  scheduleAgentRouteSync()
 })
 
 watch(activeConversationId, (id) => {
   try { localStorage.setItem(ACTIVE_CONVERSATION_KEY, id || '') } catch {}
+  scheduleAgentRouteSync()
+})
+
+// ── URL ↔ space/conversation 双向同步 ─────────────────────────
+let agentRouteSyncScheduled = false
+function scheduleAgentRouteSync() {
+  if (agentRouteSyncScheduled) return
+  agentRouteSyncScheduled = true
+  nextTick(() => {
+    agentRouteSyncScheduled = false
+    syncRouteFromAgentState()
+  })
+}
+
+function syncRouteFromAgentState() {
+  const spaceId        = selectedSpaceId.value || null
+  const conversationId = activeConversationId.value || null
+  const currParams     = route.params || {}
+  // URL 已经一致 → skip（同时打破 watch(route) → state → watch(state) → push 的回环）
+  if ((currParams.spaceId || null) === spaceId &&
+      (currParams.conversationId || null) === conversationId) return
+
+  // 当前 URL 缺 spaceId → 这是"进入页面后补完 URL"，用 replace 不污染历史
+  // 当前 URL 已有 spaceId 但与 state 不一致 → 用户主动切换，用 push 让浏览器后退能回到上一个
+  const isFillIn = !currParams.spaceId
+  const navigate = isFillIn ? router.replace : router.push
+
+  if (spaceId && conversationId) {
+    navigate({ name: 'agent-conversation', params: { spaceId, conversationId } })
+  } else if (spaceId) {
+    navigate({ name: 'agent', params: { spaceId } })
+  } else {
+    navigate({ name: 'agent' })
+  }
+}
+
+// 浏览器前进/后退/外部链接 → state
+watch(() => [route.params.spaceId, route.params.conversationId], ([rSpace, rConv]) => {
+  // 只在 agent 路由下生效（避免离开页面时还跑这个 watch）
+  if (!route.name || (route.name !== 'agent' && route.name !== 'agent-conversation')) return
+
+  const sSpace = selectedSpaceId.value || ''
+  const sConv  = activeConversationId.value || ''
+
+  if (rSpace && rSpace !== sSpace) {
+    // 改 selectedSpaceId 会触发它自己的 watcher：内部会读 route.params.conversationId 优先打开
+    selectedSpaceId.value = rSpace
+    return
+  }
+  if (rConv && rConv !== sConv) {
+    openConversation(rConv)
+  }
 })
 
 watch(conversationSidebarCollapsed, (value) => {
@@ -3444,7 +3511,19 @@ const hasActiveStream = ref(false)
 let sseGeneration = 0
 let stopInProgress = false  // 防抖：避免快速点两次"停止"造成重复 POST 与状态错乱
 
+// connectBrainSSE 注册"在 close 前最后落盘 streaming 半截文本"的钩子。
+// 没有它的话，closeSseConnection() 增 sseGeneration 之后，1s 节流定时器即使还没跑，
+// 它的 isCurrentSse() 守卫也会 bail——streamingText 永久留在闭包内存里、不写 DB。
+// 用户在 SSE 跑到一半切走/关 tab/网络断了，最后那 0-1 秒的 token 就这么丢了，
+// 重连后看到的是"半截字"或者完全没有。
+let pendingStreamFlushHook = null
+
 function closeSseConnection() {
+  // 1) 先 flush——必须在 sseGeneration++ 之前，否则 hook 内部 isCurrentSse 会失配返回
+  if (typeof pendingStreamFlushHook === 'function') {
+    try { pendingStreamFlushHook('partial'); } catch {}
+    pendingStreamFlushHook = null
+  }
   sseGeneration += 1
   if (sse) {
     sse.close()
@@ -3486,9 +3565,13 @@ async function send() {
     }
   }
 
-  // 如果 PPT 已生成完成，开新对话；否则在同一对话内继续
+  // 如果 PPT 已生成完成，开新对话；否则在同一对话内继续。
+  // 注意：以前 failed 状态也会自动清掉 activeConversationId，但 brain 的 L2 软失败
+  // 会发出有用的兜底叙述（"上次响应失败，下一步建议..."），用户的下一句多半是
+  // 在那条叙述上继续推进。这里把 failed 分支去掉——hard fail 的话用户可以手动
+  // 点"新建对话"，不靠隐式清状态。
   const pptDone = wsState.value === 'done' && (resultDownloadUrl.value || resultSlides.value.length > 0)
-  if (pptDone || (wsState.value === 'failed' && !wasManuallyStopped.value)) {
+  if (pptDone) {
     activeConversationId.value = ''
     currentSessionId.value = ''
   }
@@ -3817,7 +3900,8 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
   const flushStreamingPartial = (finalStatus) => {
     if (!streamingMsgId || !taskConversationId) return
     if (wasManuallyStopped.value && finalStatus !== 'complete') return
-    // 已被新 SSE 取代或切到新对话：直接丢弃，避免老连接残留事件覆盖新会话的状态
+    // close-before-flush 路径：closeSseConnection 调本钩子时还没自增 sseGeneration，
+    // 所以 isCurrentSse() 仍然 true，正常走持久化。新 SSE 取代场景才需要 bail。
     if (!isCurrentSse()) return
     const snapshot = {
       id: streamingMsgId,
@@ -3837,6 +3921,10 @@ function connectBrainSSE(url, resolveOrOptions = () => {}, maybeConversationId) 
       }).catch(() => {})
     )
   }
+
+  // 把 flush 钩子挂到模块级变量，让 closeSseConnection 在 SSE 关闭前能 force flush
+  // 当前未及落盘的 streaming partial（比如 1s 节流还没跑、用户 SSE 已断）。
+  pendingStreamFlushHook = flushStreamingPartial
 
   sse.addEventListener('text_delta', e => {
     const { delta } = JSON.parse(e.data)

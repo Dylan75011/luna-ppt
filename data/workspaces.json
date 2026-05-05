@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T16:21:52.711Z",
+  "updatedAt": "2026-05-04T16:30:11.585Z",
   "spaces": [
     {
       "id": "space_ff551e947841",
@@ -17,6 +17,23 @@
           "docType": "document",
           "system": true,
           "systemType": "space_index"
+        },
+        {
+          "id": "folder_6195947597e4",
+          "type": "folder",
+          "name": "岚图无界：132站车展的'呼吸感'全链路",
+          "children": [
+            {
+              "id": "doc_cab744081734",
+              "type": "document",
+              "name": "策划方案",
+              "createdAt": "2026-05-04T15:50:39.912Z",
+              "updatedAt": "2026-05-04T16:30:11.581Z",
+              "docType": "document"
+            }
+          ],
+          "createdAt": "2026-05-04T15:50:39.909Z",
+          "updatedAt": "2026-05-04T15:50:39.909Z"
         }
       ],
       "indexDocId": "doc_90d470e684f4"

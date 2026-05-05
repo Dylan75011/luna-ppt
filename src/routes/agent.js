@@ -348,6 +348,49 @@ router.post('/start', upload.array('images', 5), async (req, res) => {
               if (!session.docHtml && dbAgentState.docHtml) session.docHtml = dbAgentState.docHtml;
               if (!session.docMarkdown && dbAgentState.docMarkdown) session.docMarkdown = dbAgentState.docMarkdown;
             }
+            // pendingBackgroundInjects 也要补：服务重启后 /start 入口走的就是 brain.run()，
+            // run() 第一行就 drainPendingBackgroundInjects——如果不从 DB 拿回来，重启前
+            // 还没消费的后台工具结果就永久丢失。
+            if ((!session.pendingBackgroundInjects || !session.pendingBackgroundInjects.length)
+                && Array.isArray(dbAgentState.pendingBackgroundInjects)
+                && dbAgentState.pendingBackgroundInjects.length) {
+              session.pendingBackgroundInjects = dbAgentState.pendingBackgroundInjects;
+            }
+            // 创意方向状态簇：approve_concept / run_strategy 都靠它拿用户挑的方向
+            if (!session.conceptProposal && dbAgentState.conceptProposal) {
+              session.conceptProposal = dbAgentState.conceptProposal;
+            }
+            if (!session.conceptIteration && dbAgentState.conceptIteration) {
+              session.conceptIteration = dbAgentState.conceptIteration;
+            }
+            if (!session.conceptApproved && dbAgentState.conceptApproved) {
+              session.conceptApproved = true;
+              session.approvedDirection = dbAgentState.approvedDirection || null;
+              session.approvedDirectionLabel = dbAgentState.approvedDirectionLabel || '';
+            }
+            if (!session.conceptContextBrand && dbAgentState.conceptContextBrand) {
+              session.conceptContextBrand = dbAgentState.conceptContextBrand;
+            }
+            if (!session.lastSavedDocId && dbAgentState.lastSavedDocId) {
+              session.lastSavedDocId = dbAgentState.lastSavedDocId;
+              session.lastSavedDocName = dbAgentState.lastSavedDocName || null;
+            }
+            // 跨重启的死 in-flight 工具：同 /reply 路径处理。/start 走 brain.run()，
+            // 生成的 system inject 会跟新 user 消息一起进 buildMessages 给 LLM。
+            const deadInflight = Array.isArray(dbAgentState.inflightBackgroundCalls)
+              ? dbAgentState.inflightBackgroundCalls
+              : [];
+            if (deadInflight.length && Array.isArray(session.messages)) {
+              for (const item of deadInflight) {
+                session.messages.push({
+                  role: 'user',
+                  content: `[系统注入｜后台任务在服务重启时丢失] 之前你后台化的工具 ${item.toolName}（call_id=${item.toolCallId}）的真实结果因为服务重启已经无法回收。请基于已有信息推进，不要重复调用同一工具。`,
+                  _backgroundInject: true
+                });
+              }
+              session.inflightBackgroundCalls = [];
+              console.warn('[agent/start] 检测到', deadInflight.length, '个崩溃前未回收的后台工具，已注入死亡通知');
+            }
           }
         } catch (err) {
           console.warn('[agent/start] agent_state_json 补缺失败:', err.message);
@@ -505,7 +548,41 @@ router.post('/:sessionId/reply', upload.array('images', 5), async (req, res) => 
           session.docHtml = dbAgentState.docHtml || '';
           session.docMarkdown = dbAgentState.docMarkdown || '';
           session.forceTool = dbAgentState.forceTool || '';
-          console.warn('[agent/reply] 从 agent_state_json 复活 session:', sessionId, 'conversationId=', conversationId);
+          // 后台工具结果队列：之前转后台的 tool 在 idle 期间回结果会塞进这里，
+          // 等下次 /reply 入口的 drainPendingBackgroundInjects 拉走。崩溃前如果队列
+          // 有内容、又没来得及 drain，恢复时必须把它带回来——否则 brain 看不到后台
+          // 结果，相当于用户白等了一分钟工具完全失效。
+          session.pendingBackgroundInjects = Array.isArray(dbAgentState.pendingBackgroundInjects)
+            ? dbAgentState.pendingBackgroundInjects
+            : [];
+          // 创意方向状态簇：propose_concept 卡片 + 用户挑选的方向
+          session.conceptProposal = dbAgentState.conceptProposal || null;
+          session.conceptIteration = dbAgentState.conceptIteration || 0;
+          session.conceptApproved = !!dbAgentState.conceptApproved;
+          session.approvedDirection = dbAgentState.approvedDirection || null;
+          session.approvedDirectionLabel = dbAgentState.approvedDirectionLabel || '';
+          session.conceptContextBrand = dbAgentState.conceptContextBrand || '';
+          session.lastSavedDocId = dbAgentState.lastSavedDocId || null;
+          session.lastSavedDocName = dbAgentState.lastSavedDocName || null;
+          // in-flight 后台工具死亡通知：崩溃前还在登记的 tool_call 们的真结果已经
+          // 跟 promise 一起死了。把它们转换成"系统注入"消息塞进对话历史，让 brain
+          // 下一轮 LLM 调用看到"那个工具其实没成功，决定接下来怎么做"，避免它在
+          // pendingToolCallId 已平衡的前提下还以为后台工具在跑。
+          const inflight = Array.isArray(dbAgentState.inflightBackgroundCalls)
+            ? dbAgentState.inflightBackgroundCalls
+            : [];
+          if (inflight.length) {
+            for (const item of inflight) {
+              session.messages.push({
+                role: 'user',
+                content: `[系统注入｜后台任务在服务重启时丢失] 之前你后台化的工具 ${item.toolName}（call_id=${item.toolCallId}）的真实结果因为服务重启已经无法回收。请基于已有信息推进，不要重复调用同一工具。`,
+                _backgroundInject: true
+              });
+            }
+            // 清掉登记，避免下一轮 resurrect 重复注入
+            session.inflightBackgroundCalls = [];
+          }
+          console.warn('[agent/reply] 从 agent_state_json 复活 session:', sessionId, 'conversationId=', conversationId, 'pendingBgInjects=', session.pendingBackgroundInjects.length, 'conceptApproved=', session.conceptApproved, 'inflightDead=', inflight.length);
         }
       } catch (err) {
         console.warn('[agent/reply] DB resurrect 失败:', err.message);
@@ -657,6 +734,32 @@ router.post('/:sessionId/stop', (req, res) => {
   const { sessionId } = req.params;
   const { conversationId } = req.body || {};
   const session = agentSession.getSession(sessionId);
+
+  // 兜底：session 不在内存里（LRU evicted / 进程重启了）时也要把 DB 里的 status 标
+  // 成 idle，否则下次任何 /start 复用会从 agent_state_json 看到 waiting_for_user 并
+  // 走 reply 流程，相当于"用户点了 stop 但服务半小时后又复活了刚才的任务"。
+  if (!session && conversationId) {
+    try {
+      const conversationStore = require('../services/conversationStore');
+      const dbAgentState = conversationStore.getAgentState(conversationId);
+      if (dbAgentState && (dbAgentState.status === 'running' || dbAgentState.status === 'waiting_for_user')) {
+        conversationStore.patchAgentState(conversationId, {
+          ...dbAgentState,
+          status: 'idle',
+          pendingToolCallId: null,
+          // resumeMessages 显式置 null，因为 status 不再是 waiting_for_user
+          resumeMessages: null,
+          // inflight 任务在 stop 时也要清——这些任务的 promise 早就死了（重启/淘汰），
+          // 留着只会让下次 resurrect 误以为还有后台事在跑
+          inflightBackgroundCalls: [],
+          updatedAt: new Date().toISOString()
+        });
+        console.warn('[agent/stop] session 已 evicted/重启丢失，把 DB 状态强制置 idle:', conversationId);
+      }
+    } catch (err) {
+      console.warn('[agent/stop] DB state 写回失败:', err.message);
+    }
+  }
 
   if (session) {
     if (conversationId && session.conversationId && session.conversationId !== conversationId) {

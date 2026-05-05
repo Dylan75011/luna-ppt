@@ -1,0 +1,1596 @@
+{
+  "schemaVersion": 1,
+  "id": "doc_cab744081734",
+  "docType": "document",
+  "name": "策划方案",
+  "contentFormat": "tiptap-json",
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "岚图无界：132站车展的'呼吸感'全链路运营"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "核心策略"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "以'会呼吸的未来座舱'为核心载体，用全息光场+动态机械构建中式现代豪华的科技表达，驱动展前传播→展中体验→展后转化全链路"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "方案亮点"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "「感知穹顶」穹顶投影岚图智驾视界，车辆行驶在数字云端"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "「岚图实验室」手势控车/声纹定制/AR透视三大装置驱动社交裂变"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "「无界之门」EXIT通道实时渲染'你的岚图故事'，扫码即带走专属大片"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展前传播：全域预热引爆声量"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "KOL矩阵种草：提前7天释放'岚图无界'悬念"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "城市地标联动：132站城市灯光秀/大屏预埋视觉素材"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "邀约链路：潜客邀约+媒体邀约双通道，锁定到店率"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "社交话题铺垫：抖音/小红书#岚图无界#话题预埋UGC钩子"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "物料前置铺排：预热视频/AR海报/H5邀请函同步上线"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "开展前7天，启动“岚图无界”全域预热。用线上悬念配合线下地标，在132座城市同时制造话题风暴。三条线并行推进："
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "第一条线是KOL矩阵种草。锁定抖音汽车区头部博主10位，包括@说车的阿飞、@陈震同学等。锁定小红书品质生活博主20位，包括@生活美学家琳达等。统一发布15秒悬念视频。画面只有“岚图无界·会呼吸的未来座舱”字样，配合一束流动光影。文案引导“倒计时7天，解锁北京/上海/成都…132城同步揭秘”。让粉丝自发追问这是什么。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "第二条线是城市地标联动。在132城的春熙路、太古里、国金中心等顶级商圈大屏统一上刊“岚图无界”主视觉。以岚图品牌色渐变为背景。中央是一扇缓缓开启的光之门。底部标注“X月X日全球首展”。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "第三条线是邀约链路打通。潜客端通过DCC系统筛选近30天内到店过的潜客，发送AR海报和定制H5邀请函。打开后手机屏幕浮现一座发光的未来座舱。滑动解锁展馆定位并一键导航。媒体端建立132站专属媒体名单包，提前48小时发送电子邀请函和媒体专属H5，内嵌展台3D预览和媒体发布会预约通道。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "三条线汇成合力。“岚图无界”在开展前就成为用户搜索热词和社交货币。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展中体验：未来座舱的呼吸感营造"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "暗色系+岚图蓝紫光主视觉，赛博东方调性统一"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "「感知穹顶」：半透明穹顶内壁实时投影岚图智驾感知世界"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "「岚图实验室」：手势控车、声纹定制、AR透视底盘三装置"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "「无界之门」：EXIT通道实时渲染'你的岚图故事'大片"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "提升落座率：设置VIP洽谈区+沉浸体验动线引导"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "步入132站岚图展位的那一刻，观众会被一种'呼吸感'包围——这不是简单的声光电，而是一场关于中式现代豪华的沉浸叙事。我们以岚图蓝紫光为主线，在600㎡的暗色系空间内构建赛博东方调性，让科技与东方意境在此交汇。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "「感知穹顶」是整个展位的灵魂所在。半透明穹顶内壁实时投影岚图智驾感知世界，数据流如光带般穿梭其间，观众抬头即见岚图'看见'的世界——行人轨迹、交通标识、动态障碍物一一呈现，仿佛置身岚图大脑的神经网络中央。这不仅是技术展示，更是一种信任感的建立。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "「岚图实验室」是体验深度的关键。三大装置——手势控车、声纹定制、AR透视底盘——让观众从操作层感知岚图的智能化程度。手掌隔空切换驾驶模式、声纹识别激活个人设置、AR透视看到底盘电池布局……每一个触点都在强化'岚图懂你'的品牌心智。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "「无界之门」则是情感收束的精心设计。EXIT通道不再是离场过道，而是一段5米长的沉浸式隧道。系统实时渲染观众在展位内的体验片段——停留时长、互动装置、定制配置——生成'你的岚图故事'短片，以二维码形式推送至手机。这段记忆将伴随观众离开，并在社交媒体上持续发酵。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "为提升转化效率，我们在动线末端设置VIP洽谈区，以半透明屏风区隔，既保证私密感又不破坏整体意境。体验动线从穹顶到实验室到无界之门，自然引导观众完成认知-体验-情感的三级跃迁。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展中互动：社交素材的持续裂变"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "拍照打卡点：感知穹顶下设置最佳拍摄机位"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "互动装置出片：每个技术装置配置专属拍摄脚本"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "扫码下载：EXIT通道扫码即时生成个人专属故事视频"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "现场直播：KOL实时逛展，二次传播扩大触达"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "数据采集：互动即留资，实现体验到线索的即时转化"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "我们建议将整个展台变成一座「出片工厂」，让每一位观众在离场时不仅带走记忆，更带走一段值得分享的内容。在感知穹顶的正下方，我们设置三个黄金拍摄机位——穹顶光影折射形成天然柔光罩，配合岚图无界的光场矩阵，取景框内自动呈现「人在画中」的视觉张力。每个技术装置旁配置专属拍摄脚本：动态机械臂舞动时，提示观众举起手势与光带同频；全息舱门开启瞬间，倒计时引导最佳表情管理。观众完成体验后移步EXIT通道，扫码即可在15秒内生成个人专属故事视频——系统自动剪辑入场到离场的精华片段，配以岚图无界专属滤镜与BGM，一键分享至朋友圈或抖音。展台核心区设置KOL专属逛展动线，提前预约的汽车/科技/生活方式达人以第一人称视角实时直播，在光场穹顶前的驻足解读、在呼吸座舱内的沉浸体验，均成为二次传播的原生素材。整条动线设计遵循「互动即留资」原则：扫码下载触发手机号授权、直播关注引导账号沉淀、打卡分享激活积分累计，让每一份自发传播都同步转化为可触达的销售线索。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "AIGC 水墨长卷"
+          },
+          {
+            "type": "text",
+            "text": "：展位核心区设置水墨体验舱，观众站在感应屏前，AI 实时捕捉人物轮廓与动作姿态，动态生成一幅专属水墨画卷——背景融入岚图标志性山水云纹元素，画中人以岚图蓝紫光勾勒。60 秒生成完毕可扫码带走，留存率极高，且天然具备东方豪华美学辨识度，社媒分享意愿强。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展后转化：长尾价值的持续收割"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "潜客追踪：48小时内完成首次触达+意向邀约"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "内容二次分发：剪辑'岚图无界'精彩片段持续投放"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "数据沉淀：132站数据统一归集，建立潜客池"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "口碑运营：引导真实用户评价，形成正向舆论"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "下站预告：形成'岚图无界'城市巡展的连续期待"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "每一站车展落幕，不是句号，而是新一轮增长的起点。我们把展中积累的每一份关注、每一张留资卡片、每一次指尖滑动，都视为一颗待培育的种子。展后72小时内，精密的转化漏斗即刻启动。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "闭馆后2小时内，销售顾问完成潜客分类。48小时内，首批高意向用户收到专属邀约，邀请他们回店试驾、领取「岚图无界」限量周边。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "展中捕捉的「呼吸感」精彩片段，由内容团队在24小时内剪辑成3个版本。15秒素材适配朋友圈，60秒版本适合微博故事，3分钟深度回顾展现完整魅力。同步分发至抖音、小红书、微信视频号，让未能到场的用户也能感受现场的光影震撼。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "132站数据统一接入CRM系统。每位潜客的互动轨迹被标签化沉淀，形成可以跨站调用的动态画像。这意味着什么？一位用户在成都车展关注了某款车型，明年他在上海车展再次出现时，我们已经知道他的偏好和需求。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "我们鼓励真实下单用户在小红书分享提车日记，精选优质内容给予官方转发。口碑从「朋友推荐」进化为「社区共识」，这是信任的传递，也是品牌温度的延续。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "每站收尾时，团队发布下一站城市的悬念预告海报。「岚图无界·下一站」成为用户追更的理由，单次展会变成跨越132城的连续叙事，而用户始终是这个故事的主角。"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "预算框架"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "总预算"
+          },
+          {
+            "type": "text",
+            "text": "：150-250万/站"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "场地/搭建"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（75-100万 · 45-50%）：含600㎡展位搭建、主结构、呼吸装置、灯光音响硬装"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "物料/道具"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（25-35万 · 14-17%）：全息光场设备、机械动态组件、拍摄打卡装置、展示物料"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "媒介/传播"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（30-45万 · 18-20%）：KOL矩阵、悬念预热素材、132城同步投放、信息流广告"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "人员/执行"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（15-20万 · 9-10%）：执行团队、主持、技术支持、礼仪、安保人员费用"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "应急预备"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（8-12万 · 5-6%）：设备故障备用、天气应对、临时调整预算"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "执行节奏"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "活动日期"
+          },
+          {
+            "type": "text",
+            "text": "：待定"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "T-30 策略筹备"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（23天）：全链路方案定稿、搭建商确认、媒介排期锁定"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "T-7 预热引爆"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（7天）：悬念素材上线、KOL矩阵种草、132城话题同步"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "T-1 展前搭建"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（1天）：展位搭建完成、设备调试、全息光场与机械装置联调"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "T+0 展中执行"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（3-5天）：呼吸感体验落地、出片素材持续产出、实时留资转化"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "T+7 长尾转化"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（7天）：72小时私域触达、潜客跟进、战报复盘"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "核心 KPI"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "线上声量"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：目标 话题阅读量≥5000万、讨论量≥10万，验证展前全域预热效果，衡量破圈传播力"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "留资转化"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：目标 单站留资≥3000组、到店试驾率≥15%，衡量展台留资效率与后期潜客质量"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "社交裂变"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：目标 UGC素材≥5000条、二次传播≥200万曝光，衡量出片工厂设置的社交货币价值"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "展台流量"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：目标 单站进店人次≥1.5万、驻留时长≥8分钟，衡量呼吸感体验对观众的吸引力和沉浸度"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "销售转化"
+                  },
+                  {
+                    "type": "text",
+                    "text": "：目标 单站订单量≥150台、线索转成交率≥8%，衡量全链路运营最终商业价值产出"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "风险应对"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "设备故障风险：主设备双机备份、24小时技术支持待命、搭建期全流程彩排"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "人流超载风险：分时段预约机制、现场动线单向设计、排队缓冲区设置"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "舆情负面风险：预设话术包、实时舆情监测、24小时危机响应小组"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "天气变化风险：室内场馆备选、应急备货预留、搭建时间弹性缓冲"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "执行协同风险：SOP手册定稿、每日晨会复盘、关键节点双人确认机制"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "textAlign": null,
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "现场视觉建议"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        },
+        "content": [
+          {
+            "type": "text",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ],
+            "text": "整体气质"
+          },
+          {
+            "type": "text",
+            "text": "：如同步入深海静谧舱体，光与结构随呼吸律动"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "呼吸穹顶主装置"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（承载视觉焦点与呼吸感核心体验）：直径8米半透膜穹顶，内嵌点阵光源随心跳节律明暗交替，投影岚图LOGO光纹"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "座舱体验区"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（沉浸式感知中式豪华未来座舱）：半包裹式舱体结构，内置全息仪表台、透明OLED侧窗、环绕式呼吸灯光带"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "三黄金拍摄机位"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（驱动社交裂变素材持续产出）：穹顶折射光位/悬浮座舱中景/蓝紫隧道纵深感，配套AR滤镜相框"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "textAlign": null
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "text": "签到留资区"
+                  },
+                  {
+                    "type": "text",
+                    "text": "（无缝衔接体验与数据采集）：无感扫码留资+呼吸灯指引流向，配合留资礼呼吸灯光效反馈"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "attrs": {
+          "textAlign": null
+        }
+      }
+    ]
+  },
+  "createdAt": "2026-05-04T15:50:39.912Z",
+  "updatedAt": "2026-05-04T16:30:11.581Z"
+}

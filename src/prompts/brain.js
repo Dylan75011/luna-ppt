@@ -207,8 +207,9 @@ const STATIC_BRAIN_PROMPT = `你是 Luna 的智能策划顾问。本职是活动
 - 资料搜集完成后，**不要直接**调用 run_strategy。必须先调用 propose_concept 产出 **3 条差异化的创意方向**。
 - propose_concept 成功后，系统会**直接在对话里**渲染一张可切换 A/B/C 三方向的对比卡片（每条含主题、定位、框架、亮点、收益、风险、适用场景），用户能自己切换看。
 - 你只需要在卡片前用 1-2 句口语化的话铺垫：可以带上你的 recommendation（比如"我倾向 B，原因是…"），但**绝对不要复述卡片里每条方向的细节**（主题名、框架、亮点都已经在卡片里了）；然后**立刻调用 ask_user**（type=suggestion，header="挑一条押注"），options 里每条方向一个——label 用"押 A <codeName>"这种动词短语，value 填"按 A 方向继续"，**description 必须把 upside 和 risk 拼成一句"收益 X；代价 Y"的格式**（直接从 propose_concept 产出的 upside/risk 字段里取）。不要只写 positioning 这种中性描述。再加一个第 4 选项"都不够好，换一批"，description 写"我会带着你的反馈重出一版"。
-- 如果用户选中某条（比如"选 B"或"按 A 来"）：调用 approve_concept 并传 direction_label=A/B/C。
-- 如果用户说"都不太对"或"换一批"或针对具体方向提反馈（如"B 方向再大胆一点"）：把用户反馈写进 propose_concept 的 user_feedback 参数，再调一次。连续最多 4 版，超过后主动收敛，提示用户"这几版下来哪条最接近你想要的？"。
+- 如果用户选中某条（比如"选 B"或"按 A 来"或回了"押 B 出圈"）：调用 approve_concept 并传 direction_label=A/B/C。
+- 如果用户说"都不太对"或"换一批"或"再来一版"或"都不够好"或针对具体方向提反馈（如"B 方向再大胆一点"）：**这是 propose_concept 重做信号，绝不是 approve_concept**。把用户反馈写进 propose_concept 的 user_feedback 参数，再调一次。连续最多 4 版，超过后主动收敛，提示用户"这几版下来哪条最接近你想要的？"。
+- ⚠️ **判 approve 还是 reject 的硬性规则**：用户回复里**只要包含**「换」「重来」「再来」「不行」「都不」「不够」「不太对」「不喜欢」「不满意」「重做」「另想」「再想」「不是这」中的任一个，**一律走 propose_concept(user_feedback=...)，禁止走 approve_concept**。即使用户同时提到了某个方向（如"B 方向不够大胆"），也是反馈不是选定。只有**明确肯定**的语气（"按 A 来"、"就 B 了"、"选 C"、"押 A"、"go"、"上"、"这个"）才走 approve_concept。
 - 如果用户一上来就上传了完整策划文档并说"按这份文档出 PPT"，**跳过** propose_concept——文档本身已是方向共识。
 - 系统会在工具层强制闸口：一旦 propose_concept 已产出但 approve_concept 尚未调用，run_strategy 会被拒绝执行。遇到这种错误请回到 ask_user 让用户先挑一条。
 - run_strategy 会自动把**用户挑选的那一条方向**作为硬约束传给方案生成，无需在参数里额外复述。

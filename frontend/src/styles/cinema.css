@@ -6,28 +6,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&display=swap');
 
 :root {
-  /* ── 表面色 ───────────────────────────── */
-  --bg-stage:        #0F0F0E;                          /* 主背景：影院黑 */
-  --bg-stage-2:      #161614;                          /* 次级背景（sidebar / modal） */
-  --bg-rise:         #1A1A18;                          /* 上浮一层（卡片底） */
-  --bg-card:         rgba(255,255,255,0.03);           /* 卡片（透明叠加） */
-  --bg-card-hover:   rgba(255,255,255,0.06);
-  --bg-input:        rgba(255,255,255,0.04);
-  --bg-input-focus:  rgba(255,255,255,0.07);
-  --bg-elevated:     #232321;                          /* dropdown / popover */
+  /* ── 表面色（Gemini-style 纯中性暗场） ─── */
+  --bg-stage:        #131314;                          /* 主背景：纯净深色 */
+  --bg-stage-2:      #1B1C1D;                          /* 次级背景（sidebar / modal） */
+  --bg-rise:         #1E1F20;                          /* 上浮一层（卡片底） */
+  --bg-card:         #1E1F20;                          /* 卡片：实色，不再用半透叠加避免灰雾 */
+  --bg-card-hover:   #282A2C;
+  --bg-input:        #1E1F20;
+  --bg-input-focus:  #282A2C;
+  --bg-elevated:     #2A2B2E;                          /* dropdown / popover */
 
   /* ── 文字 ──────────────────────────────── */
-  --ink:             #E8E6E1;                          /* 主文字（暖白） */
+  --ink:             #ECEEF1;                          /* 主文字（中性白，去掉暖偏） */
   --ink-strong:      #FFFFFF;                          /* 强调标题 */
-  --ink-2:           rgba(255,255,255,0.7);            /* 次文字 */
-  --ink-3:           rgba(255,255,255,0.5);            /* 辅助 */
-  --mute:            rgba(255,255,255,0.4);            /* meta / 标签 */
-  --mute-2:          rgba(255,255,255,0.28);           /* 极弱 */
+  --ink-2:           rgba(236,238,241,0.78);           /* 次文字 */
+  --ink-3:           rgba(236,238,241,0.55);           /* 辅助 */
+  --mute:            rgba(236,238,241,0.42);           /* meta / 标签 */
+  --mute-2:          rgba(236,238,241,0.28);           /* 极弱 */
 
-  /* ── 描边 ──────────────────────────────── */
-  --line:            rgba(255,255,255,0.08);
-  --line-strong:     rgba(255,255,255,0.18);
-  --line-soft:       rgba(255,255,255,0.04);
+  /* ── 描边（极弱，主要靠背景层差区分） ─── */
+  --line:            rgba(255,255,255,0.05);
+  --line-strong:     rgba(255,255,255,0.12);
+  --line-soft:       rgba(255,255,255,0.025);
 
   /* ── 强调色（暖绿，借鉴 demo 03 verdict） ─── */
   --accent:          #C8DCC5;
@@ -481,13 +481,13 @@ html, body, #app {
 }
 .cn-btn.ghost:hover { background: var(--bg-card-hover); border-color: var(--ink-3); }
 
-/* 暖光氛围 — body 上一层非常微弱的辐射，为了避免纯死黑 */
+/* 极弱中性辐射，避免纯死黑（去掉暖/冷偏色） */
 body::before {
   content: '';
   position: fixed; inset: 0;
   background:
-    radial-gradient(900px 500px at 85% 0%, rgba(237,243,236,0.04), transparent 60%),
-    radial-gradient(700px 400px at 0% 100%, rgba(225,243,254,0.03), transparent 60%);
+    radial-gradient(900px 500px at 85% 0%, rgba(255,255,255,0.018), transparent 60%),
+    radial-gradient(700px 400px at 0% 100%, rgba(255,255,255,0.012), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }

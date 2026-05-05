@@ -85,10 +85,34 @@ const {
  * 流式输出中实时过滤 <think>...</think> 块
  * 保留 7 个字符的缓冲区以处理跨 chunk 的标签边界
  */
+// 流式输出过滤器：抑制三类不该出现在 SSE text_delta 里的 XML 块——
+//   1. <think>...</think>   推理标签（部分 MiniMax 模型会泄漏）
+//   2. <minimax:tool_call>...</minimax:tool_call>  MiniMax 原生 XML 工具调用
+//      （绕开 OpenAI tools API 的"假语法"，如果不过滤会被前端当文本气泡显示）
+//   3. <invoke name="X">...</invoke>  上面包装的内层（也可能不带外层 minimax 包装）
+//
+// 三类块都是"开标签 → 抑制到闭标签出现"的状态机。同时尾缓冲 25 字符防止闭标签被
+// 跨 chunk 切断时漏掉抑制结束。
 class ThinkFilter {
   constructor() {
     this.buf = '';
-    this.inThink = false;
+    this.inSuppress = null; // null 或 { closeTag, blockName }
+  }
+
+  // 找出 buf 里"最早出现"的可抑制开标签，返回 { idx, len, closeTag, blockName } 或 null
+  _findEarliestOpenTag() {
+    const candidates = [];
+    const t = this.buf;
+    const ti = t.indexOf('<think>');
+    if (ti !== -1) candidates.push({ idx: ti, len: 7, closeTag: '</think>', blockName: 'think' });
+    const mi = t.indexOf('<minimax:tool_call>');
+    if (mi !== -1) candidates.push({ idx: mi, len: 19, closeTag: '</minimax:tool_call>', blockName: 'minimax_tool_call' });
+    // <invoke name="..."> ：开标签长度可变，找到 < invoke 后的第一个 >
+    const inv = t.match(/<invoke\b[^>]*>/i);
+    if (inv) candidates.push({ idx: inv.index, len: inv[0].length, closeTag: '</invoke>', blockName: 'invoke' });
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => a.idx - b.idx);
+    return candidates[0];
   }
 
   push(delta) {
@@ -96,27 +120,35 @@ class ThinkFilter {
     let out = '';
 
     while (this.buf.length > 0) {
-      if (this.inThink) {
-        const end = this.buf.indexOf('</think>');
+      if (this.inSuppress) {
+        const end = this.buf.indexOf(this.inSuppress.closeTag);
         if (end !== -1) {
-          this.buf = this.buf.slice(end + 8);
-          this.inThink = false;
+          this.buf = this.buf.slice(end + this.inSuppress.closeTag.length);
+          this.inSuppress = null;
         } else {
-          // 仍在 think 块内，保留末尾以防 </think> 被截断
-          if (this.buf.length > 50) this.buf = this.buf.slice(-9);
+          // 还在抑制块里，保留末尾防 closeTag 被切断（最长 </minimax:tool_call> = 20 字符）
+          const keep = this.inSuppress.closeTag.length;
+          if (this.buf.length > keep + 30) this.buf = this.buf.slice(-(keep + 1));
           break;
         }
       } else {
-        const start = this.buf.indexOf('<think>');
-        if (start !== -1) {
-          out += this.buf.slice(0, start);
-          this.buf = this.buf.slice(start + 7);
-          this.inThink = true;
+        const open = this._findEarliestOpenTag();
+        if (open) {
+          out += this.buf.slice(0, open.idx);
+          this.buf = this.buf.slice(open.idx + open.len);
+          this.inSuppress = { closeTag: open.closeTag, blockName: open.blockName };
         } else {
-          // 无 think 块 — 安全输出，末尾保留 6 字符防截断
-          const safe = this.buf.length > 7 ? this.buf.slice(0, -7) : '';
-          out += safe;
-          this.buf = this.buf.slice(safe.length);
+          // 没找到开标签 — 但末尾可能有一个未完成的 < ，留 25 字符兜底防"开标签跨 chunk 切断"
+          // 例如 chunk 1 末尾是 "<minimax:tool_c"，chunk 2 开头是 "all>..."
+          const TAIL_RESERVE = 25;
+          const lastLT = this.buf.lastIndexOf('<');
+          if (lastLT !== -1 && lastLT >= this.buf.length - TAIL_RESERVE) {
+            out += this.buf.slice(0, lastLT);
+            this.buf = this.buf.slice(lastLT);
+          } else {
+            out += this.buf;
+            this.buf = '';
+          }
           break;
         }
       }
@@ -127,12 +159,17 @@ class ThinkFilter {
   flush() {
     // 流结束，输出剩余缓冲
     const remaining = this.buf;
-    const wasInThink = this.inThink;
+    const wasInSuppress = !!this.inSuppress;
     this.buf = '';
-    this.inThink = false;
-    // 若仍在 think 块内（标签未关闭），buffer 内容是思考过程，直接丢弃
-    if (wasInThink) return '';
-    return remaining.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    this.inSuppress = null;
+    // 仍在抑制块内（开标签来了但闭标签没等到）→ 内容是 think/tool_call XML，丢弃
+    if (wasInSuppress) return '';
+    // 兜底再做一次完整块剥离，处理"开标签 + 闭标签都在 buf 末尾且没等到下一个 chunk"的边缘 case
+    return remaining
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
+      .replace(/<minimax:tool_call>[\s\S]*?<\/minimax:tool_call>/gi, '')
+      .replace(/<invoke\b[^>]*>[\s\S]*?<\/invoke>/gi, '')
+      .trim();
   }
 }
 
@@ -179,10 +216,30 @@ function enqueueBackgroundTask(session, { toolCallId, toolName, promise }) {
   };
   session.backgroundTasks.set(toolCallId, meta);
 
+  // 同步写一份"轻量级登记"到可序列化的 inflightBackgroundCalls：
+  // backgroundTasks 存 promise 对象不能持久化，进程崩了所有 in-flight 工具的"真结果"全
+  // 永久丢失（因为 promise 死了）。但 brain 看消息历史的话只看到 {backgrounded:true} stub
+  // 还以为工具在跑——等永远等不到 → 用户卡死。
+  // 登记这一份后，崩溃重启时 resurrect 路径会扫描它，把"还登记着但已经死"的 tool_call
+  // 转成系统注入消息告诉 brain"这次后台化失败了，决定怎么办"。
+  if (!Array.isArray(session.inflightBackgroundCalls)) session.inflightBackgroundCalls = [];
+  session.inflightBackgroundCalls.push({
+    toolCallId,
+    toolName,
+    startedAt: meta.startedAt
+  });
+  try { agentSession.flushAgentState(session.sessionId, { immediate: true }); } catch {}
+
   const finish = (status, payload) => {
     if (meta.cancelled) return;
     if (session.backgroundTasks?.get(toolCallId) !== meta) return;
     session.backgroundTasks.delete(toolCallId);
+
+    // 从 inflight 登记里摘掉——这条已经成功回收
+    if (Array.isArray(session.inflightBackgroundCalls)) {
+      session.inflightBackgroundCalls = session.inflightBackgroundCalls
+        .filter(x => x.toolCallId !== toolCallId);
+    }
 
     const elapsedMs = Date.now() - meta.startedAt;
     try {
@@ -204,6 +261,9 @@ function enqueueBackgroundTask(session, { toolCallId, toolName, promise }) {
       // 已经 idle / failed：暂存，等下一次 run/resume 入口处合并
       if (!Array.isArray(session.pendingBackgroundInjects)) session.pendingBackgroundInjects = [];
       session.pendingBackgroundInjects.push(injectMsg);
+      // 立即 flush 到 DB——idle 状态下后台结果是"必须保住的成果"，进程崩了恢复
+      // 才能不白等。flushAgentState immediate 走 best-effort，写失败不阻断主流程。
+      try { agentSession.flushAgentState(session.sessionId, { immediate: true }); } catch {}
     }
   };
 
@@ -220,6 +280,8 @@ function drainPendingBackgroundInjects(session) {
     session.messages.push({ role: msg.role, content: msg.content });
   }
   session.pendingBackgroundInjects = [];
+  // 队列已清，立即把空状态落盘——否则 DB 里残留的旧条目下次 resurrect 会被双重消费
+  try { agentSession.flushAgentState(session.sessionId, { immediate: true }); } catch {}
 }
 
 /**
@@ -1237,6 +1299,21 @@ async function resume(session, userReply, onEvent, options = {}) {
   session._softFailAttempted = false;
   session._compressAttempted = false; // 每个新用户回合都允许一次 context length 自救
   session._invalidArgsRecovered = false; // 每回合一次清坏 tool_call 自救
+  session._directReplyRecovered = false; // 每回合一次 direct_reply 空响应兜底
+
+  // 清理上一轮的"不要调用任何工具"系统注入：那是上轮 LLM 软失败时的临时纾解
+  // 指令，本轮新用户输入到了，那个限制不该跨回合粘住。否则后续每一轮 brain 都
+  // 看到"不要再调用任何工具"会一直只 narrate 不调工具——典型卡死表现：用户
+  // 让进 run_strategy / build_ppt 都被解读成"我用文本回应就行"。
+  if (Array.isArray(session.messages) && session.messages.length) {
+    const before = session.messages.length;
+    session.messages = session.messages.filter((m) => !m._softFailInject);
+    const removed = before - session.messages.length;
+    if (removed > 0) {
+      console.log(`[BrainAgent] 新用户回合开始，清理 ${removed} 条 _softFailInject 历史`);
+    }
+  }
+
   await runAutoRoutePrelude(session, onEvent, options);
   await runLoop(session, onEvent);
 }
@@ -1359,7 +1436,56 @@ async function runDirectReplyOnly(session, onEvent) {
     }
     if (hasStreamed || tail) onEvent('text_end', {});
 
-    const finalText = (fullText.trim() || (result?.message?.content || '').trim());
+    let finalText = (fullText.trim() || (result?.message?.content || '').trim());
+
+    // direct_reply 也会撞空响应陷阱：classifier 把"整体方案预算大概多少"这种看
+    // 起来像 chat 的事实问题判 chat low-conf → wrapper 转 clarify → 进 direct_reply。
+    // 此时 LLM 拿到的还是 strategy 完整对话历史，但被 tool_choice='none' 锁了，可能
+    // 直接静默吐 \n\n\n 退出。runLoop 主路径有兜底重试，direct_reply 路径之前没有，
+    // 用户表现就是发了消息但 brain 一句话没说就 idle。这里加一次强制收尾重试：
+    // 用 nudge 注入再调一次，仍 tool_choice='none'。
+    if (!finalText && !session._directReplyRecovered) {
+      session._directReplyRecovered = true;
+      console.warn('[BrainAgent] direct_reply 收到空响应，注入 nudge 重试一次');
+      onEvent('tool_progress', { message: 'AI 沉默了一下，让我再问一次...' });
+      session.messages.push({
+        role: 'user',
+        content: '系统提示：你刚才一句话都没说就把控制权交回来了，用户那边是空白等待。请基于当前对话状态直接给用户一段实质性回复（解释、阶段性结论、下一步建议都行），不要静默结束。'
+      });
+      try {
+        const retry = await callMinimaxWithToolsStream(
+          buildMessages(session),
+          TOOL_DEFINITIONS,
+          {
+            runtimeKey: session.apiKeys.minimaxApiKey,
+            minimaxModel: session.apiKeys.minimaxModel,
+            maxTokens: 1200,
+            temperature: 0.6,
+            tool_choice: 'none',
+            signal: ac.signal
+          },
+          (chunk) => {
+            if (chunk.type !== 'text_delta') return;
+            const clean = filter.push(chunk.delta);
+            if (clean) {
+              fullText += clean;
+              hasStreamed = true;
+              onEvent('text_delta', { delta: clean });
+            }
+          }
+        );
+        const tail2 = filter.flush();
+        if (tail2) {
+          fullText += tail2;
+          onEvent('text_delta', { delta: tail2 });
+        }
+        if (hasStreamed || tail2) onEvent('text_end', {});
+        finalText = (fullText.trim() || (retry?.message?.content || '').trim());
+      } catch (retryErr) {
+        console.warn('[BrainAgent] direct_reply 兜底重试失败:', retryErr.message);
+      }
+    }
+
     if (finalText) {
       session.messages.push({
         role: 'assistant',
@@ -1378,7 +1504,19 @@ async function runDirectReplyOnly(session, onEvent) {
  */
 async function runLoop(session, onEvent) {
   const loopTracker = {}; // "toolName:argsHash" → 调用次数
+  const toolNameCounts = {}; // "toolName" → 调用次数（不区分参数）
+  let emptyResponseRecovered = false; // 本轮已注入 nudge 兜底，避免死循环
   let turn = 0;
+
+  // 单轮调用次数硬上限（不区分参数）：防止 brain 同一类工具失控刷调用，
+  // context 雪球+LLM 超时连锁触发软失败兜底。strategy 流程典型踩坑：
+  //   update_brief → web_search × 5+ → context blow up → LLM fail
+  // 触达上限后给 brain 注入 tool_result 错误并塞一句强 nudge 让其收敛。
+  const TOOL_NAME_LIMITS = {
+    web_search: 4,    // 4 次散搜够用，再多基本是 brain 跳过 challenge_brief 在硬撑
+    web_fetch: 3,     // 深读 ≤3 个页面够了，更多说明 brain 选 URL 没收敛
+    search_images: 4
+  };
 
   if (session.taskSpec?.primaryRoute === 'direct_reply') {
     try {
@@ -1670,6 +1808,23 @@ async function runLoop(session, onEvent) {
 
     const { message } = choice;
 
+    // 空响应陷阱：brain LLM 偶尔会输出"空 content + 无 tool_calls"就交回控制权
+    // （观测：route_auto write_todos 之后 LLM 把第一个 tool_call 当成已完成标记，
+    // 自己什么也不说就 stop）。前端表现是空 narration，用户必须打"?"才能续上。
+    // 兜底：本轮注入一次 nudge 让 brain 再来一遍，避免静默吞回复。
+    const hasToolCalls = Array.isArray(message.tool_calls) && message.tool_calls.length > 0;
+    const contentText = (message.content || '').trim();
+    if (!hasToolCalls && !contentText && !emptyResponseRecovered) {
+      emptyResponseRecovered = true;
+      console.warn(`[BrainAgent] turn=${turn} 检测到空响应 + 无工具调用，注入 nudge 重试`);
+      onEvent('tool_progress', { message: 'AI 沉默了一下，让我再问一次...' });
+      session.messages.push({
+        role: 'user',
+        content: '系统提示：你刚才一句话都没说就交出了控制权，用户那边是空白等待。请基于当前对话状态，要么继续调用合适的工具推进任务，要么直接给用户一段实质性回复（澄清、阶段性结论、下一步建议都行），不要静默结束这一轮。'
+      });
+      continue;
+    }
+
     // 存储 assistant 消息（含 tool_calls 或纯文本）
     session.messages.push({
       role: 'assistant',
@@ -1678,7 +1833,7 @@ async function runLoop(session, onEvent) {
     });
 
     // 没有工具调用 → Brain 决定自然结束本轮
-    if (!message.tool_calls || message.tool_calls.length === 0) {
+    if (!hasToolCalls) {
       session.status = 'idle';
       break;
     }
@@ -1715,6 +1870,30 @@ async function runLoop(session, onEvent) {
         return;
       }
 
+      // ── 单工具名硬上限（防搜索/抓页失控）──────────────────────
+      // 越过 limit 时给本次 tool_call 直接返 error，brain 看见 error 会停下来收敛。
+      // 不再继续转给真正的工具执行，避免无谓消耗 + 进一步堆 context。
+      const nameLimit = TOOL_NAME_LIMITS[toolName];
+      if (nameLimit) {
+        toolNameCounts[toolName] = (toolNameCounts[toolName] || 0) + 1;
+        if (toolNameCounts[toolName] > nameLimit) {
+          console.warn(`[BrainAgent] ${toolName} 本轮已调 ${toolNameCounts[toolName]} 次（上限 ${nameLimit}），强制收敛`);
+          const display = getToolDisplay(toolName, args);
+          onEvent('tool_call', { tool: toolName, display, toolCallId: toolCall.id });
+          const overLimitResult = {
+            success: false,
+            error: `本轮 ${toolName} 调用已达上限（${nameLimit} 次）。请基于已经搜到的资料直接收敛——继续推进 challenge_brief / propose_concept / update_brief 等下一步动作，或者用文字给用户阶段性总结。不要再调用 ${toolName}。`
+          };
+          onEvent('tool_result', buildToolResultEvent(toolName, overLimitResult));
+          session.messages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            content: truncateToolResult(toolName, JSON.stringify(overLimitResult))
+          });
+          continue;
+        }
+      }
+
       // ── ask_user：特殊处理，暂停循环 ──────────────────────────
       if (toolName === 'ask_user') {
         // 质量体检：拦住浅问（缺 description、只有 1 个 option、suggestion 没带 options 等）
@@ -1738,6 +1917,38 @@ async function runLoop(session, onEvent) {
 
         pauseForAskUser(session, onEvent, toolCall.id, args, turn);
         return; // 暂停，等待 resume() 被调用
+      }
+
+      // ── challenge_brief 软护栏：strategy 流程下，update_brief 之后、web_search 之前，
+      //     brain 应调一次 challenge_brief 扫硬伤（看 prompt "硬性约束"那一节）。
+      //     实测 brain 偶尔会跳过它直接堆 web_search，结果 brief 红旗没暴露 + 5 轮搜
+      //     完撞 context 上限。这里在第一次调 web_search 时检查：brief 存在但
+      //     challenge_brief 没跑过 → 给本次调用返 error，brain 看到 error 会改调
+      //     challenge_brief。下一次 web_search 不再拦，让 brain 正常推进。
+      if (toolName === 'challenge_brief') {
+        session._challengeBriefCalled = true;
+      }
+      if (
+        toolName === 'web_search'
+        && session.brief
+        && !session._challengeBriefCalled
+        && !session._challengeBriefNudged
+        && session.taskSpec?.taskMode === 'strategy'
+      ) {
+        session._challengeBriefNudged = true;
+        const display = getToolDisplay(toolName, args);
+        onEvent('tool_call', { tool: toolName, display, toolCallId: toolCall.id });
+        const nudgeResult = {
+          success: false,
+          error: '本轮是 strategy 流程且 brief 已就位，按规则你必须先调用一次 challenge_brief 扫硬伤（资深总监视角看预算/目标/调性矛盾），再继续 web_search。请把这次 web_search 改成 challenge_brief 调用。这次 nudge 只发一次，下次 web_search 会正常执行。'
+        };
+        onEvent('tool_result', buildToolResultEvent(toolName, nudgeResult));
+        session.messages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          content: truncateToolResult(toolName, JSON.stringify(nudgeResult))
+        });
+        continue;
       }
 
       // ── build_ppt：硬护栏，必须先有策划方案 ─────────────────────

@@ -240,7 +240,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Message, Modal } from '@arco-design/web-vue'
 import { workspaceApi } from '../api/workspace'
 import SlideViewer from '../components/SlideViewer.vue'
@@ -257,6 +258,9 @@ import {
 } from '@phosphor-icons/vue'
 
 // ── 树形数据 ─────────────────────────────────────────────────────
+const router = useRouter()
+const route  = useRoute()
+
 const rawTree     = ref({ spaces: [] })
 const treeData    = computed(() => buildArcoTree(rawTree.value.spaces || []))
 const selectedKeys = ref([])
@@ -299,10 +303,70 @@ async function loadTree() {
   try {
     const res = await workspaceApi.getTree()
     rawTree.value = res.data || { spaces: [] }
+    // 树就绪后用 URL 把选中状态拉回来（处理刷新 / 外部链接 / 浏览器前进后退）
+    syncSelectionFromRoute()
   } catch { Message.error('加载工作空间失败') }
 }
 
 loadTree()
+
+// ── URL ↔ 选中节点 双向同步 ─────────────────────────────────────
+function findArcoNodeByKey(nodes, key) {
+  for (const n of nodes) {
+    if (n.key === key) return n
+    if (n.children?.length) {
+      const r = findArcoNodeByKey(n.children, key)
+      if (r) return r
+    }
+  }
+  return null
+}
+
+function findAncestorKeys(nodes, key, trail = []) {
+  for (const n of nodes) {
+    if (n.key === key) return trail
+    if (n.children?.length) {
+      const r = findAncestorKeys(n.children, key, [...trail, n.key])
+      if (r) return r
+    }
+  }
+  return null
+}
+
+function ensureExpandedTo(key) {
+  const ancestors = findAncestorKeys(treeData.value, key) || []
+  if (!ancestors.length) return
+  const set = new Set(expandedKeys.value)
+  let changed = false
+  for (const k of ancestors) {
+    if (!set.has(k)) { set.add(k); changed = true }
+  }
+  if (changed) {
+    expandedKeys.value = [...set]
+    persistExpandedKeys(expandedKeys.value)
+  }
+}
+
+function syncSelectionFromRoute() {
+  const id = route.params.nodeId
+  if (!id) return
+  if (selectedKeys.value[0] === id) return
+  const node = findArcoNodeByKey(treeData.value, id)
+  if (!node) return  // 树尚未加载完或节点已被删
+  ensureExpandedTo(id)
+  // onTreeSelect 末尾会调 syncRouteFromSelection，但 id 已与 URL 一致 → 不会再 push
+  onTreeSelect([id], { node })
+}
+
+function syncRouteFromSelection() {
+  const id = selectedKeys.value[0] || null
+  const currentParam = route.params.nodeId || null
+  if (id === currentParam) return
+  if (id) router.push({ name: 'workspace', params: { nodeId: id } })
+  else    router.push({ name: 'workspace' })
+}
+
+watch(() => route.params.nodeId, () => { syncSelectionFromRoute() })
 
 function clampTreePanelWidth(nextWidth) {
   const total = layoutRef.value?.clientWidth || window.innerWidth
@@ -431,6 +495,9 @@ async function onTreeSelect(keys, { node }) {
   docTitle.value     = ''
   currentNodeId      = null
 
+  // 选中变化反向同步到 URL（已一致则内部 noop，避免与 watch(route) 形成回环）
+  syncRouteFromSelection()
+
   if (!node || node.nType === 'space' || node.nType === 'folder') return
 
   try {
@@ -536,7 +603,12 @@ async function onNodeAction(action, node) {
       okButtonProps: { status: 'danger' },
       onOk: async () => {
         await workspaceApi.remove(node.key)
-        if (selectedNode.value?.key === node.key) selectedNode.value = null
+        if (selectedNode.value?.key === node.key) {
+          selectedNode.value = null
+          selectedKeys.value = []
+          // 当前选中节点被删 → URL 也清掉
+          syncRouteFromSelection()
+        }
         Message.success('已删除')
         await loadTree()
       }

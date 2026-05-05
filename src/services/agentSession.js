@@ -45,6 +45,35 @@ function snapshotAgentState(session) {
     docHtml: typeof session.docHtml === 'string' ? session.docHtml : '',
     docMarkdown: typeof session.docMarkdown === 'string' ? session.docMarkdown : '',
     forceTool: session.forceTool || '',
+    // 后台工具结果队列：转后台的工具（propose_concept / run_strategy 等 >45s）执行
+    // 完毕后回填到 session.pendingBackgroundInjects，等下次 /run 或 /resume 入口
+    // drainPendingBackgroundInjects 拉走。如果在这两个时间点之间服务重启而它没落盘，
+    // 后台跑的结果就永久丢失，brain 下一轮看不到——典型"用户白等了一分钟但工具效果消失"。
+    pendingBackgroundInjects: Array.isArray(session.pendingBackgroundInjects)
+      ? session.pendingBackgroundInjects
+      : [],
+    // in-flight 后台工具登记表：backgroundTasks Map 里的 promise 没法序列化，进程崩了
+    // promise 全死，但 brain 看消息历史只见 {backgrounded:true} stub 以为工具还在跑会
+    // 永远等。登记这一份后，resurrect 时能识别"crashed inflight tool_call"并通知 brain。
+    // 字段：[{ toolCallId, toolName, startedAt }]
+    inflightBackgroundCalls: Array.isArray(session.inflightBackgroundCalls)
+      ? session.inflightBackgroundCalls
+      : [],
+    // 创意方向的状态簇——propose_concept 工具生成的 3 方向卡片 + 用户最终挑选。
+    // 不持久化的话，重启后 approve_concept 会因 session.conceptProposal=null 拒绝执行，
+    // 用户辛辛苦苦挑选的方向也回不来。run_strategy 还会通过 session.approvedDirection
+    // 拿到约束，丢了 brain 就不知道最终走哪条方向。
+    conceptProposal: session.conceptProposal || null,
+    conceptIteration: session.conceptIteration || 0,
+    conceptApproved: !!session.conceptApproved,
+    approvedDirection: session.approvedDirection || null,
+    approvedDirectionLabel: session.approvedDirectionLabel || '',
+    conceptContextBrand: session.conceptContextBrand || '',
+    // 最近一次生成/保存到工作空间的文档引用——build_ppt / update_workspace_doc / 用户
+    // 说"改一下方案"时都靠这个找到当前活跃文档。崩溃后 brain 不知道刚做的是哪份，
+    // 用户要么手动 @ 引用，要么 brain 走 list_workspace_docs 浪费一轮。
+    lastSavedDocId: session.lastSavedDocId || null,
+    lastSavedDocName: session.lastSavedDocName || null,
     updatedAt: session.updatedAt
   };
   if (session.status === 'waiting_for_user' && Array.isArray(session.messages)) {
